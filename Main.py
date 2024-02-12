@@ -6,9 +6,9 @@ from pprint import pprint
 
 def fmc_init():
     with fmcapi.FMC(
-        host='192.168.33.52',
+        host='192.168.33.193',
         username='admin',#input('Enter the username: '),
-        password='Pass135!!',#input('Enter the password: '),
+        password='GetCon135!',#input('Enter the password: '),
         autodeploy=False,
     ) as fmc:
         headers = ['Access Policy', 'Access Rule', 'Action', 'Enabled', 'Source Networks', 'Source Zones', 'Destination Networks', 'Destination Zones', 'Destination Ports']
@@ -214,4 +214,86 @@ def export_to_excel(rules, headers):
         df = pd.DataFrame(data, columns=headers)
         df.to_excel('access_rules.xlsx')
 
-fmc_init()
+
+def get_data_by_name(data, name):
+        for item in data['items']:
+                 if item['name'] == name:
+                        return item
+        return None
+
+
+def process_network_literals(literal):
+        resultlist = []
+        for item in literal:
+                if item['type'] == 'Network': 
+                        result = item['value']
+
+                elif item['type'] == 'Host': 
+                        result = item['value']
+                else: 
+                      raise TypeError('Only Network and Host type supported')
+                resultlist.append(result)
+        return resultlist
+
+
+def process_network_objects(object, network_groups, networks, hosts, flattened_groups: dict ):
+        resultlist = []
+        for item in object:
+                result = None
+                if item['type'] == 'Network': 
+                        network = get_data_by_name(networks,item['name'])
+                        if network:
+                                result = network['value']
+                elif item['type'] == 'Host': 
+                        host = get_data_by_name(hosts,item['name'])
+                        if host:
+                                result = host['value']
+                elif item['type'] == 'NetworkGroup': 
+                        if flattened_groups and item['name'] in flattened_groups: # get from already flattened group
+                                group_result = flattened_groups[item['name']]
+                        else: #group not processed yet
+                                network_group = get_data_by_name(network_groups, item['name'])
+                                if network_group:
+                                        group_result = process_network_objects(network_group['objects'],network_groups,networks,hosts,flattened_groups)
+                        resultlist.extend(group_result)
+                else:
+                        raise TypeError('Only NetworkGroup, Network and Host type supported')
+                if result:
+                        resultlist.append(result)
+        return resultlist
+
+def flatten_networks(network_groups,networks,hosts):
+        result = {}
+        for network_group in network_groups['items']:
+            objects = network_group.get('objects', None)
+            literals = network_group.get('literals', None)
+            
+            if objects: 
+                value_1 = process_network_objects(objects,network_groups,networks,hosts,result)
+                result[network_group['name']] = value_1
+            if literals:
+                value_2 = process_network_literals(literals)
+                result[network_group['name']] = value_2
+        return result
+
+def test01():
+    with fmcapi.FMC(
+        host='192.168.33.193',
+        username='admin',#input('Enter the username: '),
+        password='GetCon135!',#input('Enter the password: '),
+        autodeploy=False,
+    ) as fmc:
+        hosts = fmcapi.Hosts(fmc=fmc).get()
+        networks = fmcapi.Networks(fmc=fmc).get()
+        network_groups = fmcapi.NetworkGroups(fmc=fmc).get()
+        result = flatten_networks(network_groups,networks,hosts)
+
+
+        #print(hosts)
+        #print(networks)
+        #print(network_groups)
+        print(result)
+
+
+
+test01()
