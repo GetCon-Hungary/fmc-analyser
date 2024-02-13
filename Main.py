@@ -3,7 +3,7 @@ from AccessPolicy import AccessPolicy
 from AccessRule import AccessRule
 import pandas as pd
 from pprint import pprint
-from netaddr import IPNetwork
+from netaddr import IPNetwork, IPRange
 
 def fmc_init():
     with fmcapi.FMC(
@@ -237,7 +237,7 @@ def process_network_literals(literal):
         return resultlist
 
 
-def process_network_objects(object, network_groups, networks, hosts, flattened_groups: dict ):
+def process_network_objects(object, network_groups, networks, ranges, hosts, flattened_groups: dict ):
         resultlist = []
         for item in object:
                 result = None
@@ -249,28 +249,32 @@ def process_network_objects(object, network_groups, networks, hosts, flattened_g
                         host = get_data_by_name(hosts,item['name'])
                         if host:
                                 result = host['value']
+                elif item['type'] == 'Range': 
+                        range = get_data_by_name(ranges,item['name'])
+                        if range:
+                                result = range['value']
                 elif item['type'] == 'NetworkGroup': 
                         if flattened_groups and item['name'] in flattened_groups: # get from already flattened group
                                 group_result = flattened_groups[item['name']]
                         else: #group not processed yet
                                 network_group = get_data_by_name(network_groups, item['name'])
                                 if network_group:
-                                        group_result = process_network_objects(network_group['objects'],network_groups,networks,hosts,flattened_groups)
+                                        group_result = process_network_objects(network_group['objects'],network_groups,networks,ranges,hosts,flattened_groups)
                         resultlist.extend(group_result)
                 else:
-                        raise TypeError('Only NetworkGroup, Network and Host type supported')
+                        raise TypeError('Only NetworkGroup, Range, Network and Host type supported')
                 if result:
                         resultlist.append(result)
         return resultlist
 
-def flatten_networks(network_groups,networks,hosts):
+def flatten_networks(network_groups,networks,ranges,hosts):
         result = {}
         for network_group in network_groups['items']:
             objects = network_group.get('objects', None)
             literals = network_group.get('literals', None)
             
             if objects: 
-                value_1 = process_network_objects(objects,network_groups,networks,hosts,result)
+                value_1 = process_network_objects(objects,network_groups,networks,ranges,hosts,result)
                 result[network_group['name']] = value_1
             if literals:
                 value_2 = process_network_literals(literals)
@@ -279,16 +283,24 @@ def flatten_networks(network_groups,networks,hosts):
                 ips = []
                 ips.append(network['value'])
                 result[network['name']] = ips
+        for range in ranges['items']:
+                ips = []
+                ips.append(range['value'])
+                result[range['name']] = ips
         for host in hosts['items']:
                 ips = []
-                ips.append(network['value'])
+                ips.append(host['value'])
                 result[host['name']] = ips
         return result
 
 def str_to_ip(list: list):
         result = []
         for item in list:
-                net = IPNetwork(item)
+                if '-' in item:
+                        ipr = item.split('-')
+                        net = IPRange(ipr[0],ipr[-1])
+                else: 
+                        net = IPNetwork(item)
                 result.append(net)
         return result
 
@@ -333,8 +345,9 @@ def test01():
     ) as fmc:
         hosts = fmcapi.Hosts(fmc=fmc).get()
         networks = fmcapi.Networks(fmc=fmc).get()
+        network_ranges = fmcapi.Ranges(fmc=fmc).get()
         network_groups = fmcapi.NetworkGroups(fmc=fmc).get()
-        result01 = flatten_networks(network_groups,networks,hosts)
+        result01 = flatten_networks(network_groups,networks,network_ranges,hosts)
 
         result02 = {}
 
