@@ -3,6 +3,7 @@ from AccessPolicy import AccessPolicy
 from AccessRule import AccessRule
 import pandas as pd
 from pprint import pprint
+from netaddr import IPNetwork
 
 def fmc_init():
     with fmcapi.FMC(
@@ -274,7 +275,54 @@ def flatten_networks(network_groups,networks,hosts):
             if literals:
                 value_2 = process_network_literals(literals)
                 result[network_group['name']] = value_2
+        for network in networks['items']:
+                ips = []
+                ips.append(network['value'])
+                result[network['name']] = ips
+        for host in hosts['items']:
+                ips = []
+                ips.append(network['value'])
+                result[host['name']] = ips
         return result
+
+def str_to_ip(list: list):
+        result = []
+        for item in list:
+                net = IPNetwork(item)
+                result.append(net)
+        return result
+
+
+def get_network_size(network: list[IPNetwork]):
+        size = 0
+        for item in network[1]:
+                if item.version == 4:
+                        size += item.size
+        return network[0], size
+
+
+def get_network_size_from_clients(n):
+   
+    # Initialize a mask
+    mask = 0x80000000  # 0b10000000000000000000000000000000
+
+    # Find the leftmost set bit
+    position = 32
+    while position > 0:
+        if n-mask > 0:
+            half_mask = mask >> 1
+            if n-mask-half_mask > 0:
+                return position
+            else:
+                   return position - 1
+        mask >>= 1
+        position -= 1
+    
+    return 0  # Should not reach here, but just in case
+
+
+def get_network_size_mask(network: list[IPNetwork]):
+        return network[0], (32 - get_network_size_from_clients(get_network_size(network)[1]-1))
 
 def test01():
     with fmcapi.FMC(
@@ -286,13 +334,27 @@ def test01():
         hosts = fmcapi.Hosts(fmc=fmc).get()
         networks = fmcapi.Networks(fmc=fmc).get()
         network_groups = fmcapi.NetworkGroups(fmc=fmc).get()
-        result = flatten_networks(network_groups,networks,hosts)
+        result01 = flatten_networks(network_groups,networks,hosts)
+
+        result02 = {}
+
+        for key,value in result01.items():
+                net_list = str_to_ip(value)
+                result02[key] = net_list
+
 
 
         #print(hosts)
         #print(networks)
         #print(network_groups)
-        print(result)
+        print(result01)
+        print(result02)
+
+        network_size = dict(map(get_network_size, result02.items()))
+        network_size_mask = dict(map(get_network_size_mask, result02.items()))
+
+        print(network_size)
+        print(network_size_mask)
 
 
 
