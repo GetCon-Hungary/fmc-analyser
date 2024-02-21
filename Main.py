@@ -1,7 +1,10 @@
 import fmcapi
-from AccessPolicy import AccessPolicy
-from AccessRule import AccessRule
+from Models.AccessPolicy import AccessPolicy
+from Models.AccessRule import AccessRule
+from Models.Port import Port
 import pandas as pd
+import os
+import math
 from pprint import pprint
 from netaddr import IPNetwork, IPRange
 
@@ -9,23 +12,53 @@ def fmc_init():
     with fmcapi.FMC(
         host='192.168.33.193',
         username='admin',#input('Enter the username: '),
-        password='GetCon135!',#input('Enter the password: '),
+        password='GetCon135!!',#input('Enter the password: '),
         autodeploy=False,
     ) as fmc:
-        headers = ['Access Policy', 'Access Rule', 'Action', 'Enabled', 'Source Networks', 'Source Zones', 'Destination Networks', 'Destination Zones', 'Destination Ports']
-        #policies = get_access_policies(fmc)
-        #rules = []
-        #for policy in policies:
-        #      rules.extend(get_access_rules(fmc, policy.id, policy.name))
-        #export_to_excel(rules, headers)
-        #equal_port_object_finder(fmc)
-        equal_network_object_finder(fmc)
+        acp = fmcapi.AccessPolicies(fmc).get()
+        policies = get_access_policies(acp)
+
+        access_rule_header = ['Access Policy', 'Access Rule', 'Action', 'Enabled', 'Source Networks', 'Source Zones', 'Source Ports', 'Destination Networks', 'Destination Zones', 'Destination Ports']
+        rules = []
+        for policy in policies:
+              accessrules = fmcapi.AccessRules(fmc, acp_id=policy.id).get()
+              rules.extend(get_access_rules(fmc, accessrules['items'], policy.name))
+        access_rule_data = [(rule.access_policy, rule.name, rule.action, rule.enabled, rule.source_networks, rule.source_zones, rule.source_ports, rule.destination_networks, rule.destination_zones, rule.destination_ports) for rule in rules]
+        export_to_excel(access_rule_data, access_rule_header, 'access_rules_v1')
+
+        """ports_header = ['Group Name', 'Name', 'Protocol', 'Port', 'Size', 'Risky']
+        ports = []
+        protocol_port_objs = fmcapi.ProtocolPortObjects(fmc).get()
+        for protocol_port_obj in protocol_port_objs['items']:
+                ports.append(calculate_protocol_port_object_size(None, protocol_port_obj))
+        port_obj_groups = fmcapi.PortObjectGroups(fmc).get()
+        for port_obj_group in port_obj_groups['items']:
+                ports.extend(calculate_port_group_size(fmc, port_obj_group))
+        ports_data = [(port.group_name, port.name, port.protocol, port.port, port.size, port.is_risky) for port in ports]
+        export_to_excel(ports_data, ports_header, 'ports')
+
+        equal_ports_header = ['Type', 'Name', 'Name']
+        equal_ports = equal_port_object_finder(fmc, protocol_port_objs, port_obj_groups)
+        equal_ports_data = [(ports.split(';')[0], ports.split(';')[1], ports.split(';')[2]) for ports in equal_ports]
+        export_to_excel(equal_ports_data, equal_ports_header, 'equal_ports')
+
+        equal_network_header = ['Name', 'Value', 'Name', 'Value']
+        hosts = fmcapi.Hosts(fmc).get()
+        networks = fmcapi.Networks(fmc).get()
+        ranges = fmcapi.Ranges(fmc).get()
+        calculate_network_size(networks)
+        equal_networks = []
+        equal_networks.extend(equal_network_object_finder(hosts))
+        equal_networks.extend(equal_network_object_finder(networks))
+        equal_networks.extend(equal_network_object_finder(ranges))
+        equal_networks_data = [(network.split(';')[0], network.split(';')[1], network.split(';')[2], network.split(';')[3]) for network in equal_networks]
+        export_to_excel(equal_networks_data, equal_network_header, 'equal_networks')"""
+
         print('Done')
 
-def get_access_policies(fmc):
-        acp = fmcapi.AccessPolicies(fmc)
+def get_access_policies(acp):
         policies = []
-        for acp in acp.get()['items']:
+        for acp in acp['items']:
             id = acp.get('id', None)
             name = acp.get('name', None)
             policies.append(AccessPolicy(id, name))
@@ -33,22 +66,21 @@ def get_access_policies(fmc):
         return policies
 
 
-def get_access_rules(fmc, acp_id, acp_name):
-        accessrule = fmcapi.AccessRules(fmc, acp_id=acp_id)
+def get_access_rules(fmc, accessrules, acp_name):
         rules = []
-        for rule in accessrule.get()['items']:
+        for rule in accessrules:
                 access_policy = acp_name
                 id = rule.get('id', None)
                 name = rule.get('name', None)
                 action = rule.get('action', None)
                 enabled = rule.get('enabled', None)
-                source_network, destination_networks = get_networks(fmc, rule)
-                source_zones, destination_zones = get_name_from_zones(rule)
-                destination_ports = get_ports(fmc, rule)
-                rules.append(AccessRule(access_policy, id, name, action, enabled, source_network, source_zones, destination_networks, destination_ports, destination_zones))
+                source_network, destination_networks, source_depth, dest_depth = get_networks_by_rule(fmc, rule)
+                source_zones, destination_zones = get_zones_by_rule(rule)
+                source_ports, destination_ports = get_ports_by_rule(fmc, rule)
+                rules.append(AccessRule(access_policy, id, name, action, enabled, source_network, source_zones, source_ports, destination_networks, destination_zones, destination_ports))
         return rules
 
-def get_name_from_zones(rule):
+def get_zones_by_rule(rule):
         s_zones = rule.get('sourceZones', None)
         d_zones = rule.get('destinationZones', None)
         if s_zones is not None:
@@ -57,45 +89,74 @@ def get_name_from_zones(rule):
                 d_zones =  d_zones['objects'][0]['name']
         return s_zones, d_zones
 
-def get_ports(fmc, rule):
+def get_ports_by_rule(fmc, rule):
+        s_ports = rule.get('sourcePorts', None)
         d_ports = rule.get('destinationPorts', None)
+        s_ports_list = []
         d_ports_list = []
+        if s_ports is not None:
+                s_objects = s_ports.get('objects', None)
+                s_literals = s_ports.get('literals', None)
+                if s_objects is not None:
+                        s_ports_list.extend(get_ports(fmc, s_objects))
+                elif s_literals is not None:
+                        s_ports_list.extend(get_ports(fmc, s_literals))
         if d_ports is not None:
-                for d_port in d_ports['objects']:
-                        d_port_obj = []
-                        d_ports_id = d_port['id']
-                        d_ports_type = d_port['type']
-                        if d_ports_type == 'ProtocolPortObject':
-                                d_port_obj.append(fmcapi.ProtocolPortObjects(fmc, id=d_ports_id).get())
-                        elif d_ports_type == 'PortObjectGroup':
-                                d_port_obj_group = fmcapi.PortObjectGroups(fmc, id=d_ports_id).get()
-                                for d_port in d_port_obj_group['objects']:
-                                        d_ports_id = d_port['id']
-                                        d_port_obj.append(fmcapi.ProtocolPortObjects(fmc, id=d_ports_id).get())
-                        for d_port in d_port_obj:
-                                d_ports_name = d_port['name']
-                                d_ports_port = d_port['port']
-                                d_ports_protocol = d_port['protocol']
-                                d_ports_list.append('{} - {} {}'.format(d_ports_name, d_ports_protocol, d_ports_port))
-        return d_ports_list
+                d_objects = d_ports.get('objects', None)
+                d_literals = d_ports.get('literals', None)
+                if d_objects is not None:
+                        d_ports_list.extend(get_ports(fmc, d_objects))
+                elif d_literals is not None:
+                        d_ports_list.extend(get_ports(fmc, d_literals))
 
-def get_networks(fmc, rule):
+        return s_ports_list, d_ports_list
+
+def get_ports(fmc, ports):
+        ports_list = []
+        for port in ports:
+                port_objs = []
+                port_id = port.get('id', None)
+                port_type = port.get('type', None)
+                if port_type == 'ProtocolPortObject':
+                        port_objs.append(fmcapi.ProtocolPortObjects(fmc, id=port_id).get())
+                elif port_type == 'PortObjectGroup':
+                        port_objs.extend(flat_port_object_grp(fmc, port_id))
+                elif port_type == 'ICMPv4PortLiteral':
+                        ports_list.append('{} {} {}'.format(port_type, port.get('protocol', None), port.get('icmpType', None)))
+                for port_obj in port_objs:
+                        port_id, port_name, port_port, port_protocol = _get_ports_info(port_obj)
+                        ports_list.append('{} - {} {}'.format(port_name, port_protocol, port_port))
+        return ports_list
+
+def flat_port_object_grp(fmc, port_grp_id):
+        port_obj = []
+        port_obj_group = fmcapi.PortObjectGroups(fmc, id=port_grp_id).get()
+        for port in port_obj_group['objects']:
+                port_id = port['id']
+                port_obj.append(fmcapi.ProtocolPortObjects(fmc, id=port_id).get())
+        return port_obj
+
+def get_networks_by_rule(fmc, rule):
         s_networks = rule.get('sourceNetworks', None)
         d_networks = rule.get('destinationNetworks', None)
         s_networks_list = []
         d_networks_list = []
+        source_depth = 0
+        dest_depth = 0
         if s_networks is not None:
                 for s_network in s_networks['objects']:
                         recursive_collector_source = []
-                        s_networks_list.extend(recursive(fmc, s_network, recursive_collector_source))
+                        source_collector, source_depth = recursive(fmc, s_network, recursive_collector_source, source_depth)
+                        s_networks_list.extend(source_collector)
         if d_networks is not None:
                 for d_network in d_networks['objects']:
                         recursive_collector_destination = []
-                        d_networks_list.extend(recursive(fmc, d_network, recursive_collector_destination))
+                        dest_collector, dest_depth = recursive(fmc, d_network, recursive_collector_destination, dest_depth)
+                        d_networks_list.extend(dest_collector)
         
-        return s_networks_list, d_networks_list
+        return s_networks_list, d_networks_list, source_depth, dest_depth
 
-def recursive(fmc, network, recursive_collector):
+def recursive(fmc, network, recursive_collector, depth):
         networks = []
         networks_grp = None
 
@@ -107,12 +168,15 @@ def recursive(fmc, network, recursive_collector):
                 networks.append(fmcapi.Hosts(fmc, id=network_id).get())
         elif network_type == 'Network':
                 networks.append(fmcapi.Networks(fmc, id=network_id).get())
+        elif network_type == 'Range':
+                networks.append(fmcapi.Ranges(fmc, id=network_id).get())
         elif network_type == 'NetworkGroup':
                 networks_grp = fmcapi.NetworkGroups(fmc, id=network_id).get()
 
                 if networks_grp.get('objects', None) is not None:
                         for network_obj in networks_grp['objects']:
-                                recursive(fmc, network_obj, recursive_collector)
+                                depth += 1
+                                recursive(fmc, network_obj, recursive_collector, depth)
 
                 if networks_grp.get('literals', None) is not None:
                         networks = networks_grp['literals']
@@ -121,17 +185,15 @@ def recursive(fmc, network, recursive_collector):
                 network_value = network.get('value', None)
                 recursive_collector.append('{} - {}'.format(network_name, network_value))
 
-        return recursive_collector
+        return recursive_collector, depth
 
-def equal_port_object_finder(fmc):
+def equal_port_object_finder(fmc, port_objs, port_obj_groups):
         final = []
-        port_objs =  fmcapi.ProtocolPortObjects(fmc).get()
         for i in range(len(port_objs['items']) - 1):
                 for j in range(i + 1, len(port_objs['items'])):
                         if port_objs['items'][i]['protocol'] == port_objs['items'][j]['protocol'] and port_objs['items'][i]['port'] == port_objs['items'][j]['port']:
-                                final.append('Port Object: {} = {}'.format(port_objs['items'][i]['name'], port_objs['items'][j]['name']))
+                                final.append('Port Object;{};{}'.format(port_objs['items'][i]['name'], port_objs['items'][j]['name']))
 
-        port_obj_groups = fmcapi.PortObjectGroups(fmc).get()
         for i in range(len(port_obj_groups['items']) - 1):
                 for j in range(i + 1, len(port_obj_groups['items'])):
                         counter = 0
@@ -145,76 +207,57 @@ def equal_port_object_finder(fmc):
                                                 if protocol_port_obj_i['protocol'] == protocol_port_obj_j['protocol'] and protocol_port_obj_i['port'] == protocol_port_obj_j['port']:
                                                         counter += 1
                                                         if counter == len(port_obj_groups['items'][i]['objects']):
-                                                                final.append('Port Object Group: {} = {}'.format(port_obj_groups['items'][i]['name'], port_obj_groups['items'][j]['name']))
-                                                        break
-        pprint(final)
+                                                                final.append('Port Object Group;{};{}'.format(port_obj_groups['items'][i]['name'], port_obj_groups['items'][j]['name']))
+                                                                break
         return final
 
-def equal_network_object_finder(fmc):
-        final = []
-        host_objs =  fmcapi.Hosts(fmc).get()
-        final.extend(network_object_helper(host_objs))
-        network_objs =  fmcapi.Networks(fmc).get()
-        final.extend(network_object_helper(network_objs))
-                       
-        pprint(final)
-        return final
+def calculate_protocol_port_object_size(group_name, protocol_port_objs):
+        port_id, port_name, port_port, port_protocol = _get_ports_info(protocol_port_objs)
+        port_size = 1
+        if "-" in port_port:
+                port_size = int(port_port.split("-")[1]) - int(port_port.split("-")[0])
+        is_risky = _is_risky_port([], port_port)
+        return Port(port_id, group_name, port_name, port_protocol, port_port, port_size, is_risky)
 
-def network_object_helper(objs):
+def calculate_port_group_size(fmc, port_obj_groups):
+        protocol_port_objs = []
+        group_name = port_obj_groups['name']
+        for ports in port_obj_groups['objects']:
+                port_id = ports['id']
+                protocol_port_obj = fmcapi.ProtocolPortObjects(fmc, id=port_id).get()
+                protocol_port_objs.append(calculate_protocol_port_object_size(group_name, protocol_port_obj))
+        return protocol_port_objs
+
+def _get_ports_info(protocol_port_obj):
+        port_id = protocol_port_obj['id']
+        port_name = protocol_port_obj['name']
+        port_port = protocol_port_obj['port']
+        port_protocol = protocol_port_obj['protocol']
+        return port_id, port_name, port_port, port_protocol
+
+def _is_risky_port(risky_ports, current_port):
+        return True
+
+def equal_network_object_finder(objs):
         final = []
         for i in range(len(objs['items']) - 1):
                 for j in range(i + 1, len(objs['items'])):
                         if objs['items'][i]['value'] == objs['items'][j]['value']:
-                                final.append('{} = {}'.format(objs['items'][i]['name'], objs['items'][j]['name']))
+                                final.append('{};{};{};{}'.format(objs['items'][i]['name'], objs['items'][i]['value'], objs['items'][j]['name'], objs['items'][j]['value']))
         return final
 
-def test(fmc):
-        final = []
-        network_obj_groups = fmcapi.NetworkGroups(fmc).get()
-        for i in range(len(network_obj_groups['items']) - 1):
-                list_i = []
-                network_obj_groups_collector_i = []
-                for j in range(i + 1, len(network_obj_groups['items'])):
-                        counter = 0
-                        list_j = []
-                        network_obj_groups_collector_j = []
-                        if network_obj_groups['items'][i].get('objects', None) is not None and network_obj_groups['items'][j].get('objects', None) is not None:
-                                if len(network_obj_groups['items'][i]['objects']) == len(network_obj_groups['items'][j]['objects']):
-                                        for network_obj_i in network_obj_groups['items'][i]['objects']:
-                                                list_i.extend(recursive(fmc, network_obj_i, network_obj_groups_collector_i))
-                                                for network_obj_j in network_obj_groups['items'][j]['objects']:
-                                                        list_j.extend(recursive(fmc, network_obj_j, network_obj_groups_collector_j))
-                                                        if len(list_i) == len(list_j):
-                                                                for a in list_i:
-                                                                        for b in list_j:
-                                                                                if a == b:
-                                                                                        counter +=1
-                                                                                        if counter == len(list_i):
-                                                                                                final.append('Network Group: {} = {}'.format(network_obj_groups['items'][i]['name'], network_obj_groups['items'][j]['name']))
-                                                                                        break
+def calculate_network_size(objs):
+        for obj in objs['items']:
+                network = obj['value'].split('/')[0]
+                mask = int(obj['value'].split('/')[1])
+                if mask > 0:
+                        available_clients = int(math.pow(2, 32 - mask) - 2)
+        return network, mask, available_clients
 
-
-                        elif network_obj_groups['items'][i].get('literals', None) is not None and network_obj_groups['items'][j].get('literals', None) is not None:
-                                if len(network_obj_groups['items'][i]['literals']) == len(network_obj_groups['items'][j]['literals']):
-                                        for network_obj_i in network_obj_groups['items'][i]['literals']:
-                                                list_i.extend(recursive(fmc, network_obj_i, network_obj_groups_collector_i))
-                                                for network_obj_j in network_obj_groups['items'][j]['literals']:
-                                                        list_j.extend(recursive(fmc, network_obj_j, network_obj_groups_collector_j))
-                                                        if len(list_i) == len(list_j):
-                                                                for a in list_i:
-                                                                        for b in list_j:
-                                                                                if a == b:
-                                                                                        counter +=1
-                                                                                        if counter == len(list_i):
-                                                                                                final.append('Network Group: {} = {}'.format(network_obj_groups['items'][i]['name'], network_obj_groups['items'][j]['name']))
-                                                                                        break
-        
-
-def export_to_excel(rules, headers):
-        data = [(rule.access_policy, rule.name, rule.action, rule.enabled, rule.source_networks, rule.source_zones, rule.destination_networks, rule.destination_zones, rule.destination_ports) for rule in rules]
-        df = pd.DataFrame(data, columns=headers)
-        df.to_excel('access_rules.xlsx')
-
+def export_to_excel(data, header, excel_name):
+        df = pd.DataFrame(data, columns=header)
+        export_dir = os.getcwd() + '/Exports'
+        df.to_excel('{}/{}.xlsx'.format(export_dir, excel_name))
 
 def get_data_by_name(data, name):
         for item in data['items']:
@@ -269,10 +312,11 @@ def process_network_objects(object, network_groups, networks, ranges, hosts, fla
 
 def flatten_networks(network_groups,networks,ranges,hosts):
         result = {}
+        depth_counter = 0
         for network_group in network_groups['items']:
             objects = network_group.get('objects', None)
             literals = network_group.get('literals', None)
-            
+            depth_counter += 1
             if objects: 
                 value_1 = process_network_objects(objects,network_groups,networks,ranges,hosts,result)
                 result[network_group['name']] = value_1
@@ -336,19 +380,29 @@ def get_network_size_from_clients(n):
 def get_network_size_mask(network: list[IPNetwork]):
         return network[0], (32 - get_network_size_from_clients(get_network_size(network)[1]-1))
 
+def get_equal_networks(networks: dict):
+        reverse_dict = {}
+        for key, value in networks.items():
+                value_tuple = tuple(value)
+                reverse_dict.setdefault(value_tuple, set()).add(key)
+
+        result = [values for values in reverse_dict.values() if len(values) > 1]
+        
+        return result
+
 def test01():
     with fmcapi.FMC(
         host='192.168.33.193',
         username='admin',#input('Enter the username: '),
-        password='GetCon135!',#input('Enter the password: '),
+        password='GetCon135!!',#input('Enter the password: '),
         autodeploy=False,
     ) as fmc:
         hosts = fmcapi.Hosts(fmc=fmc).get()
         networks = fmcapi.Networks(fmc=fmc).get()
         network_ranges = fmcapi.Ranges(fmc=fmc).get()
         network_groups = fmcapi.NetworkGroups(fmc=fmc).get()
-        result01 = flatten_networks(network_groups,networks,network_ranges,hosts)
-
+        result01 = flatten_networks(network_groups, networks, network_ranges, hosts)
+        get_equal_networks(result01)
         result02 = {}
 
         for key,value in result01.items():
@@ -360,15 +414,15 @@ def test01():
         #print(hosts)
         #print(networks)
         #print(network_groups)
-        print(result01)
-        print(result02)
+        pprint(result01)
+        pprint(result02)
 
         network_size = dict(map(get_network_size, result02.items()))
         network_size_mask = dict(map(get_network_size_mask, result02.items()))
 
-        print(network_size)
-        print(network_size_mask)
+        pprint(network_size)
+        pprint(network_size_mask)
 
 
-
-test01()
+#test01()
+fmc_init()
