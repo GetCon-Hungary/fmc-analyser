@@ -16,7 +16,11 @@ def fmc_init():
         password='GetCon135!!',#input('Enter the password: '),
         autodeploy=False,
     ) as fmc:
-        """acp = fmcapi.AccessPolicies(fmc).get()
+        obj = get_network_object(fmc)
+        
+        print(obj)
+        """
+        acp = fmcapi.AccessPolicies(fmc).get()
         policies = get_access_policies(acp)
 
         access_rule_header = ['Access Policy', 'Access Rule', 'Action', 'Enabled', 'Source Networks', 'Source Zones', 'Source Ports', 'Destination Networks', 'Destination Zones', 'Destination Ports']
@@ -59,6 +63,24 @@ def fmc_init():
         export_to_excel(equal_networks_data, equal_network_header, 'equal_networks')"""
 
         print('Done')
+
+def get_network_object(fmc):
+        netObj = fmcapi.Networks(fmc).get()
+        groupObj = fmcapi.NetworkGroups(fmc).get()
+        hostObj = fmcapi.Hosts(fmc).get()
+        rangeObj = fmcapi.Ranges(fmc).get()
+        obj = {}
+        for x in netObj['items']:
+                obj[x['name']] = 0
+        for x in groupObj['items']:
+                obj[x['name']] = 0
+        for x in hostObj['items']:
+                obj[x['name']] = 0
+        for x in rangeObj['items']:
+                obj[x['name']] = 0
+        
+        return obj
+
 
 def get_access_policies(acp):
         policies = []
