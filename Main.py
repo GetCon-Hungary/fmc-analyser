@@ -2,6 +2,7 @@ import fmcapi
 from Models.AccessPolicy import AccessPolicy
 from Models.AccessRule import AccessRule
 from Models.Port import Port
+from Models.PortGroup import PortGroup
 import pandas as pd
 import os
 import math
@@ -28,25 +29,28 @@ def fmc_init():
               accessrules = fmcapi.AccessRules(fmc, acp_id=policy.id).get()
               rules.extend(get_access_rules(fmc, accessrules['items'], policy.name))
         access_rule_data = [(rule.access_policy, rule.name, rule.action, rule.enabled, rule.source_networks, rule.source_zones, rule.source_ports, rule.destination_networks, rule.destination_zones, rule.destination_ports) for rule in rules]
-        export_to_excel(access_rule_data, access_rule_header, 'access_rules_v1')
+        export_to_excel(access_rule_data, access_rule_header, 'access_rules_v1')"""
 
         ports_header = ['Group Name', 'Name', 'Protocol', 'Port', 'Size', 'Risky']
         ports = []
+        port_groups = []
         protocol_port_objs = fmcapi.ProtocolPortObjects(fmc).get()
-        for protocol_port_obj in protocol_port_objs['items']:
-                ports.append(calculate_protocol_port_object_size(None, protocol_port_obj))
+        ports.extend(get_ports(fmc, protocol_port_objs['items']))
         port_obj_groups = fmcapi.PortObjectGroups(fmc).get()
-        for port_obj_group in port_obj_groups['items']:
-                ports.extend(calculate_port_group_size(fmc, port_obj_group))
-        ports_data = [(port.group_name, port.name, port.protocol, port.port, port.size, port.is_risky) for port in ports]
+        port_groups.extend(get_ports(fmc, port_obj_groups['items']))
+        ports_data = [(None, port.name, port.protocol, port.port, port.size, port.is_risky) for port in ports]
+        for port_group in port_groups:
+                for port in port_group.ports:
+                        ports_data.append((port_group.name, port.name, port.protocol, port.port, port.size, port.is_risky))
         export_to_excel(ports_data, ports_header, 'ports')
 
-        equal_ports_header = ['Type', 'Name', 'Name']
-        equal_ports = equal_port_object_finder(fmc, protocol_port_objs, port_obj_groups)
-        equal_ports_data = [(ports.split(';')[0], ports.split(';')[1], ports.split(';')[2]) for ports in equal_ports]
-        export_to_excel(equal_ports_data, equal_ports_header, 'equal_ports')
+        equal_ports_header = ['Name', 'Name']
+        equal_ports = []
+        equal_ports.extend(equal_port_object_finder(ports))
+        equal_ports.extend(equal_port_object_finder(port_groups))
+        export_to_excel(equal_ports, equal_ports_header, 'equal_ports')
 
-        equal_network_header = ['Name', 'Value', 'Name', 'Value']
+        """equal_network_header = ['Name', 'Value', 'Name', 'Value']
         hosts = fmcapi.Hosts(fmc).get()
         networks = fmcapi.Networks(fmc).get()
         ranges = fmcapi.Ranges(fmc).get()
@@ -86,7 +90,6 @@ def get_access_policies(acp):
             policies.append(AccessPolicy(id, name))
         
         return policies
-
 
 def get_access_rules(fmc, accessrules, acp_name):
         rules = []
@@ -131,32 +134,63 @@ def get_ports_by_rule(fmc, rule):
                 elif d_literals is not None:
                         d_ports_list.extend(get_ports(fmc, d_literals))
 
-        return s_ports_list, d_ports_list
+        return [(port.name, port.protocol, port.port) for port in s_ports_list], [(port.name, port.protocol, port.port) for port in d_ports_list]
 
 def get_ports(fmc, ports):
-        ports_list = []
+        port_objs = []
         for port in ports:
-                port_objs = []
                 port_id = port.get('id', None)
                 port_type = port.get('type', None)
                 if port_type == 'ProtocolPortObject':
-                        port_objs.append(fmcapi.ProtocolPortObjects(fmc, id=port_id).get())
+                        protocol_port_obj = fmcapi.ProtocolPortObjects(fmc, id=port_id).get()
+                        port_objs.append(_create_port(port_id, protocol_port_obj))
                 elif port_type == 'PortObjectGroup':
-                        port_objs.extend(flat_port_object_grp(fmc, port_id))
+                        port_grp = []
+                        port_obj_grp = fmcapi.PortObjectGroups(fmc, id=port_id).get()
+                        group_name = port_obj_grp['name']
+                        flattened_port_obj_grp = flat_port_object_grp(fmc, port_obj_grp)
+                        for protocol_port_obj in flattened_port_obj_grp:
+                                port_grp.append(_create_port(port_id, protocol_port_obj))
+                        port_objs.append(PortGroup(port_id, group_name, port_grp))
                 elif port_type == 'ICMPv4PortLiteral':
-                        ports_list.append('{} {} {}'.format(port_type, port.get('protocol', None), port.get('icmpType', None)))
-                for port_obj in port_objs:
-                        port_id, port_name, port_port, port_protocol = _get_ports_info(port_obj)
-                        ports_list.append('{} - {} {}'.format(port_name, port_protocol, port_port))
-        return ports_list
+                        port_objs.append(Port(port_id, None, port_type, port.get('protocol', None), port.get('icmpType', None), '1', True ))
+        return port_objs
 
-def flat_port_object_grp(fmc, port_grp_id):
+def flat_port_object_grp(fmc, port_obj_group):
         port_obj = []
-        port_obj_group = fmcapi.PortObjectGroups(fmc, id=port_grp_id).get()
         for port in port_obj_group['objects']:
                 port_id = port['id']
                 port_obj.append(fmcapi.ProtocolPortObjects(fmc, id=port_id).get())
         return port_obj
+
+def _create_port(port_id, port_obj):
+        port_name, port_port, port_protocol = _get_ports_info(port_obj)
+        port_size = calculate_protocol_port_object_size(port_port)
+        is_risky = _is_risky_port([], port_port)
+        return Port(port_id, port_name, port_protocol, port_port, port_size, is_risky)
+
+def equal_port_object_finder(ports):
+        final = []
+        for i in range(len(ports) - 1):
+                for j in range(i + 1, len(ports)):
+                        if ports[i].__eq__(ports[j]):
+                                final.append((ports[i].name, ports[j].name))
+        return final
+
+def calculate_protocol_port_object_size(port_port):
+        port_size = 1
+        if "-" in port_port:
+                port_size = int(port_port.split("-")[1]) - int(port_port.split("-")[0])
+        return port_size
+
+def _get_ports_info(protocol_port_obj):
+        port_name = protocol_port_obj.get('name', None)
+        port_port = protocol_port_obj.get('port', None)
+        port_protocol = protocol_port_obj.get('protocol', None)
+        return port_name, port_port, port_protocol
+
+def _is_risky_port(risky_ports, current_port):
+        return True
 
 def get_networks_by_rule(fmc, rule):
         s_networks = rule.get('sourceNetworks', None)
@@ -208,57 +242,6 @@ def recursive(fmc, network, recursive_collector, depth):
                 recursive_collector.append('{} - {}'.format(network_name, network_value))
 
         return recursive_collector, depth
-
-def equal_port_object_finder(fmc, port_objs, port_obj_groups):
-        final = []
-        for i in range(len(port_objs['items']) - 1):
-                for j in range(i + 1, len(port_objs['items'])):
-                        if port_objs['items'][i]['protocol'] == port_objs['items'][j]['protocol'] and port_objs['items'][i]['port'] == port_objs['items'][j]['port']:
-                                final.append('Port Object;{};{}'.format(port_objs['items'][i]['name'], port_objs['items'][j]['name']))
-
-        for i in range(len(port_obj_groups['items']) - 1):
-                for j in range(i + 1, len(port_obj_groups['items'])):
-                        counter = 0
-                        if len(port_obj_groups['items'][i]['objects']) == len(port_obj_groups['items'][j]['objects']):
-                                for port_obj_i in port_obj_groups['items'][i]['objects']:
-                                        port_id_i = port_obj_i['id']
-                                        protocol_port_obj_i = fmcapi.ProtocolPortObjects(fmc, id=port_id_i).get()
-                                        for port_obj_j in port_obj_groups['items'][j]['objects']:
-                                                port_id_j = port_obj_j['id']
-                                                protocol_port_obj_j = fmcapi.ProtocolPortObjects(fmc, id=port_id_j).get()
-                                                if protocol_port_obj_i['protocol'] == protocol_port_obj_j['protocol'] and protocol_port_obj_i['port'] == protocol_port_obj_j['port']:
-                                                        counter += 1
-                                                        if counter == len(port_obj_groups['items'][i]['objects']):
-                                                                final.append('Port Object Group;{};{}'.format(port_obj_groups['items'][i]['name'], port_obj_groups['items'][j]['name']))
-                                                                break
-        return final
-
-def calculate_protocol_port_object_size(group_name, protocol_port_objs):
-        port_id, port_name, port_port, port_protocol = _get_ports_info(protocol_port_objs)
-        port_size = 1
-        if "-" in port_port:
-                port_size = int(port_port.split("-")[1]) - int(port_port.split("-")[0])
-        is_risky = _is_risky_port([], port_port)
-        return Port(port_id, group_name, port_name, port_protocol, port_port, port_size, is_risky)
-
-def calculate_port_group_size(fmc, port_obj_groups):
-        protocol_port_objs = []
-        group_name = port_obj_groups['name']
-        for ports in port_obj_groups['objects']:
-                port_id = ports['id']
-                protocol_port_obj = fmcapi.ProtocolPortObjects(fmc, id=port_id).get()
-                protocol_port_objs.append(calculate_protocol_port_object_size(group_name, protocol_port_obj))
-        return protocol_port_objs
-
-def _get_ports_info(protocol_port_obj):
-        port_id = protocol_port_obj['id']
-        port_name = protocol_port_obj['name']
-        port_port = protocol_port_obj['port']
-        port_protocol = protocol_port_obj['protocol']
-        return port_id, port_name, port_port, port_protocol
-
-def _is_risky_port(risky_ports, current_port):
-        return True
 
 def equal_network_object_finder(objs):
         final = []
