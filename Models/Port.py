@@ -1,7 +1,6 @@
 class Port:
     def __init__(self, id, name, protocol, port, size, is_risky):
         self.id = id
-        #self.group_name = group_name
         self.name = name
         self.protocol = protocol
         self.port = port

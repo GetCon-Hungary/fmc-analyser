@@ -1,7 +1,7 @@
-class PortGroup:
-    def __init__(self, id, name, ports):
+class PortObject:
+    def __init__(self, id, group_name, ports):
         self.id = id
-        self.name = name
+        self.group_name = group_name
         self.ports = ports
     
     def __eq__(self, __value: object) -> bool:
