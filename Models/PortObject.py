@@ -13,5 +13,6 @@ class PortObject:
                         counter += 1
                         if counter == len(self.ports):
                             return True
+            return False
         else:
             return False
