@@ -20,6 +20,3 @@ class NetworkObject:
             return False
         else:
             return False
-    
-    def __str__(self) -> str:
-        pass
