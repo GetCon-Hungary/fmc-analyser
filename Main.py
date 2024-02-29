@@ -16,9 +16,6 @@ def fmc_init():
         password='GetCon135!!',#input('Enter the password: '),
         autodeploy=False,
     ) as fmc:
-        #obj = get_network_object(fmc)
-        #print(obj)
-        
         
         acp = fmcapi.AccessPolicies(fmc).get()
         policies = get_access_policies(fmc, acp)
@@ -27,19 +24,35 @@ def fmc_init():
                 access_rule_data = [(rule.name, rule.action, rule.enabled, get_networks_data_by_rule(rule.source_networks), rule.source_zones, get_ports_data_by_rule(rule.source_ports) , get_networks_data_by_rule(rule.destination_networks), rule.destination_zones, get_ports_data_by_rule(rule.destination_ports)) for rule in policy.rules]
                 export_to_excel(access_rule_data, access_rule_header, 'access_rules_of_{}'.format(policy.name))
         
-        """
+        unused_port_objs = []
+        unused_port_data = []
+        unused_port_objs.append(fmcapi.ProtocolPortObjects(fmc).get(unusedOnly=True))
+        unused_port_objs.append(fmcapi.PortObjectGroups(fmc).get(unusedOnly=True))
+        for unused_port in unused_port_objs:
+                unused_port_data.extend([(port['name']) for port in unused_port['items']])
+        export_to_excel(unused_port_data, ['Name'], 'unused_ports')
+
         ports_header = ['Group Name', 'Name', 'Protocol', 'Port', 'Size', 'Risky', 'Equal with']
-        ports = []
+        port_objs = []
         protocol_port_objs = fmcapi.ProtocolPortObjects(fmc).get()
         port_obj_groups = fmcapi.PortObjectGroups(fmc).get()
-        ports.extend(get_ports(fmc, protocol_port_objs['items']))
-        ports.extend(get_ports(fmc, port_obj_groups['items']))
-        equal_port_object_finder(ports)
-        ports_data = get_ports_data(ports)
+        port_objs.extend(get_ports(fmc, protocol_port_objs['items']))
+        port_objs.extend(get_ports(fmc, port_obj_groups['items']))
+        equal_port_object_finder(port_objs)
+        ports_data = get_ports_data(port_objs)
         export_to_excel(ports_data, ports_header, 'ports')
         
-
-        network_header = ['Group Name', 'Name', 'Value', 'Mask', 'Size', 'Equal with']
+        unused_networks_objs = []
+        unused_networks_data = []
+        unused_networks_objs.append(fmcapi.Hosts(fmc).get(unusedOnly=True))
+        unused_networks_objs.append(fmcapi.Networks(fmc).get(unusedOnly=True))
+        unused_networks_objs.append(fmcapi.Ranges(fmc).get(unusedOnly=True))
+        unused_networks_objs.append(fmcapi.NetworkGroups(fmc).get(unusedOnly=True))
+        for unused_network in unused_networks_objs:
+                unused_networks_data.extend([(network['name']) for network in unused_network['items']])
+        export_to_excel(unused_networks_data, ['Name'], 'unused_networks')
+        
+        network_header = ['Group Name', 'Name', 'Value', 'Size', 'Equal with']
         network_objs = []
         hosts = fmcapi.Hosts(fmc).get()
         networks = fmcapi.Networks(fmc).get()
@@ -53,51 +66,14 @@ def fmc_init():
         network_data = get_networks_data(network_objs)
         export_to_excel(network_data, network_header, 'networks')
         """
+        for policy in policies:
+                enabled_count = policy.enabled_rules_count()
+                allowed_count = policy.allowed_rules_count()
+                allowed_ratio = policy.allowed_rules_ratio()
+                enabled_ratio = policy.enabled_rules_ratio()
+                print(str(enabled_ratio) + " " + str(len(policy.rules)) + " " + str(enabled_count) + " " + str(allowed_ratio) + " " + str(len(policy.rules)) + " " + str(allowed_count))
+        """
         print('Done')
-
-def get_ports_data_by_rule(ports):
-        value = ""
-        value_2 = ""
-        for port in ports:
-                if isinstance(port, Port):
-                        value += "{} - {} {}, ".format(port.name, port.protocol, port.port)
-                elif isinstance(port, PortObject):
-                        for p in port.ports:
-                                value_2 += "{} - {} {}, ".format(p.name, p.protocol, p.port)
-                        value += "{}: ({}), ".format(port.name, value_2)
-        return value
-
-def get_networks_data_by_rule(networks):
-        value = ""
-        value_2 = ""
-        for network in networks:
-                if isinstance(network, NetworkObject):
-                        nets = flat_network_object_grp(network)
-                        for net in nets:
-                                value_2 += "{} : {}, ".format(net.name, net.value)
-                        value += "{}: ({}), ".format(network.name, value_2)
-                else:
-                        value += "{} : {}, ".format(network.name, network.value)
-
-        return value
-
-
-def get_network_object(fmc):
-        netObj = fmcapi.Networks(fmc).get()
-        groupObj = fmcapi.NetworkGroups(fmc).get()
-        hostObj = fmcapi.Hosts(fmc).get()
-        rangeObj = fmcapi.Ranges(fmc).get()
-        obj = {}
-        for x in netObj['items']:
-                obj[x['name']] = 0
-        for x in groupObj['items']:
-                obj[x['name']] = 0
-        for x in hostObj['items']:
-                obj[x['name']] = 0
-        for x in rangeObj['items']:
-                obj[x['name']] = 0
-        
-        return obj
 
 def get_access_policies(fmc, acp):
         policies = []
@@ -203,7 +179,7 @@ def calculate_protocol_port_object_size(port_port):
         return port_size
 
 def _is_risky_port(risky_ports, current_port):
-        return True
+        return False
 
 def equal_port_object_finder(ports):
         for i in range(len(ports) - 1):
@@ -226,6 +202,18 @@ def get_ports_data(ports):
                         for p in port.ports:
                                 ports_data.append((port.name, p.name, p.protocol, p.port, p.size, p.is_risky, port.equal_with))
         return ports_data
+
+def get_ports_data_by_rule(ports):
+        value = ""
+        value_2 = ""
+        for port in ports:
+                if isinstance(port, Port):
+                        value += "{} - {} {}, ".format(port.name, port.protocol, port.port)
+                elif isinstance(port, PortObject):
+                        for p in port.ports:
+                                value_2 += "{} - {} {}, ".format(p.name, p.protocol, p.port)
+                        value += "{}: ({}), ".format(port.name, value_2)
+        return value
 
 def get_networks_by_rule(fmc, rule):
         s_networks = rule.get('sourceNetworks', None)
@@ -283,10 +271,10 @@ def get_networks(fmc, networks):
 def _create_network(network_obj, range = False):
         network_id, network_type, network_name = _get_networks_info(network_obj)
         if range:
-                network_value, available_clients, network_mask = calculate_range_size(network_obj)
+                network_value, available_clients = calculate_range_size(network_obj)
         else:
-                network_value, available_clients, network_mask = calculate_network_size(network_obj)
-        return Network(network_id, network_type, network_name, network_value, available_clients, network_mask)
+                network_value, available_clients = calculate_network_size(network_obj)
+        return Network(network_id, network_type, network_name, network_value, available_clients)
 
 def _get_networks_info(network_obj):
         network_id = network_obj.get('id', None)
@@ -295,19 +283,18 @@ def _get_networks_info(network_obj):
         return network_id, network_type, network_name
 
 def calculate_network_size(network_obj):
+        network = network_obj['value']
         try:
-                network = network_obj['value'].split('/')[0]
                 mask = int(network_obj['value'].split('/')[1])
                 if '::' not in network_obj['value']:
                         available_clients = int(math.pow(2, 32 - mask) - 2)
                 else:
                         available_clients = 'NaN'
         except:
-                network = network_obj['value']
-                mask = "32"
+                network = network_obj['value'] + "/32"
                 available_clients = 1
         
-        return network, available_clients, "/{}".format(mask)
+        return network, available_clients
 
 def calculate_range_size(network_obj):
         network = network_obj['value']
@@ -318,11 +305,12 @@ def calculate_range_size(network_obj):
                 network_to_mask = network_to.split('/')[1]
                 available_clients = int(math.pow(2, 32 - network_from_mask) - 2) + int(math.pow(2, 32 - network_to_mask) - 2)
         except:
-                network_from_mask = '32'
-                network_to_mask = '32'
+                network_from_mask = '/32'
+                network_to_mask = '/32'
+                network = "{}{}-{}{}".format(network_from, network_from_mask, network_to, network_to_mask)
                 available_clients = int(network_to.split('.')[-1]) - int(network_from.split('.')[-1])
                 
-        return network, available_clients, "/{} /{}".format(network_from_mask, network_to_mask)
+        return network, available_clients
 
 def equal_network_object_finder(objs):
         for i in range(len(objs) - 1):
@@ -352,14 +340,29 @@ def get_networks_data(networks):
         for network in networks:
                 if isinstance(network, NetworkObject):
                         nets = flat_network_object_grp(network)
-                        networks_data.extend([(network.name, net.name, net.value, net.mask, net.size, network.equal_with) for net in nets])
+                        networks_data.extend([(network.name, net.name, net.value, net.size, network.equal_with) for net in nets])
                 else:
-                        networks_data.append((None, network.name, network.value, network.mask, network.size, network.equal_with))
+                        networks_data.append((None, network.name, network.value, network.size, network.equal_with))
 
         return networks_data
 
+def get_networks_data_by_rule(networks):
+        value = ""
+        value_2 = ""
+        for network in networks:
+                if isinstance(network, NetworkObject):
+                        nets = flat_network_object_grp(network)
+                        for net in nets:
+                                value_2 += "{} : {}, ".format(net.name, net.value)
+                        value += "{}: ({}), ".format(network.name, value_2)
+                else:
+                        value += "{} : {}, ".format(network.name, network.value)
+
+        return value
+
 def export_to_excel(data, header, sheet_name):
         df = pd.DataFrame(data, columns=header)
+        df.index = range(1, len(df)+1)
         export_dir = os.getcwd() + '/Exports/final.xlsx'
         with pd.ExcelWriter(path=export_dir, mode='a', if_sheet_exists='replace') as writer:
                 df.to_excel(excel_writer=writer, sheet_name=sheet_name)
