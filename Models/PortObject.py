@@ -1,8 +1,9 @@
 class PortObject:
-    def __init__(self, id, group_name, ports):
+    def __init__(self, id, name, ports):
         self.id = id
-        self.group_name = group_name
+        self.name = name
         self.ports = ports
+        self.equal_with = ""
     
     def __eq__(self, __value: object) -> bool:
         counter = 0

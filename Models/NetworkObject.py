@@ -1,12 +1,13 @@
 class NetworkObject:
     usageCount = 0
 
-    def __init__(self, id, group_name, networks, depth, **kwargs):
+    def __init__(self, id, name, networks, depth, **kwargs):
         self.id = id
-        self.group_name = group_name
+        self.name = name
         #c = kwargs.get('c', None)
         self.networks = networks
         self.depth = depth
+        self.equal_with = ""
 
     def __eq__(self, __value: object) -> bool:
         counter = 0
