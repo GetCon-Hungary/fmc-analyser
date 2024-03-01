@@ -1,12 +1,11 @@
-class NetworkObject:
-    usageCount = 0
+from Models.Network import Network
 
-    def __init__(self, id, name, networks, depth, **kwargs):
+class NetworkObject:
+    def __init__(self, id, name):
         self.id = id
         self.name = name
-        #c = kwargs.get('c', None)
-        self.networks = networks
-        self.depth = depth
+        self.networks = []
+        self.depth = 0
         self.equal_with = ""
 
     def __eq__(self, __value: object) -> bool:
@@ -21,3 +20,13 @@ class NetworkObject:
             return False
         else:
             return False
+    
+    def flat_network_object_grp(self, network_obj_group):
+        final = []
+        for network_obj in network_obj_group.networks:
+                if isinstance(network_obj, Network):
+                        final.append(network_obj)
+                elif isinstance(network_obj, NetworkObject):
+                        self.depth += 1
+                        final = self.flat_network_object_grp(network_obj)
+        return final
