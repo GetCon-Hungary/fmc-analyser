@@ -16,7 +16,6 @@ def fmc_init():
         password='GetCon135!!',#input('Enter the password: '),
         autodeploy=False,
     ) as fmc:
-        
         acp = fmcapi.AccessPolicies(fmc).get()
         policies = get_access_policies(fmc, acp)
         access_rule_header = ['Access Rule', 'Action', 'Enabled', 'Source Networks', 'Source Zones', 'Source Ports', 'Destination Networks', 'Destination Zones', 'Destination Ports']
@@ -24,6 +23,7 @@ def fmc_init():
                 access_rule_data = [(rule.name, rule.action, rule.enabled, get_networks_data_by_rule(rule.source_networks), rule.source_zones, get_ports_data_by_rule(rule.source_ports) , get_networks_data_by_rule(rule.destination_networks), rule.destination_zones, get_ports_data_by_rule(rule.destination_ports)) for rule in policy.rules]
                 export_to_excel(access_rule_data, access_rule_header, 'access_rules_of_{}'.format(policy.name))
 
+        '''
         ports_header = ['Group Name', 'Name', 'Protocol', 'Port', 'Size', 'Risky', 'Equal with']
         port_objs = []
         protocol_port_objs = fmcapi.ProtocolPortObjects(fmc).get()
@@ -49,14 +49,22 @@ def fmc_init():
         equal_network_object_finder(network_objs)
         network_data = get_networks_data(network_objs)
         export_to_excel(network_data, network_header, 'networks')
-        
+        '''
         for policy in policies:
                 enabled_count = policy.enabled_rules_count()
                 allowed_count = policy.allowed_rules_count()
                 allowed_ratio = policy.allowed_rules_ratio()
                 enabled_ratio = policy.enabled_rules_ratio()
-                print(str(enabled_ratio) + " " + str(len(policy.rules)) + " " + str(enabled_count) + " " + str(allowed_ratio) + " " + str(len(policy.rules)) + " " + str(allowed_count))
-        
+                #print(str(enabled_ratio) + " " + str(len(policy.rules)) + " " + str(enabled_count) + " " + str(allowed_ratio) + " " + str(len(policy.rules)) + " " + str(allowed_count))
+                
+                print(policy.name)
+                for x in policy.rules:
+                        print("halo")
+                        print(str(x.get_source_size()) + " " + str(x.get_destination_size()))
+                        print("portok")
+                        print(str(x.get_source_port_size()) + " " + str(x.get_destination_port_size()))
+
+
         print('Done')
 
 def network_object_count(obj, accessPolicy):
@@ -334,10 +342,10 @@ def equal_network_object_finder(objs):
                                         objs[i].equal_with += "{}, ".format(objs[j].name)
                                         objs[j].equal_with += "{}, ".format(objs[i].name)
                         elif isinstance(objs[i], NetworkObject) and isinstance(objs[j], NetworkObject):
-                                obj_i = objs[i].flat_network_object_grp(objs[i])
-                                obj_j = objs[j].flat_network_object_grp(objs[j])
-                                #obj_i = flat_network_object_grp(objs[i])
-                                #obj_j = flat_network_object_grp(objs[j])
+                                #obj_i = objs[i].flat_network_object_grp(objs[i])
+                                #obj_j = objs[j].flat_network_object_grp(objs[j])
+                                obj_i = flat_network_object_grp(objs[i])
+                                obj_j = flat_network_object_grp(objs[j])
                                 if obj_i.__eq__(obj_j):
                                         objs[i].equal_with += "{}, ".format(objs[j].name)
                                         objs[j].equal_with += "{}, ".format(objs[i].name)
@@ -355,7 +363,7 @@ def get_networks_data(networks):
         networks_data = []
         for network in networks:
                 if isinstance(network, NetworkObject):
-                        nets = network.flat_network_object_grp()
+                        nets = flat_network_object_grp(network)
                         networks_data.extend([(network.name, net.name, net.value, net.size, network.equal_with) for net in nets])
                 else:
                         networks_data.append((None, network.name, network.value, network.size, network.equal_with))
@@ -367,7 +375,7 @@ def get_networks_data_by_rule(networks):
         value_2 = ""
         for network in networks:
                 if isinstance(network, NetworkObject):
-                        nets = network.flat_network_object_grp()
+                        nets = flat_network_object_grp(network)
                         for net in nets:
                                 value_2 += "{} : {}, ".format(net.name, net.value)
                         value += "{}: ({}), ".format(network.name, value_2)

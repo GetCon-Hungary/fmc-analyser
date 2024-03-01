@@ -10,3 +10,6 @@ class Port:
     
     def __eq__(self, __value: object) -> bool:
         return self.protocol == __value.protocol and self.port == __value.port
+    
+    def get_size(self):
+        return int(self.size)

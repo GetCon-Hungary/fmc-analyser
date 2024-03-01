@@ -30,3 +30,10 @@ class NetworkObject:
                         self.depth += 1
                         final = self.flat_network_object_grp(network_obj)
         return final
+    
+    def get_size(self):
+        summ = 0
+        for network in self.networks:
+            summ += network.get_size()
+
+        return summ

@@ -31,3 +31,31 @@ class AccessRule:
     
     def network_used_in_rule(self, network):
         return self.network_used(network, self.source_networks) or self.network_used(network, self.destination_networks)
+
+    def get_source_size(self):
+        summ = 0
+        for network in self.source_networks:
+            summ += network.get_size()
+
+        return summ
+    
+    def get_destination_size(self):
+        summ = 0
+        for network in self.destination_networks:
+            summ += network.get_size()
+
+        return summ
+    
+    def get_source_port_size(self):
+        summ = 0
+        for port in self.source_ports:
+            summ += port.get_size()
+
+        return summ
+    
+    def get_destination_port_size(self):
+        summ = 0
+        for port in self.destination_ports:
+            summ += port.get_size()
+
+        return summ

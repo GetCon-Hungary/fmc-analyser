@@ -17,3 +17,10 @@ class PortObject:
             return False
         else:
             return False
+        
+    def get_size(self):
+        summ = 0
+        for port in self.ports:
+            summ += port.get_size()
+
+        return summ
