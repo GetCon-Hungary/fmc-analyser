@@ -21,15 +21,22 @@ class NetworkObject:
         else:
             return False
     
-    def flat_network_object_grp(self, network_obj_group):
+    def flat_network_object_grp(self):
         final = []
-        for network_obj in network_obj_group.networks:
+        for network_obj in self.networks:
                 if isinstance(network_obj, Network):
                         final.append(network_obj)
                 elif isinstance(network_obj, NetworkObject):
-                        self.depth += 1
-                        final = self.flat_network_object_grp(network_obj)
+                        final.extend(network_obj.flat_network_object_grp())
         return final
+    
+    def set_network_depth(self):
+        depth = 0
+        for network_obj in self.networks:
+             if isinstance(network_obj, NetworkObject):
+                  depth += network_obj.set_network_depth()
+                  depth += 1
+        return depth
     
     def get_size(self):
         summ = 0
