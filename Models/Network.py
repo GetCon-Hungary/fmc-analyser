@@ -9,3 +9,6 @@ class Network:
     
     def __eq__(self, __value: object) -> bool:
         return self.type == __value.type and self.value == __value.value
+    
+    def get_size(self):
+        return self.size
