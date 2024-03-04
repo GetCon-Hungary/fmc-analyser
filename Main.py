@@ -23,7 +23,7 @@ def fmc_init():
                 access_rule_data = [(rule.name, rule.action, rule.enabled, get_networks_data_by_rule(rule.source_networks), rule.source_zones, get_ports_data_by_rule(rule.source_ports) , get_networks_data_by_rule(rule.destination_networks), rule.destination_zones, get_ports_data_by_rule(rule.destination_ports)) for rule in policy.rules]
                 export_to_excel(access_rule_data, access_rule_header, 'access_rules_of_{}'.format(policy.name))
 
-        '''
+        
         ports_header = ['Group Name', 'Name', 'Protocol', 'Port', 'Size', 'Risky', 'Equal with']
         port_objs = []
         protocol_port_objs = fmcapi.ProtocolPortObjects(fmc).get()
@@ -35,7 +35,7 @@ def fmc_init():
         ports_data = get_ports_data(port_objs)
         export_to_excel(ports_data, ports_header, 'ports')
         
-        network_header = ['Group Name', 'Name', 'Value', 'Size', 'Equal with']
+        network_header = ['Group Name', 'Group depth', 'Name', 'Value', 'Size', 'Equal with']
         network_objs = []
         network_groups = fmcapi.NetworkGroups(fmc).get()
         hosts = fmcapi.Hosts(fmc).get()
@@ -49,7 +49,7 @@ def fmc_init():
         equal_network_object_finder(network_objs)
         network_data = get_networks_data(network_objs)
         export_to_excel(network_data, network_header, 'networks')
-        '''
+        
         for policy in policies:
                 enabled_count = policy.enabled_rules_count()
                 allowed_count = policy.allowed_rules_count()
@@ -278,8 +278,9 @@ def get_networks(fmc, networks):
                                 for network_obj in networks_grp['objects']:
                                         group_result = get_networks(fmc, [network_obj])
                                         network_group.networks.extend(group_result)
+                                network_group.depth = network_group.set_network_depth()
                                 recursive_collector.append(network_group)
-
+                        
                         if networks_grp.get('literals', None) is not None:
                                 network_literals = networks_grp['literals']
                                 for network_literal in network_literals:
@@ -337,36 +338,24 @@ def calculate_range_size(network_obj):
 def equal_network_object_finder(objs):
         for i in range(len(objs) - 1):
                 for j in range(i + 1, len(objs)):
-                        if isinstance(objs[i], Network) and isinstance(objs[j], Network):
-                                if objs[i].__eq__(objs[j]):
-                                        objs[i].equal_with += "{}, ".format(objs[j].name)
-                                        objs[j].equal_with += "{}, ".format(objs[i].name)
+                        if isinstance(objs[i], Network) and isinstance(objs[j], Network) and objs[i].__eq__(objs[j]):
+                                objs[i].equal_with += "{}, ".format(objs[j].name)
+                                objs[j].equal_with += "{}, ".format(objs[i].name)
                         elif isinstance(objs[i], NetworkObject) and isinstance(objs[j], NetworkObject):
-                                #obj_i = objs[i].flat_network_object_grp(objs[i])
-                                #obj_j = objs[j].flat_network_object_grp(objs[j])
-                                obj_i = flat_network_object_grp(objs[i])
-                                obj_j = flat_network_object_grp(objs[j])
+                                obj_i = objs[i].flat_network_object_grp()
+                                obj_j = objs[j].flat_network_object_grp()
                                 if obj_i.__eq__(obj_j):
                                         objs[i].equal_with += "{}, ".format(objs[j].name)
                                         objs[j].equal_with += "{}, ".format(objs[i].name)
-
-def flat_network_object_grp(network_obj_group):
-        final = []
-        for network_obj in network_obj_group.networks:
-                if isinstance(network_obj, Network):
-                        final.append(network_obj)
-                elif isinstance(network_obj, NetworkObject):
-                        final = flat_network_object_grp(network_obj)
-        return final
 
 def get_networks_data(networks):
         networks_data = []
         for network in networks:
                 if isinstance(network, NetworkObject):
-                        nets = flat_network_object_grp(network)
-                        networks_data.extend([(network.name, net.name, net.value, net.size, network.equal_with) for net in nets])
+                        nets = network.flat_network_object_grp()
+                        networks_data.extend([(network.name, network.depth, net.name, net.value, net.size, network.equal_with) for net in nets])
                 else:
-                        networks_data.append((None, network.name, network.value, network.size, network.equal_with))
+                        networks_data.append((None, None, network.name, network.value, network.size, network.equal_with))
 
         return networks_data
 
@@ -375,7 +364,7 @@ def get_networks_data_by_rule(networks):
         value_2 = ""
         for network in networks:
                 if isinstance(network, NetworkObject):
-                        nets = flat_network_object_grp(network)
+                        nets = network.flat_network_object_grp()
                         for net in nets:
                                 value_2 += "{} : {}, ".format(net.name, net.value)
                         value += "{}: ({}), ".format(network.name, value_2)
