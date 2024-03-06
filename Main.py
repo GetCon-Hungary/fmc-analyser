@@ -8,94 +8,67 @@ from Models.Network import Network
 import pandas as pd
 import os
 import math
+import argparse
 
-def fmc_init():
+
+def fmc_init(ip, user, passw, query, deploy):
     with fmcapi.FMC(
-        host='192.168.33.193',
-        username='admin',#input('Enter the username: '),
-        password='GetCon135!!',#input('Enter the password: '),
-        autodeploy=False,
+        host=ip,
+        username=user,
+        password=passw,
+        autodeploy=deploy,
     ) as fmc:
-        acp = fmcapi.AccessPolicies(fmc).get()
-        policies = get_access_policies(fmc, acp)
-        access_rule_header = ['Access Rule', 'Action', 'Enabled', 'Source Networks', 'Source Zones', 'Source Ports', 'Destination Networks', 'Destination Zones', 'Destination Ports']
-        for policy in policies:
-                access_rule_data = [(rule.name, rule.action, rule.enabled, get_networks_data_by_rule(rule.source_networks), rule.source_zones, get_ports_data_by_rule(rule.source_ports) , get_networks_data_by_rule(rule.destination_networks), rule.destination_zones, get_ports_data_by_rule(rule.destination_ports)) for rule in policy.rules]
-                export_to_excel(access_rule_data, access_rule_header, 'access_rules_of_{}'.format(policy.name))
+        if query == 'acp' or query == 'all':
+                acp = fmcapi.AccessPolicies(fmc).get()
+                policies = get_access_policies(fmc, acp)
+                access_rule_header = ['Access Rule', 'Action', 'Enabled', 'Source Networks', 'Source Zones', 'Source Ports', 'Destination Networks', 'Destination Zones', 'Destination Ports']
+                for policy in policies:
+                        access_rule_data = [(rule.name, rule.action, rule.enabled, get_networks_data_by_rule(rule.source_networks), rule.source_zones, get_ports_data_by_rule(rule.source_ports) , get_networks_data_by_rule(rule.destination_networks), rule.destination_zones, get_ports_data_by_rule(rule.destination_ports)) for rule in policy.rules]
+                        export_to_excel(access_rule_data, access_rule_header, 'access_rules_of_{}'.format(policy.name))
 
-        
-        ports_header = ['Group Name', 'Name', 'Protocol', 'Port', 'Size', 'Risky', 'Equal with']
-        port_objs = []
-        protocol_port_objs = fmcapi.ProtocolPortObjects(fmc).get()
-        port_obj_groups = fmcapi.PortObjectGroups(fmc).get()
+                for policy in policies:    
+                        enabled_count = policy.enabled_rules_count()
+                        allowed_count = policy.allowed_rules_count()
+                        allowed_ratio = policy.allowed_rules_ratio()
+                        enabled_ratio = policy.enabled_rules_ratio()
+                        print(str(enabled_ratio) + " " + str(len(policy.rules)) + " " + str(enabled_count) + " " + str(allowed_ratio) + " " + str(len(policy.rules)) + " " + str(allowed_count))
+                        
+                        print(policy.name)
+                        for x in policy.rules:
+                                print("halo")
+                                print(str(x.get_source_size()) + " " + str(x.get_destination_size()))
+                                print("portok")
+                                print(str(x.get_source_port_size()) + " " + str(x.get_destination_port_size()))
 
-        port_objs.extend(get_ports(fmc, protocol_port_objs['items']))
-        port_objs.extend(get_ports(fmc, port_obj_groups['items']))
-        equal_port_object_finder(port_objs)
-        ports_data = get_ports_data(port_objs)
-        export_to_excel(ports_data, ports_header, 'ports')
+        if query == 'ports' or query == 'all':
+                ports_header = ['Group Name', 'Name', 'Protocol', 'Port', 'Size', 'Risky', 'Equal with']
+                port_objs = []
+                protocol_port_objs = fmcapi.ProtocolPortObjects(fmc).get()
+                port_obj_groups = fmcapi.PortObjectGroups(fmc).get()
+
+                port_objs.extend(get_ports(fmc, protocol_port_objs['items']))
+                port_objs.extend(get_ports(fmc, port_obj_groups['items']))
+                equal_port_object_finder(port_objs)
+                ports_data = get_ports_data(port_objs)
+                export_to_excel(ports_data, ports_header, 'ports')
         
-        network_header = ['Group Name', 'Group depth', 'Name', 'Value', 'Size', 'Equal with']
-        network_objs = []
-        network_groups = fmcapi.NetworkGroups(fmc).get()
-        hosts = fmcapi.Hosts(fmc).get()
-        networks = fmcapi.Networks(fmc).get()
-        ranges = fmcapi.Ranges(fmc).get()
-        
-        network_objs.extend(get_networks(fmc, hosts['items']))
-        network_objs.extend(get_networks(fmc, networks['items']))
-        network_objs.extend(get_networks(fmc, ranges['items']))
-        network_objs.extend(get_networks(fmc, network_groups['items']))
-        equal_network_object_finder(network_objs)
-        network_data = get_networks_data(network_objs)
-        export_to_excel(network_data, network_header, 'networks')
-        
-        for policy in policies:
-                enabled_count = policy.enabled_rules_count()
-                allowed_count = policy.allowed_rules_count()
-                allowed_ratio = policy.allowed_rules_ratio()
-                enabled_ratio = policy.enabled_rules_ratio()
-                #print(str(enabled_ratio) + " " + str(len(policy.rules)) + " " + str(enabled_count) + " " + str(allowed_ratio) + " " + str(len(policy.rules)) + " " + str(allowed_count))
+        if query == 'networks' or query == 'all':
+                network_header = ['Group Name', 'Group depth', 'Name', 'Value', 'Size', 'Equal with']
+                network_objs = []
+                network_groups = fmcapi.NetworkGroups(fmc).get()
+                hosts = fmcapi.Hosts(fmc).get()
+                networks = fmcapi.Networks(fmc).get()
+                ranges = fmcapi.Ranges(fmc).get()
                 
-                print(policy.name)
-                for x in policy.rules:
-                        print("halo")
-                        print(str(x.get_source_size()) + " " + str(x.get_destination_size()))
-                        print("portok")
-                        print(str(x.get_source_port_size()) + " " + str(x.get_destination_port_size()))
-
+                network_objs.extend(get_networks(fmc, hosts['items']))
+                network_objs.extend(get_networks(fmc, networks['items']))
+                network_objs.extend(get_networks(fmc, ranges['items']))
+                network_objs.extend(get_networks(fmc, network_groups['items']))
+                equal_network_object_finder(network_objs)
+                network_data = get_networks_data(network_objs)
+                export_to_excel(network_data, network_header, 'networks')
 
         print('Done')
-
-def network_object_count(obj, accessPolicy):
-        for policy in accessPolicy:
-                for rule in policy.rules:
-                        for key in obj.keys():
-                                if rule.NetworkUsedInRule(key):
-                                        obj[key] += 1
-                
-
-def port_object_count(obj, accessPolicy):
-        for policy in accessPolicy:
-                for rule in policy.rules:
-                        for key in obj.keys():
-                                if rule.PortUsedInRule(key):
-                                        obj[key] += 1
-
-def get_port_object(objs):
-        obj = {}
-        
-        for x in objs:
-                obj[x.name] = 0
-
-        return obj
-
-def get_network_object(objs):
-        obj = {}
-        for x in objs:
-                obj[x.name] = 0
-        
-        return obj
 
 def get_access_policies(fmc, acp):
         policies = []
@@ -153,6 +126,21 @@ def get_ports_by_rule(fmc, rule):
                         d_ports_list.extend(get_ports(fmc, d_literals))
                         
         return s_ports_list, d_ports_list
+
+def port_object_count(obj, accessPolicy):
+        for policy in accessPolicy:
+                for rule in policy.rules:
+                        for key in obj.keys():
+                                if rule.PortUsedInRule(key):
+                                        obj[key] += 1
+
+def get_port_object(objs):
+        obj = {}
+        
+        for x in objs:
+                obj[x.name] = 0
+
+        return obj
 
 def get_ports(fmc, ports):
         port_objs = []
@@ -252,6 +240,20 @@ def get_networks_by_rule(fmc, rule):
                         d_networks_list.extend(dest_collector)
         
         return s_networks_list, d_networks_list
+
+def network_object_count(obj, accessPolicy):
+        for policy in accessPolicy:
+                for rule in policy.rules:
+                        for key in obj.keys():
+                                if rule.NetworkUsedInRule(key):
+                                        obj[key] += 1
+
+def get_network_object(objs):
+        obj = {}
+        for x in objs:
+                obj[x.name] = 0
+        
+        return obj
 
 def get_networks(fmc, networks):
         recursive_collector = []
@@ -380,4 +382,13 @@ def export_to_excel(data, header, sheet_name):
         with pd.ExcelWriter(path=export_dir, mode='a', if_sheet_exists='replace') as writer:
                 df.to_excel(excel_writer=writer, sheet_name=sheet_name)
 
-fmc_init()
+
+parser = argparse.ArgumentParser(description='FMC Analyser')
+parser.add_argument('-i', '--ip', required=True, help='ip address of FMC')
+parser.add_argument('-u', '--username', required=True, help='enter username')
+parser.add_argument('-p', '--password', required=True, help='enter password')
+parser.add_argument('-q', '--query', required=False, choices=['acp', 'ports', 'networks'], default='all', help='chose from list or leave blank and run all by default')
+parser.add_argument('-d', '--deploy', required=False, default=False, help='enable auto deploy with True. By default it is False')
+ARGS = parser.parse_args()
+
+fmc_init(ARGS.ip, ARGS.username, ARGS.password, ARGS.query, ARGS.deploy)
