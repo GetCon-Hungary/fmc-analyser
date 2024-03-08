@@ -382,13 +382,14 @@ def export_to_excel(data, header, sheet_name):
         with pd.ExcelWriter(path=export_dir, mode='a', if_sheet_exists='replace') as writer:
                 df.to_excel(excel_writer=writer, sheet_name=sheet_name)
 
+if __name__ == "__main__":
 
-parser = argparse.ArgumentParser(description='FMC Analyser')
-parser.add_argument('-i', '--ip', required=True, help='ip address of FMC')
-parser.add_argument('-u', '--username', required=True, help='enter username')
-parser.add_argument('-p', '--password', required=True, help='enter password')
-parser.add_argument('-q', '--query', required=False, choices=['acp', 'ports', 'networks'], default='all', help='chose from list or leave blank and run all by default')
-parser.add_argument('-d', '--deploy', required=False, default=False, help='enable auto deploy with True. By default it is False')
-ARGS = parser.parse_args()
+        parser = argparse.ArgumentParser(description='FMC Analyser')
+        parser.add_argument('-i', '--ip', required=True, help='ip address of FMC')
+        parser.add_argument('-u', '--username', required=True, help='enter username')
+        parser.add_argument('-p', '--password', required=True, help='enter password')
+        parser.add_argument('-q', '--query', required=False, choices=['acp', 'ports', 'networks'], default='all', help='chose from list or leave blank and run all by default')
+        parser.add_argument('-d', '--deploy', required=False, default=False, help='enable auto deploy with True. By default it is False')
+        ARGS = parser.parse_args()
 
-fmc_init(ARGS.ip, ARGS.username, ARGS.password, ARGS.query, ARGS.deploy)
+        fmc_init(ARGS.ip, ARGS.username, ARGS.password, ARGS.query, ARGS.deploy)
