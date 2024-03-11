@@ -1,6 +1,7 @@
 from Models.Network import Network
 
-class NetworkObject:
+#ToDo: rename NetworkGroup make subclass of Network
+class NetworkObject():
     def __init__(self, id, name):
         self.id = id
         self.name = name

@@ -21,7 +21,7 @@ def test_range_size():
 
 def test_network_size():
     test_networks = [
-                    {"value": "192.168.0.0/24", "result": 256} ,
+                    {"value": "192.168.0.0/24", "result": 256},
                     {"value": "192.168.0.0/27", "result": 32}, 
                     {"value": "192.168.0.0/16", "result": 65536} 
     ]

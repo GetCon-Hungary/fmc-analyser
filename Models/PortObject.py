@@ -1,3 +1,4 @@
+#ToDo: rename PortGroup make subclass of Port
 class PortObject:
     def __init__(self, id, name, ports):
         self.id = id
