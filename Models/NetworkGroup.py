@@ -1,6 +1,6 @@
 from Models.Network import Network
 
-class NetworkObject:
+class NetworkGroup:
     def __init__(self, id, name):
         self.id = id
         self.name = name
@@ -26,15 +26,15 @@ class NetworkObject:
         for network_obj in self.networks:
                 if isinstance(network_obj, Network):
                         final.append(network_obj)
-                elif isinstance(network_obj, NetworkObject):
+                elif isinstance(network_obj, NetworkGroup):
                         final.extend(network_obj.flat_network_object_grp())
         return final
     
-    def set_network_depth(self):
+    def get_network_depth(self):
         depth = 0
         for network_obj in self.networks:
-             if isinstance(network_obj, NetworkObject):
-                  depth += network_obj.set_network_depth()
+             if isinstance(network_obj, NetworkGroup):
+                  depth += network_obj.get_network_depth()
                   depth += 1
         return depth
     
