@@ -4,7 +4,7 @@ stages:
 test:
     stage: test
     script:
-        - lsb_release -a 
+        - uname -a
         - python3 -m pip install pytest
         - ls
     only:
