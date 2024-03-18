@@ -2,7 +2,6 @@ argparse
 requests
 urllib3
 netaddr
-enum
 unittest
 fmcapi
 pandas
