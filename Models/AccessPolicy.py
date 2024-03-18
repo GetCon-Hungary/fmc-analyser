@@ -29,3 +29,11 @@ class AccessPolicy():
             return self.enabled_rules_count() / len(self.rules) * 100
         except:
             return "NaN"
+    
+    def calculate_avg_source_network_size_of_acp(self):
+        number_of_ip_addresses = 0
+        if len(self.rules) > 0:
+            for rule in self.rules:
+                number_of_ip_addresses += rule.get_source_network_size()
+            return number_of_ip_addresses / len(self.rules)
+        return 0
