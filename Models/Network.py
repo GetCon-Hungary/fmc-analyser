@@ -1,22 +1,23 @@
 from netaddr import IPNetwork, IPRange
 class Network:
-    def __init__(self, id, type, name):
+    def __init__(self, id, type, name, value):
         self.id = id
         self.type = type
         self.name = name
-        self.value = None
-        self.size = None
-        self.equal_with = None
+        self.value = self.create_network_value(value)
+        self.size = self.value.size
+        self.equal_with = ""
     
     def __eq__(self, __value: object) -> bool:
         return self.type == __value.type and self.value == __value.value
 
-    def calculate_network_size(self, network_obj):
-        if '-' in network_obj['value']:
-                self.value = IPRange(network_obj['value'].split('-')[0], network_obj['value'].split('-')[1])
+    def create_network_value(self, network_value):
+        value = None
+        if '-' in network_value:
+            value = IPRange(network_value.split('-')[0], network_value.split('-')[1])
         else:
-                self.value = IPNetwork(network_obj['value'])
-        self.size = self.value.size
+            value = IPNetwork(network_value)
+        return value
 
     def get_size(self):
         return self.size
