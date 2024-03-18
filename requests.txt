@@ -1,12 +1,9 @@
 argparse
 requests
 urllib3
-base64
-json
-pprint
-math
 netaddr
 enum
 unittest
 fmcapi
 pandas
+pytest
