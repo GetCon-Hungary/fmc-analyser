@@ -7,5 +7,5 @@ test:
   script:
     - python -m venv venv
     - source venv/bin/activate
-    - pip install pytest
+    - pip install -r requests.txt
     - pytest Tests/*
