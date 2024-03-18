@@ -4,7 +4,6 @@ stages:
 test:
     stage: test
     script:
-        - pip3 install pytest
         - ls
     only:
         - main
