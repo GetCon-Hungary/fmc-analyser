@@ -6,7 +6,17 @@ FMCAnalyser is able to download all kinds of objects from the Cisco Secure Firew
 
 ## Features
 
-- Supports the following data from FMC
+- Includes the following in the exported Excel
+  - Duplicates for networks, ports and port groups.
+  - Size of networks.
+  - Riskyness of ports.
+  - Depth of nested network groups.
+
+## Support
+
+- Cisco FMC >= 7.x.x (?)
+- IPv4 only
+- Supported FMC data:
   - Hosts
   - Networks
   - Network groups
@@ -21,7 +31,7 @@ FMCAnalyser is able to download all kinds of objects from the Cisco Secure Firew
 ### Requirements
 
 - Python >= 3.6
-- Cisco FMC >= 7.x.x
+- Python libraries outlined in `requirements.txt.`
 
 ### Usage
 
@@ -34,4 +44,4 @@ Please use the issue tracker to report any bugs or file feature requests.
 
 ## Acknowledgments
 
-- https://github.com/marksull/fmcapi
+- [fmcapi](https://github.com/marksull/fmcapi)
