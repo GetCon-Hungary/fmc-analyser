@@ -2,11 +2,12 @@
 
 ## Introduction
 
-FMCAnalyser is able to download all kinds of objects from the Cisco Secure Firewall Management Center, parses and exports them into Excel sheets with various analyses.
+FMCAnalyser can download, parse and export a wide range of data from Cisco Secure Firewall Management Center (FMC) including analyses of the data.
 
 ## Features
 
-- Includes the following in the exported Excel
+- Parse FMC objects into Excel table.
+- Extra analyses of exported data:
   - Duplicates for networks, ports and port groups.
   - Size of networks.
   - Riskyness of ports.
@@ -14,7 +15,7 @@ FMCAnalyser is able to download all kinds of objects from the Cisco Secure Firew
 
 ## Support
 
-- Cisco FMC >= 7.x.x (?)
+- Tested on FMC 7.2.5 (build 208)
 - IPv4 only
 - Supported FMC data:
   - Hosts
@@ -31,7 +32,7 @@ FMCAnalyser is able to download all kinds of objects from the Cisco Secure Firew
 ### Requirements
 
 - Python >= 3.6
-- Python libraries outlined in `requirements.txt.`
+- Python libraries outlined in `requirements.txt`
 
 ### Usage
 
