@@ -38,6 +38,12 @@ FMCAnalyser can download, parse and export a wide range of data from Cisco Secur
 
 - First configure the application to your needs by modifying the `config.yaml` file.
 - Run the application with the following: `python3 main.py`
+- Command line arguments
+  - `-h / --host`: IP address of FMC
+  - `-u / --username`: FMC login username
+  - `-p / --password`: FMC login password
+  - `-a / --acp`:
+  - `-c / --config`: Enter configuration file path. If skipped, the default is used: `config.ini`
 
 ## Contributing
 
