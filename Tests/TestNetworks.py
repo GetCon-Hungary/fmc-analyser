@@ -14,7 +14,7 @@ from Models.NetworkGroup import NetworkGroup
 class TestNetworks(unittest.TestCase):
 
     def test_network_size(self):
-        network0 = Network('1', 'Range', 'test_0', '192.168.0.1 - 192.168.0.5')
+        network0 = Network('1', 'Range', 'test_0', '192.168.0.1-192.168.0.5')
         network1 = Network('2', 'Range', 'test_1', '192.168.0.1-192.168.1.1')
         network2 = Network('3', 'Network', 'test_2', '192.168.0.0/24')
         network3 = Network('4', 'Network', 'test_3', '192.168.0.0/27')
