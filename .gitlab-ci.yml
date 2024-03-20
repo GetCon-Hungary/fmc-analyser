@@ -1,0 +1,14 @@
+stages:
+    - test
+
+test:
+  stage: test
+  image: python:3.9
+  script:
+    - python -m venv venv
+    - source venv/bin/activate
+    - pip install -r requirements.txt
+    - pytest Tests/*
+  only:
+    - merge_requests
+
