@@ -11,4 +11,3 @@ test:
     - pytest Tests/*
   only:
     - merge_requests
-
