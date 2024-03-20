@@ -102,9 +102,9 @@ class AccessRule:
             return Risk.High.name
     
     def _return_risk(self, ports: list[Union[Port, PortGroup]], port_number: dict[str, int]):
-        if len(ports) > port_number['HIGH']:
+        if len(ports) >= port_number['HIGH']:
             return Risk.High.name
-        elif len(ports) > port_number['MEDIUM']:
+        elif len(ports) >= port_number['MEDIUM']:
             return Risk.Medium.name
         else:
             return Risk.Low.name
