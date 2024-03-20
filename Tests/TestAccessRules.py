@@ -55,10 +55,11 @@ class TestAccessRules(unittest.TestCase):
                         {"value": self.rule2, "result": 'Low'},
         ]
 
-        config = {'RELATIVE_DESTINATION_PORT_CATEGORIES:': {'HIGH': 10, 'MEDIUM': 5, 'LOW': 3}}
+        config = {'RELATIVE_DESTINATION_PORT_CATEGORIES': {'HIGH': 10, 'MEDIUM': 5, 'LOW': 3}}
 
         for testcase in test_networks:
-            risk = testcase['value'].risk_category_by_destination_port_dynamic(500, config['RELATIVE_DESTINATION_PORT_CATEGORIES'])
+            if isinstance(testcase['value'], AccessRule):
+                risk = testcase['value'].risk_category_by_destination_port_dynamic(2, config['RELATIVE_DESTINATION_PORT_CATEGORIES'])
             self.assertEqual(risk, testcase["result"])
     
     def create_ports_for_test(self):
