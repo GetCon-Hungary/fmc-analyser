@@ -16,52 +16,68 @@ from Models.AccessRule import AccessRule
 class TestAccessRules(unittest.TestCase):
 
     def setUp(self) -> None:
-        self.rule1 = AccessRule('1', 'test_rule1', 'allow', True)
-        self.rule2 = AccessRule('2', 'test_rule2', 'allow', True)
-        self.rule3 = AccessRule('3', 'test_rule3', 'allow', True)
-        self.rule4 = AccessRule('4', 'test_rule4', 'allow', True)
-        self.rule5 = AccessRule('5', 'test_rule5', 'allow', True)
-        self.rule6 = AccessRule('6', 'test_rule6', 'allow', True)
-        self.rule7 = AccessRule('7', 'test_rule7', 'allow', True)
-        self.rule8 = AccessRule('8', 'test_rule8', 'allow', True)
+        ports = self.create_ports_for_test()
+        port_grp = self.create_port_groups_for_test(ports)
+
+        self.rule0 = AccessRule(id='0', name='test_rule0', action='allow', enabled='True', source_networks=[], source_zones=['Inside'], source_ports=[], destination_networks=[], destination_zones=['OUTISDE'], destination_ports=[])
+        self.rule1 = AccessRule(id='1', name='test_rule1', action='allow', enabled='True', source_networks=[], source_zones=['Inside'], source_ports=[], destination_networks=[], destination_zones=['OUTISDE'], destination_ports=ports['rule1'])
+        self.rule2 = AccessRule(id='2', name='test_rule2', action='allow', enabled='True', source_networks=[], source_zones=['Inside'], source_ports=[], destination_networks=[], destination_zones=['OUTISDE'], destination_ports=ports['rule2'])
+        self.rule3 = AccessRule(id='3', name='test_rule3', action='allow', enabled='True', source_networks=[], source_zones=['Inside'], source_ports=[], destination_networks=[], destination_zones=['OUTISDE'], destination_ports=ports['rule3'])
+        self.rule4 = AccessRule(id='4', name='test_rule4', action='allow', enabled='True', source_networks=[], source_zones=['Inside'], source_ports=[], destination_networks=[], destination_zones=['OUTISDE'], destination_ports=[Port('1', 'test_port', 'TCP', '20')])
+        self.rule5 = AccessRule(id='5', name='test_rule5', action='allow', enabled='True', source_networks=[], source_zones=['Inside'], source_ports=[], destination_networks=[], destination_zones=['OUTISDE'], destination_ports=[port_grp[0]])
+        self.rule6 = AccessRule(id='6', name='test_rule6', action='allow', enabled='True', source_networks=[], source_zones=['Inside'], source_ports=[], destination_networks=[], destination_zones=['OUTISDE'], destination_ports=[port_grp[1]])
+        self.rule7 = AccessRule(id='7', name='test_rule7', action='allow', enabled='True', source_networks=[], source_zones=['Inside'], source_ports=[], destination_networks=[], destination_zones=['OUTISDE'], destination_ports=[port_grp[2]])
+        
     
 
     def test_risk_category_by_port(self):
-        self.create_ports_for_test()
         test_networks = [
+                        {"value": self.rule0, "result": 'High'},
                         {"value": self.rule1, "result": 'High'},
-                        {"value": self.rule2, "result": 'High'},
-                        {"value": self.rule3, "result": 'Medium'},
+                        {"value": self.rule2, "result": 'Medium'},
+                        {"value": self.rule3, "result": 'Low'},
                         {"value": self.rule4, "result": 'Low'},
-                        {"value": self.rule5, "result": 'Low'},
-                        {"value": self.rule6, "result": 'High'},
-                        {"value": self.rule7, "result": 'Medium'},
-                        {"value": self.rule8, "result": 'Low'},
+                        {"value": self.rule5, "result": 'High'},
+                        {"value": self.rule6, "result": 'Medium'},
+                        {"value": self.rule7, "result": 'Low'},
         ]
 
+        config = {'DESTINATION_PORT_CATEGORIES': {'HIGH': 16, 'MEDIUM': 8, 'LOW': 4}}
+
         for testcase in test_networks:
-            risk = testcase['value'].risk_category_by_port()
+            risk = testcase['value'].risk_category_by_destination_port_static(config['DESTINATION_PORT_CATEGORIES'])
             self.assertEqual(risk, testcase["result"])
     
     def create_ports_for_test(self):
-        self.port_group = PortGroup('1', 'test_group')
-        self.port_group2 = PortGroup('2', 'test_group2')
-        self.port_group3 = PortGroup('3', 'test_group3')
-
-        for i in range(11):
-            self.rule2.destination_ports.append(Port(str(i), 'test_port{}'.format(i), 'TCP', str(i)))
-            self.port_group.ports.append(Port(str(i), 'test_port{}'.format(i), 'TCP', str(i)))
-        for i in range(6):
-            self.rule3.destination_ports.append(Port(str(i), 'test_port{}'.format(i), 'TCP', str(i)))
-            self.port_group2.ports.append(Port(str(i), 'test_port{}'.format(i), 'TCP', str(i)))
+        ports_dict: dict[str, list] = {}
+        ports = []
+        for i in range(16):
+            ports.append(Port(str(i), 'test_port{}'.format(i), 'TCP', str(i))) 
+        ports_dict['rule1'] = ports
+        ports_dict['group0'] = ports
+        ports = []
+        for i in range(8):
+            ports.append(Port(str(i), 'test_port{}'.format(i), 'TCP', str(i))) 
+        ports_dict['rule2'] = ports
+        ports_dict['group1'] = ports
+        ports = []
         for i in range(5):
-            self.rule4.destination_ports.append(Port(str(i), 'test_port{}'.format(i), 'TCP', str(i)))
-            self.port_group3.ports.append(Port(str(i), 'test_port{}'.format(i), 'TCP', str(i)))
-            
-        self.rule5.destination_ports.append(Port('1', 'test_port', 'TCP', '20'))
-        self.rule6.destination_ports.append(self.port_group)
-        self.rule7.destination_ports.append(self.port_group2)
-        self.rule8.destination_ports.append(self.port_group3)
+            ports.append(Port(str(i), 'test_port{}'.format(i), 'TCP', str(i))) 
+        ports_dict['rule3'] = ports
+        ports_dict['group2'] = ports
+        
+        return ports_dict
+
+    def create_networks_for_test(self):
+        pass
+
+    def create_port_groups_for_test(self, ports):
+        port_grps = []
+        for i in range(3):
+            grp = PortGroup(i, 'test_group_{}'.format(i))
+            grp.ports.extend(ports['group{}'.format(i)])
+            port_grps.append(grp)
+        return port_grps
 
 if __name__ == "__main__":
     unittest.main()
