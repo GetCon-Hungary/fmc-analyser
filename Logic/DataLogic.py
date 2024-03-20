@@ -3,6 +3,8 @@ from Models.Port import Port
 from Models.PortGroup import PortGroup
 from Models.Network import Network
 from Models.NetworkGroup import NetworkGroup
+from Models.AccessPolicy import AccessPolicy
+from typing import Union
 
 class Data():
     def __init__(self, builder: Builder):
@@ -11,13 +13,13 @@ class Data():
         self.networks_data = self.get_networks_data(self.builder.network_objs)
         self.access_rules_data = self.get_access_rules_data(self.builder.policies)
            
-    def get_access_rules_data(self, policies):
+    def get_access_rules_data(self, policies: list[AccessPolicy]):
         access_rule_data = {}
         for policy in policies:
                 access_rule_data[policy.name] = [(rule.name, rule.action, rule.enabled, self._get_networks_data_by_rule(rule.source_networks), rule.source_zones, self._get_ports_data_by_rule(rule.source_ports), self._get_networks_data_by_rule(rule.destination_networks), rule.destination_zones, self._get_ports_data_by_rule(rule.destination_ports)) for rule in policy.rules]
         return access_rule_data
     
-    def get_ports_data(self, ports):
+    def get_ports_data(self, ports: dict[str, Union[Port, PortGroup]]):
         ports_data = []
         for port in ports.values():
                 if isinstance(port, Port):
@@ -27,7 +29,7 @@ class Data():
                                 ports_data.append((port.name, p.name, p.protocol, p.port, p.size, p.is_risky, port.equal_with))
         return ports_data
 
-    def get_networks_data(self, networks):
+    def get_networks_data(self, networks: dict[str, Union[Network, NetworkGroup]]):
         networks_data = []
         for network in networks.values():
                 if isinstance(network, NetworkGroup):
@@ -37,7 +39,7 @@ class Data():
                         networks_data.append((None, None, network.name, network.value, network.size, network.equal_with))
         return networks_data
 
-    def _get_ports_data_by_rule(self, ports):
+    def _get_ports_data_by_rule(self, ports: list[Union[Port, PortGroup]]):
         value = ""
         value_2 = ""
         for port in ports:
@@ -49,7 +51,7 @@ class Data():
                         value += "{}: ({}), ".format(port.name, value_2)
         return value
 
-    def _get_networks_data_by_rule(self, networks):
+    def _get_networks_data_by_rule(self, networks: list[Union[Network, NetworkGroup]]):
         value = ""
         value_2 = ""
         for network in networks:

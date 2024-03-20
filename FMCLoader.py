@@ -1,7 +1,7 @@
 import fmcapi
 
 class FMCLoader():
-    def __init__(self, fmc_host, username, password, acp_name):
+    def __init__(self, fmc_host: str, username: str, password: str, acp_name: str):
         with fmcapi.FMC(fmc_host,username=username, password=password, autodeploy=False) as fmc:
 
             self.protocol_port_objs = fmcapi.ProtocolPortObjects(fmc).get()
@@ -13,7 +13,7 @@ class FMCLoader():
             self.access_policies = self.get_acess_policies(fmc, acp_name)
             self.access_rules = self.get_acess_rules(fmc)
     
-    def get_acess_policies(self, fmc, acp_name):
+    def get_acess_policies(self, fmc, acp_name: str):
         access_policies = {}
         if acp_name == 'all':
             access_policies = fmcapi.AccessPolicies(fmc).get()

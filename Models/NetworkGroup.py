@@ -1,10 +1,11 @@
 from Models.Network import Network
+from typing import Union
 
 class NetworkGroup:
-    def __init__(self, id, name):
+    def __init__(self, id: str, name: str):
         self.id = id
         self.name = name
-        self.networks = []
+        self.networks: list[Union[Network, NetworkGroup]] = []
         self.depth = 0
         self.equal_with = ""
 
