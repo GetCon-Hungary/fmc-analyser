@@ -30,7 +30,7 @@ class TestAccessRules(unittest.TestCase):
         
     
 
-    def test_risk_category_by_port(self):
+    def test_risk_category_by_port_static(self):
         test_networks = [
                         {"value": self.rule0, "result": 'High'},
                         {"value": self.rule1, "result": 'High'},
@@ -46,6 +46,19 @@ class TestAccessRules(unittest.TestCase):
 
         for testcase in test_networks:
             risk = testcase['value'].risk_category_by_destination_port_static(config['DESTINATION_PORT_CATEGORIES'])
+            self.assertEqual(risk, testcase["result"])
+    
+    def test_risk_category_by_port_dynamic(self):
+        test_networks = [
+                        {"value": self.rule0, "result": 'High'},
+                        {"value": self.rule1, "result": 'Medium'},
+                        {"value": self.rule2, "result": 'Low'},
+        ]
+
+        config = {'RELATIVE_DESTINATION_PORT_CATEGORIES:': {'HIGH': 10, 'MEDIUM': 5, 'LOW': 3}}
+
+        for testcase in test_networks:
+            risk = testcase['value'].risk_category_by_destination_port_dynamic(500, config['RELATIVE_DESTINATION_PORT_CATEGORIES'])
             self.assertEqual(risk, testcase["result"])
     
     def create_ports_for_test(self):
