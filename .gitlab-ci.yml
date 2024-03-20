@@ -9,3 +9,5 @@ test:
     - source venv/bin/activate
     - pip install -r requirements.txt
     - pytest Tests/*
+  only:
+    - merge_requests
