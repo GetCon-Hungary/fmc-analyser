@@ -1,11 +1,11 @@
 class Port:
-    def __init__(self, id, name, protocol, port):
+    def __init__(self, id: str, name: str, protocol: str, port: str):
         self.id = id
         self.name = name
         self.protocol = protocol
         self.port = port
         self.size = self.calculate_protocol_port_object_size()
-        self.is_risky = self._is_risky_port([])
+        self.is_risky = False
         self.equal_with = ""
     
     def __eq__(self, __value: object) -> bool:
@@ -17,10 +17,12 @@ class Port:
             size = int(self.port.split("-")[1]) - (int(self.port.split("-")[0]) - 1)
         return size
 
-    def _is_risky_port(self, risky_ports):
-        for port in risky_ports:
-             if self.protocol == str(port).split(' ')[0] and self.port == str(port).split(' ')[1]:
-                  return True
+    def _is_risky_port(self, risky_ports: dict):
+        for protocol, ports in risky_ports.items():
+            if ports is not None:
+                for port in ports:
+                    if self.protocol == protocol and int(self.port) == port:
+                        return True
         return False
     
     def get_size(self):
