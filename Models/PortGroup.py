@@ -1,10 +1,10 @@
 from Models.Port import Port
 
 class PortGroup:
-    def __init__(self, id, name):
+    def __init__(self, id: str, name: str):
         self.id = id
         self.name = name
-        self.ports = []
+        self.ports: list[Port] = []
         self.equal_with = ""
     
     def __eq__(self, __value: object) -> bool:
