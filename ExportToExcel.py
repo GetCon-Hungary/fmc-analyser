@@ -10,5 +10,9 @@ def export_to_excel(data: list[str], header: list[str], sheet_name: str):
         df = pd.DataFrame(data, columns=header)
         df.index = range(1, len(df)+1)
         export_dir = os.getcwd() + '/Exports/final.xlsx'
-        with pd.ExcelWriter(path=export_dir, mode='a', if_sheet_exists='replace') as writer:
-                df.to_excel(excel_writer=writer, sheet_name=sheet_name)
+        if os.path.exists(export_dir):
+                with pd.ExcelWriter(path=export_dir, mode='a', if_sheet_exists='replace', engine='openpyxl') as writer:
+                        df.to_excel(excel_writer=writer, sheet_name=sheet_name)
+        else:
+                with pd.ExcelWriter(path=export_dir) as writer:
+                        df.to_excel(excel_writer=writer, sheet_name=sheet_name)
