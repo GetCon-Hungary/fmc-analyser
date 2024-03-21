@@ -21,18 +21,18 @@ class AccessRule:
         self.destination_zones = destination_zones
         self.destination_ports = destination_ports
 
-    def port_used(self, xPort, ports: list[Union[Port, PortGroup]]):
+    def port_used(self, xport, ports: list[Union[Port, PortGroup]]):
         for port in ports:
-            if xPort == port.name:
-                return Truei
+            if xport == port.name:
+                return True
         return False
 
     def port_used_in_rule(self, port):
         return self.port_used(port, self.source_ports) or self.port_used(port, self.destination_ports)
 
-    def network_used(self, xNetwork, networks: list[Union[Network, NetworkGroup]]):
+    def network_used(self, xnetwork, networks: list[Union[Network, NetworkGroup]]):
         for network in networks:
-            if xNetwork == network.name:
+            if xnetwork == network.name:
                 return True
         return False
 
@@ -63,7 +63,7 @@ class AccessRule:
             sum += port.get_size()
         return sum
 
-    def risk_category_by_destination_port_dynamic(self, avg_port_number: int, relative_destination_port: dict[str, int]):
+    def risk_category_by_destination_port_dynamic(self, avg_port_number: float, relative_destination_port: dict[str, int]):
         if len(self.destination_ports) > 0:
             if self.get_destination_port_size() >= relative_destination_port['HIGH'] * avg_port_number:
                 return Risk.High.name
@@ -72,7 +72,7 @@ class AccessRule:
             return Risk.Low.name
         return Risk.High.name
 
-    def risk_category_by_source_network_dynamic(self, avg_ip_number: int, relative_source_network: dict[str, int]):
+    def risk_category_by_source_network_dynamic(self, avg_ip_number: float, relative_source_network: dict[str, int]):
         if len(self.source_networks) > 0:
             if self.get_source_networks_size() >= relative_source_network['HIGH'] * avg_ip_number:
                 return Risk.High.name
@@ -81,7 +81,7 @@ class AccessRule:
             return Risk.Low.name
         return Risk.High.name
 
-    def risk_category_by_destination_network_dynamic(self, avg_ip_number: int, relative_destination_network: dict[str, int]):
+    def risk_category_by_destination_network_dynamic(self, avg_ip_number: float, relative_destination_network: dict[str, int]):
         if len(self.destination_networks) > 0:
             if self.get_destination_network_size() >= relative_destination_network['HIGH'] * avg_ip_number:
                 return Risk.High.name

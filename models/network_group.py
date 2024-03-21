@@ -11,7 +11,7 @@ class NetworkGroup:
         self.depth = 0
         self.equal_with = ""
 
-    def __eq__(self, __value: object) -> bool:
+    def __eq__(self, __value: 'NetworkGroup') -> bool:
         counter = 0
         if len(self.networks) == len(__value.networks):
             for i in range(len(self.networks)):

@@ -8,7 +8,7 @@ class PortGroup:
         self.ports: list[Port] = []
         self.equal_with = ""
 
-    def __eq__(self, __value: object) -> bool:
+    def __eq__(self, __value: 'PortGroup') -> bool:
         counter = 0
         if len(self.ports) == len(__value.ports):
             for i in range(len(self.ports)):
