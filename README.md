@@ -1,5 +1,7 @@
 # FMC analyser
 
+![FMC Analyser logo](assets/fmc_analyser_logo.png)
+
 ## Introduction
 
 FMCAnalyser can download, export and analyse wide range of data from Cisco Secure Firewall Management Center (FMC). The scope of the project is to process most of the production data in FMC, with support for the latest version.
