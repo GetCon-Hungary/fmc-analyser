@@ -1,3 +1,4 @@
+"""Parses data from models into easy-to-use format for Pandas."""
 from typing import Union
 
 import yaml

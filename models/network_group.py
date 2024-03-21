@@ -1,10 +1,11 @@
+"""Represents the network group class."""
 from typing import Union
 
 from models.network import Network
 
 
 class NetworkGroup:
-    def __init__(self, id: str, name: str):
+    def __init__(self, id: str, name: str) -> None:
         self.id = id
         self.name = name
         self.networks: list[Union[Network, NetworkGroup]] = []
@@ -23,7 +24,7 @@ class NetworkGroup:
             return False
         return False
 
-    def flat_network_object_grp(self):
+    def flat_network_object_grp(self) -> int:
         final = []
         for network_obj in self.networks:
             if isinstance(network_obj, Network):
@@ -32,7 +33,7 @@ class NetworkGroup:
                 final.extend(network_obj.flat_network_object_grp())
         return final
 
-    def get_network_depth(self):
+    def get_network_depth(self) -> int:
         depth = 0
         for network_obj in self.networks:
             if isinstance(network_obj, NetworkGroup):
@@ -40,7 +41,7 @@ class NetworkGroup:
                 depth += 1
         return depth
 
-    def get_size(self):
+    def get_size(self) -> int:
         summ = 0
         for network in self.networks:
             summ += network.get_size()

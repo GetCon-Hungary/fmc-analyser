@@ -1,20 +1,20 @@
 from models.access_rule import AccessRule
 
 
-class AccessPolicy():
+class AccessPolicy:
     def __init__(self, id: str, name: str, rules: list[AccessRule]):
         self.id = id
         self.name = name
         self.rules = rules
 
-    def enabled_rules_count(self):
+    def enabled_rules_count(self) -> int:
         count = 0
         for rule in self.rules:
             if rule.enabled:
                 count += 1
         return count
 
-    def allowed_rules_count(self):
+    def allowed_rules_count(self) -> int:
         count = 0
         for rule in self.rules:
             if str.lower(rule.action) == "allow":

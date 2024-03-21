@@ -1,3 +1,4 @@
+"""Builds up all the different model classes."""
 from typing import Union
 
 from fmc_loader import FMCLoader
