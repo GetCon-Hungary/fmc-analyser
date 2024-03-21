@@ -21,7 +21,7 @@ class Port:
         for protocol, ports in risky_ports.items():
             if ports is not None:
                 for port in ports:
-                    if self.protocol == protocol and int(self.port) == port:
+                    if self.protocol == protocol and self.port == str(port):
                         return True
         return False
     
