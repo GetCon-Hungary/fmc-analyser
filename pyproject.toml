@@ -27,6 +27,10 @@ docstring-code-format = true
 
 [tool.pylint.'MESSAGES CONTROL']
 disable = [
+    "line-too-long",
+    "redefined-builtin",
     "consider-using-f-string",
-    "missing-module-docstring"
+    "missing-module-docstring",
+    "missing-function-docstring",
+    "missing-class-docstring",
 ]
