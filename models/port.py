@@ -8,7 +8,7 @@ class Port:
         self.is_risky = False
         self.equal_with = ""
 
-    def __eq__(self, __value: object) -> bool:
+    def __eq__(self, __value: 'Port') -> bool:
         return self.protocol == __value.protocol and self.port == __value.port
 
     def calculate_protocol_port_object_size(self):
