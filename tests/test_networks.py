@@ -23,7 +23,7 @@ class TestNetworks(unittest.TestCase):
                         {"value": network1, "result": 257},
                         {"value": network2, "result": 256},
                         {"value": network3, "result": 32},
-                        {"value": network4, "result": 65536}
+                        {"value": network4, "result": 65536},
         ]
 
         for testcase in test_networks:
@@ -44,7 +44,7 @@ class TestNetworks(unittest.TestCase):
         result_network = network_group_1.networks + network_group_2.networks
 
         test_networks = [
-                        {"value": network_group, "result": result_network}
+                        {"value": network_group, "result": result_network},
         ]
 
         for testcase in test_networks:

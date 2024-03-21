@@ -144,7 +144,7 @@ class TestAccessRules(unittest.TestCase):
             'rule2': Network('2', 'Network', 'test2', '10.10.10.0/20'),
             'rule3': Network('3', 'Network', 'test3', '10.10.10.0/22'),
             'rule4': Network('4', 'Network', 'test4', '10.10.10.0/23'),
-            'rule5': Network('5', 'Network', 'test5', '10.10.10.0/28')
+            'rule5': Network('5', 'Network', 'test5', '10.10.10.0/28'),
         }
         return networks_dict
 
