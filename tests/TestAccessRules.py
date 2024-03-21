@@ -28,7 +28,7 @@ class TestAccessRules(unittest.TestCase):
         self.rule5 = AccessRule(id='5', name='test_rule5', action='allow', enabled='True', source_networks=[networks['rule2']], source_zones=['Inside'], source_ports=[], destination_networks=[networks['rule5']], destination_zones=['OUTISDE'], destination_ports=[port_grp[0]])
         self.rule6 = AccessRule(id='6', name='test_rule6', action='allow', enabled='True', source_networks=[], source_zones=['Inside'], source_ports=[], destination_networks=[], destination_zones=['OUTISDE'], destination_ports=[port_grp[1]])
         self.rule7 = AccessRule(id='7', name='test_rule7', action='allow', enabled='True', source_networks=[], source_zones=['Inside'], source_ports=[], destination_networks=[], destination_zones=['OUTISDE'], destination_ports=[port_grp[2]])
-        
+
     def test_risk_category_by_port_static(self):
         test_rules = [
                         {"value": self.rule0, "result": 'High'},
@@ -47,7 +47,7 @@ class TestAccessRules(unittest.TestCase):
             if isinstance(testcase['value'], AccessRule):
                 risk = testcase['value'].risk_category_by_destination_port_static(config['DESTINATION_PORT_CATEGORIES'])
             self.assertEqual(risk, testcase["result"])
-    
+
     def test_risk_category_by_port_dynamic(self):
         test_rules = [
                         {"value": self.rule0, "result": 'High'},
@@ -61,7 +61,7 @@ class TestAccessRules(unittest.TestCase):
             if isinstance(testcase['value'], AccessRule):
                 risk = testcase['value'].risk_category_by_destination_port_dynamic(2, config['RELATIVE_DESTINATION_PORT_CATEGORIES'])
             self.assertEqual(risk, testcase["result"])
-    
+
     def test_risk_category_by_source_network_static(self):
         test_rules = [
                         {"value": self.rule0, "result": 'High'},
@@ -117,25 +117,25 @@ class TestAccessRules(unittest.TestCase):
             if isinstance(testcase['value'], AccessRule):
                 risk = testcase['value'].risk_category_by_destination_network_dynamic(60, config['RELATIVE_DESTINATION_NETWORK_CATEGORIES'])
             self.assertEqual(risk, testcase["result"])
-    
+
     def create_ports_for_test(self):
         ports_dict: dict[str, list] = {}
         ports = []
         for i in range(16):
-            ports.append(Port(str(i), 'test_port{}'.format(i), 'TCP', str(i))) 
+            ports.append(Port(str(i), 'test_port{}'.format(i), 'TCP', str(i)))
         ports_dict['rule1'] = ports
         ports_dict['group0'] = ports
         ports = []
         for i in range(8):
-            ports.append(Port(str(i), 'test_port{}'.format(i), 'TCP', str(i))) 
+            ports.append(Port(str(i), 'test_port{}'.format(i), 'TCP', str(i)))
         ports_dict['rule2'] = ports
         ports_dict['group1'] = ports
         ports = []
         for i in range(5):
-            ports.append(Port(str(i), 'test_port{}'.format(i), 'TCP', str(i))) 
+            ports.append(Port(str(i), 'test_port{}'.format(i), 'TCP', str(i)))
         ports_dict['rule3'] = ports
         ports_dict['group2'] = ports
-        
+
         return ports_dict
 
     def create_networks_for_test(self):

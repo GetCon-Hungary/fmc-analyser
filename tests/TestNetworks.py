@@ -23,13 +23,13 @@ class TestNetworks(unittest.TestCase):
                         {"value": network0, "result": 5},
                         {"value": network1, "result": 257},
                         {"value": network2, "result": 256},
-                        {"value": network3, "result": 32}, 
-                        {"value": network4, "result": 65536} 
+                        {"value": network3, "result": 32},
+                        {"value": network4, "result": 65536}
         ]
 
         for testcase in test_networks:
             self.assertEqual(testcase['value'].size, testcase["result"])
-    
+
     def test_flat_network_group(self):
         network_group = NetworkGroup('1', 'test_grp')
         network_group_1 = NetworkGroup('2', 'test_grp2')

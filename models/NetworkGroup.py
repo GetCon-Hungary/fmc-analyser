@@ -21,7 +21,7 @@ class NetworkGroup:
             return False
         else:
             return False
-    
+
     def flat_network_object_grp(self):
         final = []
         for network_obj in self.networks:
@@ -30,7 +30,7 @@ class NetworkGroup:
                 elif isinstance(network_obj, NetworkGroup):
                         final.extend(network_obj.flat_network_object_grp())
         return final
-    
+
     def get_network_depth(self):
         depth = 0
         for network_obj in self.networks:
@@ -38,7 +38,7 @@ class NetworkGroup:
                   depth += network_obj.get_network_depth()
                   depth += 1
         return depth
-    
+
     def get_size(self):
         summ = 0
         for network in self.networks:
