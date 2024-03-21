@@ -30,28 +30,28 @@ class TestAccessRules(unittest.TestCase):
 
     def test_risk_category_by_port_static(self):
         test_rules = [
-                        {"value": self.rule0, "result": 'High'},
-                        {"value": self.rule1, "result": 'High'},
-                        {"value": self.rule2, "result": 'Medium'},
-                        {"value": self.rule3, "result": 'Low'},
-                        {"value": self.rule4, "result": 'Low'},
-                        {"value": self.rule5, "result": 'High'},
-                        {"value": self.rule6, "result": 'Medium'},
-                        {"value": self.rule7, "result": 'Low'},
+                        {'value': self.rule0, 'result': 'High'},
+                        {'value': self.rule1, 'result': 'High'},
+                        {'value': self.rule2, 'result': 'Medium'},
+                        {'value': self.rule3, 'result': 'Low'},
+                        {'value': self.rule4, 'result': 'Low'},
+                        {'value': self.rule5, 'result': 'High'},
+                        {'value': self.rule6, 'result': 'Medium'},
+                        {'value': self.rule7, 'result': 'Low'},
         ]
 
         config = {'DESTINATION_PORT_CATEGORIES': {'HIGH': 16, 'MEDIUM': 8, 'LOW': 4}}
 
         for testcase in test_rules:
             if isinstance(testcase['value'], AccessRule):
-                risk = testcase['value'].risk_category_by_destination_port_static(config['DESTINATION_PORT_CATEGORIES'])
-            self.assertEqual(risk, testcase["result"])
+                risk = testcase['value'].risk_category_by_dst_port_static(config['DESTINATION_PORT_CATEGORIES'])
+            self.assertEqual(risk, testcase['result'])
 
     def test_risk_category_by_port_dynamic(self):
         test_rules = [
-                        {"value": self.rule0, "result": 'High'},
-                        {"value": self.rule1, "result": 'Medium'},
-                        {"value": self.rule2, "result": 'Low'},
+                        {'value': self.rule0, 'result': 'High'},
+                        {'value': self.rule1, 'result': 'Medium'},
+                        {'value': self.rule2, 'result': 'Low'},
         ]
 
         config = {'RELATIVE_DESTINATION_PORT_CATEGORIES': {'HIGH': 10, 'MEDIUM': 5, 'LOW': 3}}
@@ -59,41 +59,41 @@ class TestAccessRules(unittest.TestCase):
         for testcase in test_rules:
             if isinstance(testcase['value'], AccessRule):
                 risk = testcase['value'].risk_category_by_destination_port_dynamic(2, config['RELATIVE_DESTINATION_PORT_CATEGORIES'])
-            self.assertEqual(risk, testcase["result"])
+            self.assertEqual(risk, testcase['result'])
 
     def test_risk_category_by_source_network_static(self):
         test_rules = [
-                        {"value": self.rule0, "result": 'High'},
-                        {"value": self.rule1, "result": 'Medium'},
-                        {"value": self.rule2, "result": 'Low'},
+                        {'value': self.rule0, 'result': 'High'},
+                        {'value': self.rule1, 'result': 'Medium'},
+                        {'value': self.rule2, 'result': 'Low'},
         ]
 
         config = {'SOURCE_NETWORK_CATEGORIES': {'HIGH': '/16', 'MEDIUM': '/19', 'LOW': '/21'}}
 
         for testcase in test_rules:
             if isinstance(testcase['value'], AccessRule):
-                risk = testcase['value'].risk_category_by_source_network_static(config['SOURCE_NETWORK_CATEGORIES'])
-            self.assertEqual(risk, testcase["result"])
+                risk = testcase['value'].risk_category_by_src_network_static(config['SOURCE_NETWORK_CATEGORIES'])
+            self.assertEqual(risk, testcase['result'])
 
     def test_risk_category_by_destination_network_static(self):
         test_rules = [
-                        {"value": self.rule3, "result": 'High'},
-                        {"value": self.rule4, "result": 'Medium'},
-                        {"value": self.rule5, "result": 'Low'},
+                        {'value': self.rule3, 'result': 'High'},
+                        {'value': self.rule4, 'result': 'Medium'},
+                        {'value': self.rule5, 'result': 'Low'},
         ]
 
         config = {'DESTINATION_NETWORK_CATEGORIES': {'HIGH': '/22', 'MEDIUM': '/24', 'LOW': '/28'}}
 
         for testcase in test_rules:
             if isinstance(testcase['value'], AccessRule):
-                risk = testcase['value'].risk_category_by_destination_network_static(config['DESTINATION_NETWORK_CATEGORIES'])
-            self.assertEqual(risk, testcase["result"])
+                risk = testcase['value'].risk_category_by_dst_network_static(config['DESTINATION_NETWORK_CATEGORIES'])
+            self.assertEqual(risk, testcase['result'])
 
     def test_risk_category_by_source_network_dynamic(self):
         test_rules = [
-                        {"value": self.rule3, "result": 'High'},
-                        {"value": self.rule4, "result": 'Medium'},
-                        {"value": self.rule5, "result": 'Low'},
+                        {'value': self.rule3, 'result': 'High'},
+                        {'value': self.rule4, 'result': 'Medium'},
+                        {'value': self.rule5, 'result': 'Low'},
         ]
 
         config = {'RELATIVE_SOURCE_NETWORK_CATEGORIES': {'HIGH': 10, 'MEDIUM': 5, 'LOW': 3}}
@@ -101,19 +101,19 @@ class TestAccessRules(unittest.TestCase):
         for testcase in test_rules:
             if isinstance(testcase['value'], AccessRule):
                 risk = testcase['value'].risk_category_by_source_network_dynamic(1000, config['RELATIVE_SOURCE_NETWORK_CATEGORIES'])
-            self.assertEqual(risk, testcase["result"])
+            self.assertEqual(risk, testcase['result'])
 
     def test_risk_category_by_destination_network_dynamic(self):
         test_rules = [
-                        {"value": self.rule3, "result": 'High'},
-                        {"value": self.rule4, "result": 'Medium'},
-                        {"value": self.rule5, "result": 'Low'},
+                        {'value': self.rule3, 'result': 'High'},
+                        {'value': self.rule4, 'result': 'Medium'},
+                        {'value': self.rule5, 'result': 'Low'},
         ]
         config = {'RELATIVE_DESTINATION_NETWORK_CATEGORIES': {'HIGH': 10, 'MEDIUM': 5, 'LOW': 3}}
         for testcase in test_rules:
             if isinstance(testcase['value'], AccessRule):
-                risk = testcase['value'].risk_category_by_destination_network_dynamic(60, config['RELATIVE_DESTINATION_NETWORK_CATEGORIES'])
-            self.assertEqual(risk, testcase["result"])
+                risk = testcase['value'].risk_category_by_dst_network_dynamic(60, config['RELATIVE_DESTINATION_NETWORK_CATEGORIES'])
+            self.assertEqual(risk, testcase['result'])
 
     def create_ports_for_test(self) -> dict:
         ports_dict: dict[str, list] = {}
@@ -153,5 +153,5 @@ class TestAccessRules(unittest.TestCase):
             port_grps.append(grp)
         return port_grps
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()

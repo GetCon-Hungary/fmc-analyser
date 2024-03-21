@@ -10,7 +10,7 @@ class NetworkGroup:
         self.name = name
         self.networks: list[Union[Network, NetworkGroup]] = []
         self.depth = 0
-        self.equal_with = ""
+        self.equal_with = ''
 
     def __eq__(self, __value: 'NetworkGroup') -> bool:
         counter = 0
@@ -24,7 +24,7 @@ class NetworkGroup:
             return False
         return False
 
-    def flat_network_object_grp(self) -> int:
+    def flat_network_object_grp(self) -> list:
         final = []
         for network_obj in self.networks:
             if isinstance(network_obj, Network):

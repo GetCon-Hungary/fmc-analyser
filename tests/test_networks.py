@@ -19,15 +19,15 @@ class TestNetworks(unittest.TestCase):
         network3 = Network('4', 'Network', 'test_3', '192.168.0.0/27')
         network4 = Network('5', 'Network', 'test_4', '192.168.0.0/16')
         test_networks = [
-                        {"value": network0, "result": 5},
-                        {"value": network1, "result": 257},
-                        {"value": network2, "result": 256},
-                        {"value": network3, "result": 32},
-                        {"value": network4, "result": 65536},
+                        {'value': network0, 'result': 5},
+                        {'value': network1, 'result': 257},
+                        {'value': network2, 'result': 256},
+                        {'value': network3, 'result': 32},
+                        {'value': network4, 'result': 65536},
         ]
 
         for testcase in test_networks:
-            self.assertEqual(testcase['value'].size, testcase["result"])
+            self.assertEqual(testcase['value'].size, testcase['result'])
 
     def test_flat_network_group(self):
         network_group = NetworkGroup('1', 'test_grp')
@@ -44,12 +44,12 @@ class TestNetworks(unittest.TestCase):
         result_network = network_group_1.networks + network_group_2.networks
 
         test_networks = [
-                        {"value": network_group, "result": result_network},
+                        {'value': network_group, 'result': result_network},
         ]
 
         for testcase in test_networks:
             final = testcase['value'].flat_network_object_grp()
-            self.assertEqual(final, testcase["result"])
+            self.assertEqual(final, testcase['result'])
 
     def test_network_depth(self):
         network_group = NetworkGroup('1', 'test_grp')
@@ -60,12 +60,12 @@ class TestNetworks(unittest.TestCase):
         network_group.networks.append(network_group_1)
 
         test_networks = [
-                        {"value": network_group, "result": 2},
+                        {'value': network_group, 'result': 2},
         ]
 
         for testcase in test_networks:
             depth = testcase['value'].get_network_depth()
-            self.assertEqual(depth, testcase["result"])
+            self.assertEqual(depth, testcase['result'])
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()

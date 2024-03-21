@@ -7,7 +7,7 @@ ACCESS_RULE_HEADER = ['Access Rule', 'Action', 'Enabled', 'Source Networks', 'So
 PORTS_HEADER = ['Group Name', 'Name', 'Protocol', 'Port', 'Size', 'Risky', 'Equal with', 'Count of Port object in Rules']
 NETWORK_HEADER = ['Group Name', 'Group depth', 'Name', 'Value', 'Size', 'Equal with', 'Count of Network object in Rules']
 
-def export_to_excel(data: list[str], header: list[str], sheet_name: str):
+def export_to_excel(data: list[str], header: list[str], sheet_name: str) -> None:
     df = pd.DataFrame(data, columns=header)
     df.index = range(1, len(df)+1)
     export_dir = os.getcwd() + '/exports/final.xlsx'
