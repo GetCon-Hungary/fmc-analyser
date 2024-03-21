@@ -30,69 +30,69 @@ class Builder():
     def create_protocol_ports(self, ports: list[dict]):
         port_objs = {}
         for port in ports:
-                port_id = port.get('id', None)
-                if port_id is not None:
-                    port_objs[port_id] = self._create_port(port)
+            port_id = port.get('id', None)
+            if port_id is not None:
+                port_objs[port_id] = self._create_port(port)
         return port_objs
 
     def create_port_groups(self, port_groups: list[dict]):
         port_grps = {}
         for port in port_groups:
-                port_id = port.get('id', None)
-                if port_id is not None:
-                    group_name = port.get('name', None)
-                    port_group = PortGroup(port_id, group_name)
-                    for protocol_port in port['objects']:
-                        port_group.ports.append(self.port_objs[protocol_port['id']])
-                    port_grps[port_id] = port_group
+            port_id = port.get('id', None)
+            if port_id is not None:
+                group_name = port.get('name', None)
+                port_group = PortGroup(port_id, group_name)
+                for protocol_port in port['objects']:
+                    port_group.ports.append(self.port_objs[protocol_port['id']])
+                port_grps[port_id] = port_group
         return port_grps
 
     def _create_port(self, port_obj: dict):
         return Port(id=port_obj.get('id', None), name=port_obj.get('name', None), protocol=port_obj.get('protocol', None), port=port_obj.get('port', None))
 
     def equal_port_object_finder(self, ports_dict: dict[str, Union[Port, PortGroup]]):
-            ports = list(ports_dict.values())
-            for i in range(len(ports) - 1):
-                    for j in range(i + 1, len(ports)):
-                            if isinstance(ports[i], Port) and isinstance(ports[j], Port) and ports[i].__eq__(ports[j]):
-                                    ports[i].equal_with += "{}, ".format(ports[j].name)
-                                    ports[j].equal_with += "{}, ".format(ports[i].name)
-                            elif isinstance(ports[i], PortGroup) and isinstance(ports[j], PortGroup) and ports[i].__eq__(ports[j]):
-                                    ports[i].equal_with += "{}, ".format(ports[j].name)
-                                    ports[j].equal_with += "{}, ".format(ports[i].name)
+        ports = list(ports_dict.values())
+        for i in range(len(ports) - 1):
+            for j in range(i + 1, len(ports)):
+                if isinstance(ports[i], Port) and isinstance(ports[j], Port) and ports[i].__eq__(ports[j]):
+                    ports[i].equal_with += "{}, ".format(ports[j].name)
+                    ports[j].equal_with += "{}, ".format(ports[i].name)
+                elif isinstance(ports[i], PortGroup) and isinstance(ports[j], PortGroup) and ports[i].__eq__(ports[j]):
+                    ports[i].equal_with += "{}, ".format(ports[j].name)
+                    ports[j].equal_with += "{}, ".format(ports[i].name)
 
     def create_networks(self, networks: list[dict]):
         network_objs = {}
         for network in networks:
             network_id = network.get('id', None)
             if network_id is not None:
-                  network_objs[network_id] = self._create_network(network)
+                network_objs[network_id] = self._create_network(network)
         return network_objs
 
     def create_network_groups(self, network_groups: list[dict]):
         network_grps = {}
         for network in network_groups:
-                network_id = network.get('id', None)
-                if network_id is not None:
-                    group_name = network.get('name', None)
-                    network_group = NetworkGroup(network_id, group_name)
+            network_id = network.get('id', None)
+            if network_id is not None:
+                group_name = network.get('name', None)
+                network_group = NetworkGroup(network_id, group_name)
 
-                    if network.get('objects', None) is not None:
-                        for network_obj in network['objects']:
-                            network_type = network_obj['type']
-                            if network_type == "NetworkGroup":
-                                net_grp = self.find_network_group_by_id(network_obj['id'])
-                                group_result = self.create_network_groups(net_grp)
-                                network_group.networks.extend(group_result.values())
-                            else:
-                                network_group.networks.append(self.network_objs[network_obj.get('id', None)])
-                        network_group.depth = network_group.get_network_depth()
+                if network.get('objects', None) is not None:
+                    for network_obj in network['objects']:
+                        network_type = network_obj['type']
+                        if network_type == "NetworkGroup":
+                            net_grp = self.find_network_group_by_id(network_obj['id'])
+                            group_result = self.create_network_groups(net_grp)
+                            network_group.networks.extend(group_result.values())
+                        else:
+                            network_group.networks.append(self.network_objs[network_obj.get('id', None)])
+                    network_group.depth = network_group.get_network_depth()
 
-                    if network.get('literals', None) is not None:
-                        for network_literal in network['literals']:
-                            network_group.networks.append(self._create_network(network_literal))
+                if network.get('literals', None) is not None:
+                    for network_literal in network['literals']:
+                        network_group.networks.append(self._create_network(network_literal))
 
-                    network_grps[network_id] = network_group
+                network_grps[network_id] = network_group
 
         return network_grps
 
@@ -106,18 +106,18 @@ class Builder():
         return Network(id=network_obj.get('id', None), type=network_obj.get('type', None), name=network_obj.get('name', None), value=network_obj.get('value', None))
 
     def equal_network_object_finder(self, objs_dict: dict[str, Union[Network, NetworkGroup]]):
-            objs = list(objs_dict.values())
-            for i in range(len(objs) - 1):
-                    for j in range(i + 1, len(objs)):
-                            if isinstance(objs[i], Network) and isinstance(objs[j], Network) and objs[i].__eq__(objs[j]):
-                                    objs[i].equal_with += "{}, ".format(objs[j].name)
-                                    objs[j].equal_with += "{}, ".format(objs[i].name)
-                            elif isinstance(objs[i], NetworkGroup) and isinstance(objs[j], NetworkGroup):
-                                    obj_i = objs[i].flat_network_object_grp()
-                                    obj_j = objs[j].flat_network_object_grp()
-                                    if obj_i.__eq__(obj_j):
-                                            objs[i].equal_with += "{}, ".format(objs[j].name)
-                                            objs[j].equal_with += "{}, ".format(objs[i].name)
+        objs = list(objs_dict.values())
+        for i in range(len(objs) - 1):
+            for j in range(i + 1, len(objs)):
+                if isinstance(objs[i], Network) and isinstance(objs[j], Network) and objs[i].__eq__(objs[j]):
+                    objs[i].equal_with += "{}, ".format(objs[j].name)
+                    objs[j].equal_with += "{}, ".format(objs[i].name)
+                elif isinstance(objs[i], NetworkGroup) and isinstance(objs[j], NetworkGroup):
+                    obj_i = objs[i].flat_network_object_grp()
+                    obj_j = objs[j].flat_network_object_grp()
+                    if obj_i.__eq__(obj_j):
+                        objs[i].equal_with += "{}, ".format(objs[j].name)
+                        objs[j].equal_with += "{}, ".format(objs[i].name)
 
     def create_access_policies(self, acps: list[dict]):
         policies = []
@@ -132,14 +132,14 @@ class Builder():
     def create_access_rules(self, accessrules: list[dict]):
         rules = []
         for rule in accessrules:
-                id = rule.get('id', None)
-                name = rule.get('name', None)
-                action = rule.get('action', None)
-                enabled = rule.get('enabled', None)
-                source_zones, destination_zones = self.get_zones_by_rule(rule)
-                source_ports, destination_ports = self.get_ports_by_rule(rule)
-                source_networks, destination_networks = self.get_networks_by_rule(rule)
-                rules.append(AccessRule(id, name, action, enabled, source_networks, source_zones, source_ports, destination_networks, destination_zones, destination_ports))
+            id = rule.get('id', None)
+            name = rule.get('name', None)
+            action = rule.get('action', None)
+            enabled = rule.get('enabled', None)
+            source_zones, destination_zones = self.get_zones_by_rule(rule)
+            source_ports, destination_ports = self.get_ports_by_rule(rule)
+            source_networks, destination_networks = self.get_networks_by_rule(rule)
+            rules.append(AccessRule(id, name, action, enabled, source_networks, source_zones, source_ports, destination_networks, destination_zones, destination_ports))
 
         return rules
 
@@ -149,9 +149,9 @@ class Builder():
         s_zones_list = []
         d_zones_list = []
         if s_zones is not None:
-                s_zones_list = [(s_zone['name']) for s_zone in s_zones['objects']]
+            s_zones_list = [(s_zone['name']) for s_zone in s_zones['objects']]
         if d_zones is not None:
-                d_zones_list = [(d_zone['name']) for d_zone in d_zones['objects']]
+            d_zones_list = [(d_zone['name']) for d_zone in d_zones['objects']]
         return s_zones_list, d_zones_list
 
     def get_ports_by_rule(self, rule: dict):
