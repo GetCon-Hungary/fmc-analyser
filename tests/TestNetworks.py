@@ -8,8 +8,8 @@ pparent_dir = os.path.abspath(os.path.join(parent_dir, os.pardir))
 # Add the parent directory to sys.path
 sys.path.append(pparent_dir)
 
-from Models.Network import Network
-from Models.NetworkGroup import NetworkGroup
+from models.Network import Network
+from models.NetworkGroup import NetworkGroup
 
 class TestNetworks(unittest.TestCase):
 

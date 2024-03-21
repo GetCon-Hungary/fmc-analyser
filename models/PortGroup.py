@@ -1,4 +1,4 @@
-from Models.Port import Port
+from models.Port import Port
 
 class PortGroup:
     def __init__(self, id: str, name: str):

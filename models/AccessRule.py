@@ -1,10 +1,10 @@
 import math
 from typing import Union
-from Models.RiskEnum import Risk
-from Models.Network import Network
-from Models.NetworkGroup import NetworkGroup
-from Models.Port import Port
-from Models.PortGroup import PortGroup
+from models.RiskEnum import Risk
+from models.Network import Network
+from models.NetworkGroup import NetworkGroup
+from models.Port import Port
+from models.PortGroup import PortGroup
 
 class AccessRule:
     def __init__(self, id: str, name: str, action: str, enabled: str, source_networks: list[Union[Network, NetworkGroup]], source_zones: list[str], source_ports: list[Union[Port, PortGroup]], destination_networks: list[Union[Network, NetworkGroup]], destination_zones: list[str], destination_ports: list[Union[Port, PortGroup]]):
