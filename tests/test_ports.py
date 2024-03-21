@@ -12,7 +12,6 @@ pparent_dir = os.path.abspath(os.path.join(parent_dir, os.pardir))
 sys.path.append(pparent_dir)
 
 class TestPorts(unittest.TestCase):
-
     def test_port_size(self):
         test_ports = [
                         {"value": Port('1', 'test_port1', 'TCP', '80'), "result": 1} ,
