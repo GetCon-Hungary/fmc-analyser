@@ -109,15 +109,13 @@ class TestAccessRules(unittest.TestCase):
                         {"value": self.rule4, "result": 'Medium'},
                         {"value": self.rule5, "result": 'Low'},
         ]
-
         config = {'RELATIVE_DESTINATION_NETWORK_CATEGORIES': {'HIGH': 10, 'MEDIUM': 5, 'LOW': 3}}
-
         for testcase in test_rules:
             if isinstance(testcase['value'], AccessRule):
                 risk = testcase['value'].risk_category_by_destination_network_dynamic(60, config['RELATIVE_DESTINATION_NETWORK_CATEGORIES'])
             self.assertEqual(risk, testcase["result"])
 
-    def create_ports_for_test(self):
+    def create_ports_for_test(self) -> dict:
         ports_dict: dict[str, list] = {}
         ports = []
         for i in range(16):
@@ -137,8 +135,8 @@ class TestAccessRules(unittest.TestCase):
 
         return ports_dict
 
-    def create_networks_for_test(self):
-        networks_dict = {
+    def create_networks_for_test(self) -> dict:
+        return {
             'rule0': Network('0', 'Network', 'test0', '10.10.10.0/15'),
             'rule1': Network('1', 'Network', 'test1', '10.10.10.0/19'),
             'rule2': Network('2', 'Network', 'test2', '10.10.10.0/20'),
@@ -146,12 +144,11 @@ class TestAccessRules(unittest.TestCase):
             'rule4': Network('4', 'Network', 'test4', '10.10.10.0/23'),
             'rule5': Network('5', 'Network', 'test5', '10.10.10.0/28'),
         }
-        return networks_dict
 
-    def create_port_groups_for_test(self, ports):
+    def create_port_groups_for_test(self, ports) -> list:
         port_grps = []
         for i in range(3):
-            grp = PortGroup(i, 'test_group_{}'.format(i))
+            grp = PortGroup(str(i), 'test_group_{}'.format(i))
             grp.ports.extend(ports['group{}'.format(i)])
             port_grps.append(grp)
         return port_grps
