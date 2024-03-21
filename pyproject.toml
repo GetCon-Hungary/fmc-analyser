@@ -1,0 +1,27 @@
+[tool.ruff]
+line-length = 99
+# Exclude a variety of ignored directories.
+exclude = [
+    ".venv",
+    "__pycache__",
+    ".git",
+    ".vscode",
+]
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "ANN101",  # Will be soon deprecated, but until then ignored
+    "Q000",
+    "UP032",  # Reason: https://wemake-python-styleguide.readthedocs.io/en/0.8.0/pages/violations/consistency.html#wemake_python_styleguide.violations.consistency.FormattedStringViolation
+]
+
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "space"
+docstring-code-format = true
+
+[tool.pylint.'MESSAGES CONTROL']
+disable = [
+    "consider-using-f-string"
+]
