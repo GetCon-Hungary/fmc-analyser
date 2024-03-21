@@ -6,7 +6,7 @@ class PortGroup:
         self.name = name
         self.ports: list[Port] = []
         self.equal_with = ""
-    
+
     def __eq__(self, __value: object) -> bool:
         counter = 0
         if len(self.ports) == len(__value.ports):
@@ -19,7 +19,7 @@ class PortGroup:
             return False
         else:
             return False
-        
+
     def flat_port_object_grp(self):
         final = []
         for port_obj in self.ports:
@@ -28,7 +28,7 @@ class PortGroup:
                 elif isinstance(port_obj, PortGroup):
                         final.extend(port_obj.flat_port_object_grp())
         return final
-        
+
     def get_size(self):
         summ = 0
         for port in self.ports:

@@ -16,7 +16,7 @@ class Data():
                 self.networks_data = self.get_networks_data(self.builder.network_objs)
                 self.access_rules_data = self.get_access_rules_data(self.builder.policies)
                 self.access_policies_data = self.get_access_policy_data(self.builder.policies)
-        
+
         def get_access_policy_data(self, policies: list[AccessPolicy]):
                 return [(policy.name, policy.enabled_rules_count(), policy.allowed_rules_count(), policy.enabled_rules_ratio(), policy.allowed_rules_ratio()) for policy in policies]
 
@@ -27,24 +27,24 @@ class Data():
                         avg_dst_ip_num = policy.calculate_avg_destination_network_size_of_acp()
                         avg_port_number = policy.calculate_avg_destination_port_size_of_acp()
                         access_rule_data[policy.name] = [(
-                        rule.name, 
-                        rule.action, 
-                        rule.enabled, 
-                        self._get_networks_data_by_rule(rule.source_networks), 
-                        self.get_zones_data_by_rule(rule.source_zones), 
-                        self._get_ports_data_by_rule(rule.source_ports), 
-                        self._get_networks_data_by_rule(rule.destination_networks), 
-                        self.get_zones_data_by_rule(rule.destination_zones), 
-                        self._get_ports_data_by_rule(rule.destination_ports), 
-                        rule.risk_category_by_destination_port_static(self.config['DESTINATION_PORT_CATEGORIES']), 
-                        rule.risk_category_by_destination_port_dynamic(avg_port_number, self.config['RELATIVE_DESTINATION_PORT_CATEGORIES']), 
-                        rule.risk_category_by_source_network_static(self.config['SOURCE_NETWORK_CATEGORIES']), 
-                        rule.risk_category_by_destination_network_static(self.config['DESTINATION_NETWORK_CATEGORIES']), 
-                        rule.risk_category_by_source_network_dynamic(avg_src_ip_num, self.config['RELATIVE_SOURCE_NETWORK_CATEGORIES']), 
-                        rule.risk_category_by_destination_network_dynamic(avg_dst_ip_num, self.config['RELATIVE_DESTINATION_NETWORK_CATEGORIES'])) 
+                        rule.name,
+                        rule.action,
+                        rule.enabled,
+                        self._get_networks_data_by_rule(rule.source_networks),
+                        self.get_zones_data_by_rule(rule.source_zones),
+                        self._get_ports_data_by_rule(rule.source_ports),
+                        self._get_networks_data_by_rule(rule.destination_networks),
+                        self.get_zones_data_by_rule(rule.destination_zones),
+                        self._get_ports_data_by_rule(rule.destination_ports),
+                        rule.risk_category_by_destination_port_static(self.config['DESTINATION_PORT_CATEGORIES']),
+                        rule.risk_category_by_destination_port_dynamic(avg_port_number, self.config['RELATIVE_DESTINATION_PORT_CATEGORIES']),
+                        rule.risk_category_by_source_network_static(self.config['SOURCE_NETWORK_CATEGORIES']),
+                        rule.risk_category_by_destination_network_static(self.config['DESTINATION_NETWORK_CATEGORIES']),
+                        rule.risk_category_by_source_network_dynamic(avg_src_ip_num, self.config['RELATIVE_SOURCE_NETWORK_CATEGORIES']),
+                        rule.risk_category_by_destination_network_dynamic(avg_dst_ip_num, self.config['RELATIVE_DESTINATION_NETWORK_CATEGORIES']))
                         for rule in policy.rules]
                 return access_rule_data
-                
+
         def get_zones_data_by_rule(self, zones: list[str]):
                 value = ""
                 for zone in zones:
@@ -76,7 +76,7 @@ class Data():
                                 value += "{} : {}, ".format(network.name, network.value)
 
                 return value
-        
+
         def get_ports_data(self, ports: dict[str, Union[Port, PortGroup]]):
                 ports_data = []
                 ports_count = self.get_port_object(ports)
@@ -87,14 +87,14 @@ class Data():
                                 for p in port.ports:
                                         ports_data.append((port.name, p.name, p.protocol, p.port, p.size, p._is_risky_port(self.config['HIGH_RISK_PROTOCOLS']), port.equal_with, ports_count[port.name]))
                 return ports_data
-        
+
         def get_port_object(self, ports_dict: dict[str, Union[Port, PortGroup]]):
                 ports = {}
                 for port in ports_dict.values():
                         ports[port.name] = 0
                 self.port_object_count(ports)
                 return ports
-        
+
         def port_object_count(self, ports: dict):
                 for policy in self.builder.policies:
                         for rule in policy.rules:

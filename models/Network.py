@@ -8,7 +8,7 @@ class Network:
         self.value = self.create_network_value(value)
         self.size = self.value.size
         self.equal_with = ""
-    
+
     def __eq__(self, __value: object) -> bool:
         return self.type == __value.type and self.value == __value.value
 

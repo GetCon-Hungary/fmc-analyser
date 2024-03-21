@@ -3,7 +3,7 @@ from FMCLoader import FMCLoader
 from logic.BuilderLogic import Builder
 from logic.DataLogic import Data
 import ExportToExcel as exp
-  
+
 if __name__ == "__main__":
         try:
                 parser = argparse.ArgumentParser(description='FMC Analyser')
@@ -18,13 +18,13 @@ if __name__ == "__main__":
                 fmcloader = FMCLoader(ARGS.host, ARGS.username, ARGS.password, ARGS.acp)
         except:
                 fmcloader = FMCLoader('192.168.33.193', 'admin', 'GetCon135!!', 'all')
-        
+
         builder = Builder(fmcloader)
         try:
                 data = Data(builder, ARGS.config)
         except:
                 data = Data(builder, 'config.yml')
-                
+
         exp.export_to_excel(data.access_policies_data, exp.ACCESS_POLICY_HEADER, 'access_policies_information')
         for policy in builder.policies:
                 exp.export_to_excel(data.access_rules_data[policy.name], exp.ACCESS_RULE_HEADER, 'access_rules_of_{}'.format(policy.name))
