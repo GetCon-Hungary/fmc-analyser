@@ -1,4 +1,4 @@
-from models.Network import Network
+from models.network import Network
 from typing import Union
 
 class NetworkGroup:

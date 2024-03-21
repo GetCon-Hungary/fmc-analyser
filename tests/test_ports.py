@@ -8,8 +8,8 @@ pparent_dir = os.path.abspath(os.path.join(parent_dir, os.pardir))
 # Add the parent directory to sys.path
 sys.path.append(pparent_dir)
 
-from models.Port import Port
-from models.PortGroup import PortGroup
+from models.port import Port
+from models.port_group import PortGroup
 
 class TestPorts(unittest.TestCase):
 

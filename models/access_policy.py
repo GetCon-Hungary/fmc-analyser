@@ -1,4 +1,4 @@
-from models.AccessRule import AccessRule
+from models.access_rule import AccessRule
 
 class AccessPolicy():
     def __init__(self, id: str, name: str, rules: list[AccessRule]):
