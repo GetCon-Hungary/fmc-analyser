@@ -1,9 +1,9 @@
-from Models.AccessPolicy import AccessPolicy
-from Models.AccessRule import AccessRule
-from Models.Port import Port
-from Models.PortGroup import PortGroup
-from Models.Network import Network
-from Models.NetworkGroup import NetworkGroup
+from models.AccessPolicy import AccessPolicy
+from models.AccessRule import AccessRule
+from models.Port import Port
+from models.PortGroup import PortGroup
+from models.Network import Network
+from models.NetworkGroup import NetworkGroup
 from FMCLoader import FMCLoader
 from typing import Union
 

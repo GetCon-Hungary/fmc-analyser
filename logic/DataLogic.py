@@ -1,9 +1,9 @@
-from Logic.BuilderLogic import Builder
-from Models.Port import Port
-from Models.PortGroup import PortGroup
-from Models.Network import Network
-from Models.NetworkGroup import NetworkGroup
-from Models.AccessPolicy import AccessPolicy
+from logic.BuilderLogic import Builder
+from models.Port import Port
+from models.PortGroup import PortGroup
+from models.Network import Network
+from models.NetworkGroup import NetworkGroup
+from models.AccessPolicy import AccessPolicy
 from typing import Union
 import yaml
 

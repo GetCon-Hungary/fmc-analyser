@@ -8,10 +8,10 @@ pparent_dir = os.path.abspath(os.path.join(parent_dir, os.pardir))
 # Add the parent directory to sys.path
 sys.path.append(pparent_dir)
 
-from Models.Network import Network
-from Models.Port import Port
-from Models.PortGroup import PortGroup
-from Models.AccessRule import AccessRule
+from models.Network import Network
+from models.Port import Port
+from models.PortGroup import PortGroup
+from models.AccessRule import AccessRule
 
 class TestAccessRules(unittest.TestCase):
 

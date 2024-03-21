@@ -9,7 +9,7 @@ NETWORK_HEADER = ['Group Name', 'Group depth', 'Name', 'Value', 'Size', 'Equal w
 def export_to_excel(data: list[str], header: list[str], sheet_name: str):
         df = pd.DataFrame(data, columns=header)
         df.index = range(1, len(df)+1)
-        export_dir = os.getcwd() + '/Exports/final.xlsx'
+        export_dir = os.getcwd() + '/exports/final.xlsx'
         if os.path.exists(export_dir):
                 with pd.ExcelWriter(path=export_dir, mode='a', if_sheet_exists='replace', engine='openpyxl') as writer:
                         df.to_excel(excel_writer=writer, sheet_name=sheet_name)

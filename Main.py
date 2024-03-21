@@ -1,7 +1,7 @@
 import argparse
 from FMCLoader import FMCLoader
-from Logic.BuilderLogic import Builder
-from Logic.DataLogic import Data
+from logic.BuilderLogic import Builder
+from logic.DataLogic import Data
 import ExportToExcel as exp
   
 if __name__ == "__main__":
