@@ -1,5 +1,6 @@
 from netaddr import IPNetwork, IPRange
 
+
 class Network:
     def __init__(self, id: str, type: str, name: str, value: str):
         self.id = id

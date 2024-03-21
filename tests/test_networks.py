@@ -1,15 +1,15 @@
-import sys
 import os
+import sys
 import unittest
+
+from models.network import Network
+from models.network_group import NetworkGroup
 
 # Get the parent directory
 parent_dir = os.path.dirname(os.path.realpath(__file__))
 pparent_dir = os.path.abspath(os.path.join(parent_dir, os.pardir))
 # Add the parent directory to sys.path
 sys.path.append(pparent_dir)
-
-from models.network import Network
-from models.network_group import NetworkGroup
 
 class TestNetworks(unittest.TestCase):
 
