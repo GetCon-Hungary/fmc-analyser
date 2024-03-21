@@ -23,5 +23,6 @@ docstring-code-format = true
 
 [tool.pylint.'MESSAGES CONTROL']
 disable = [
-    "consider-using-f-string"
+    "consider-using-f-string",
+    "missing-module-docstring"
 ]
