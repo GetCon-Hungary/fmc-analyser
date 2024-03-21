@@ -14,7 +14,6 @@ pparent_dir = os.path.abspath(os.path.join(parent_dir, os.pardir))
 sys.path.append(pparent_dir)
 
 class TestAccessRules(unittest.TestCase):
-
     def setUp(self) -> None:
         ports = self.create_ports_for_test()
         port_grp = self.create_port_groups_for_test(ports)

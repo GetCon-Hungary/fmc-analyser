@@ -18,8 +18,7 @@ class PortGroup:
                         if counter == len(self.ports):
                             return True
             return False
-        else:
-            return False
+        return False
 
     def flat_port_object_grp(self):
         final = []
@@ -34,5 +33,4 @@ class PortGroup:
         summ = 0
         for port in self.ports:
             summ += port.get_size()
-
         return summ

@@ -12,7 +12,6 @@ pparent_dir = os.path.abspath(os.path.join(parent_dir, os.pardir))
 sys.path.append(pparent_dir)
 
 class TestNetworks(unittest.TestCase):
-
     def test_network_size(self):
         network0 = Network('1', 'Range', 'test_0', '192.168.0.1-192.168.0.5')
         network1 = Network('2', 'Range', 'test_1', '192.168.0.1-192.168.1.1')
