@@ -1,12 +1,14 @@
+"""Represents the network group class."""
+
 from models.port import Port
 
 
 class PortGroup:
-    def __init__(self, id: str, name: str):
+    def __init__(self, id: str, name: str) -> None:  # noqa: D107
         self.id = id
         self.name = name
         self.ports: list[Port] = []
-        self.equal_with = ""
+        self.equal_with = ''
 
     def __eq__(self, __value: 'PortGroup') -> bool:
         counter = 0
@@ -20,7 +22,7 @@ class PortGroup:
             return False
         return False
 
-    def flat_port_object_grp(self):
+    def flat_port_object_grp(self) -> list:
         final = []
         for port_obj in self.ports:
             if isinstance(port_obj, Port):
@@ -29,8 +31,5 @@ class PortGroup:
                 final.extend(port_obj.flat_port_object_grp())
         return final
 
-    def get_size(self):
-        summ = 0
-        for port in self.ports:
-            summ += port.get_size()
-        return summ
+    def get_size(self) -> int:
+        return sum(port.get_size() for port in self.ports)
