@@ -2,9 +2,7 @@ import argparse
 from FMCLoader import FMCLoader
 from Logic.BuilderLogic import Builder
 from Logic.DataLogic import Data
-from Logic.Model import Model
 import ExportToExcel as exp
-import yaml
   
 if __name__ == "__main__":
         try:
@@ -22,11 +20,12 @@ if __name__ == "__main__":
                 fmcloader = FMCLoader('192.168.33.193', 'admin', 'GetCon135!!', 'all')
         
         builder = Builder(fmcloader)
-        with open('config.yml') as cfg:
-                config = yaml.safe_load(cfg)
-        model = Model(builder, config)
-        data = Data(builder)
-                        
+        try:
+                data = Data(builder, ARGS.config)
+        except:
+                data = Data(builder, 'config.yml')
+        
+        exp.export_to_excel(data.access_policies_data, exp.ACCESS_POLICY_HEADER, 'policies information')
         for policy in builder.policies:
                 exp.export_to_excel(data.access_rules_data[policy.name], exp.ACCESS_RULE_HEADER, 'access_rules_of_{}'.format(policy.name))
         exp.export_to_excel(data.ports_data, exp.PORTS_HEADER, 'ports')
