@@ -76,7 +76,6 @@ class Builder():
             if network_id is not None:
                 group_name = network.get('name', None)
                 network_group = NetworkGroup(network_id, group_name)
-
                 if network.get('objects', None) is not None:
                     for network_obj in network['objects']:
                         network_type = network_obj['type']
@@ -87,11 +86,9 @@ class Builder():
                         else:
                             network_group.networks.append(self.network_objs[network_obj.get('id', None)])
                     network_group.depth = network_group.get_network_depth()
-
                 if network.get('literals', None) is not None:
                     for network_literal in network['literals']:
                         network_group.networks.append(self._create_network(network_literal))
-
                 network_grps[network_id] = network_group
 
         return network_grps
@@ -126,7 +123,6 @@ class Builder():
             name = acp.get('name', None)
             rules = self.create_access_rules(self.fmcloader.access_rules[name]['items'])
             policies.append(AccessPolicy(id, name, rules))
-
         return policies
 
     def create_access_rules(self, accessrules: list[dict]):
@@ -140,7 +136,6 @@ class Builder():
             source_ports, destination_ports = self.get_ports_by_rule(rule)
             source_networks, destination_networks = self.get_networks_by_rule(rule)
             rules.append(AccessRule(id, name, action, enabled, source_networks, source_zones, source_ports, destination_networks, destination_zones, destination_ports))
-
         return rules
 
     def get_zones_by_rule(self, rule: dict):
@@ -173,7 +168,6 @@ class Builder():
                 d_ports_list.extend(self.find_port_by_id(d_objects))
             if d_literals is not None:
                 d_ports_list.extend(self.find_port_by_id(d_literals))
-
         return s_ports_list, d_ports_list
 
     def find_port_by_id(self, rule_ports: list[dict]):
@@ -184,7 +178,6 @@ class Builder():
                 final.append(self.port_objs[port_id])
             else:
                 final.append(self._create_port(port))
-
         return final
 
     def get_networks_by_rule(self, rule: dict):
@@ -206,7 +199,6 @@ class Builder():
                 d_networks_list.extend(self.find_network_by_id(d_objects))
             if d_literals is not None:
                 d_networks_list.extend(self.find_network_by_id(d_literals))
-
         return s_networks_list, d_networks_list
 
     def find_network_by_id(self, rule_networks: list[dict]):

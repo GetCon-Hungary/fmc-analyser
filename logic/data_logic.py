@@ -77,7 +77,6 @@ class Data():
                 value += "{}: ({}), ".format(network.name, value_2)
             else:
                 value += "{} : {}, ".format(network.name, network.value)
-
         return value
 
     def get_ports_data(self, ports: dict[str, Union[Port, PortGroup]]):
@@ -129,4 +128,3 @@ class Data():
                 for key in networks.keys():
                     if rule.network_used_in_rule(key):
                         networks[key] += 1
-
