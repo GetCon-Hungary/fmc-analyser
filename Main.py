@@ -24,7 +24,7 @@ if __name__ == "__main__":
                 data = Data(builder, ARGS.config)
         except:
                 data = Data(builder, 'config.yml')
-        
+                
         exp.export_to_excel(data.access_policies_data, exp.ACCESS_POLICY_HEADER, 'policies information')
         for policy in builder.policies:
                 exp.export_to_excel(data.access_rules_data[policy.name], exp.ACCESS_RULE_HEADER, 'access_rules_of_{}'.format(policy.name))
