@@ -10,10 +10,10 @@ class FMCLoader():
             self.networks = fmcapi.Networks(fmc).get()
             self.ranges = fmcapi.Ranges(fmc).get()
             self.network_groups = fmcapi.NetworkGroups(fmc).get()
-            self.access_policies = self.get_acess_policies(fmc, acp_name)
-            self.access_rules = self.get_acess_rules(fmc)
+            self.access_policies = self.get_access_policies(fmc, acp_name)
+            self.access_rules = self.get_access_rules(fmc)
 
-    def get_acess_policies(self, fmc, acp_name: str):
+    def get_access_policies(self, fmc, acp_name: str):
         access_policies = {}
         if acp_name == 'all':
             access_policies = fmcapi.AccessPolicies(fmc).get()
@@ -24,7 +24,7 @@ class FMCLoader():
             return access_policies
         raise NameError('Wrong access policy name')
 
-    def get_acess_rules(self, fmc):
+    def get_access_rules(self, fmc):
         access_rules = {}
         for access_policy in self.access_policies['items']:
             access_rules[access_policy['name']] = fmcapi.AccessRules(fmc, acp_id=access_policy['id']).get()
