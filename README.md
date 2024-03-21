@@ -2,7 +2,7 @@
 
 ## Introduction
 
-FMCAnalyser can download, parse and export a wide range of data from Cisco Secure Firewall Management Center (FMC) including analyses of the data.
+FMCAnalyser can download, export and analyse wide range of data from Cisco Secure Firewall Management Center (FMC). The scope of the project is to process most of the production data in FMC, with support for the latest version.
 
 ## Features
 
@@ -36,14 +36,36 @@ FMCAnalyser can download, parse and export a wide range of data from Cisco Secur
 
 ### Usage
 
-- First configure the application to your needs by modifying the `config.yaml` file.
+- First configure the application to your needs by modifying the `config.yml` file.
 - Run the application with the following: `python3 main.py`
 - Command line arguments
-  - `-h / --host`: IP address of FMC
-  - `-u / --username`: FMC login username
-  - `-p / --password`: FMC login password
-  - `-a / --acp`:
-  - `-c / --config`: Enter configuration file path. If skipped, the default is used: `config.ini`
+  - `-h / --host`: IP address of FMC (required)
+  - `-u / --username`: FMC login username (required)
+  - `-p / --password`: FMC login password (required)
+  - `-a / --acp`: Choose from the following or leave blank for default "all": acp, ports, networks
+  - `-c / --config`: Enter configuration file path. If skipped, the default is used: `config.yml`
+
+### Example
+
+- If you want to set custom parameters:
+
+```bash
+python3 main.py \
+  --host 10.10.10.1
+  --username administrator
+  --password administrator!
+  --acp networks
+  --config my_conf.yml
+```
+
+- If you want to leave most things on default:
+
+```bash
+python3 main.py \
+  --host 10.10.10.1
+  --username administrator
+  --password administrator!
+```
 
 ## Contributing
 
