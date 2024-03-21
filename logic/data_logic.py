@@ -1,11 +1,14 @@
+from typing import Union
+
+import yaml
+
 from logic.builder_logic import Builder
-from models.port import Port
-from models.port_group import PortGroup
+from models.access_policy import AccessPolicy
 from models.network import Network
 from models.network_group import NetworkGroup
-from models.access_policy import AccessPolicy
-from typing import Union
-import yaml
+from models.port import Port
+from models.port_group import PortGroup
+
 
 class Data():
         def __init__(self, builder: Builder, config: dict):

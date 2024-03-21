@@ -1,5 +1,7 @@
-from models.network import Network
 from typing import Union
+
+from models.network import Network
+
 
 class NetworkGroup:
     def __init__(self, id: str, name: str):

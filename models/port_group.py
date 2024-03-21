@@ -1,5 +1,6 @@
 from models.port import Port
 
+
 class PortGroup:
     def __init__(self, id: str, name: str):
         self.id = id

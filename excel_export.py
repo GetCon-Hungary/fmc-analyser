@@ -1,5 +1,6 @@
-import pandas as pd
 import os
+
+import pandas as pd
 
 ACCESS_POLICY_HEADER = ['Name', 'Count Of Enabled Rules', 'Count Of Allowed Rules', 'Ratio Of Enabled Rules', 'Ratio Of Allowed Rules']
 ACCESS_RULE_HEADER = ['Access Rule', 'Action', 'Enabled', 'Source Networks', 'Source Zones', 'Source Ports', 'Destination Networks', 'Destination Zones', 'Destination Ports', 'Destination Port Category', 'Relative Destination Port Category', 'Source Network Category', 'Destination Network Category', 'Relative Source Network Category', 'Relative Destination Network Category']

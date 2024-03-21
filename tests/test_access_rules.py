@@ -1,17 +1,17 @@
-import sys
 import os
+import sys
 import unittest
+
+from models.access_rule import AccessRule
+from models.network import Network
+from models.port import Port
+from models.port_group import PortGroup
 
 # Get the parent directory
 parent_dir = os.path.dirname(os.path.realpath(__file__))
 pparent_dir = os.path.abspath(os.path.join(parent_dir, os.pardir))
 # Add the parent directory to sys.path
 sys.path.append(pparent_dir)
-
-from models.network import Network
-from models.port import Port
-from models.port_group import PortGroup
-from models.access_rule import AccessRule
 
 class TestAccessRules(unittest.TestCase):
 
