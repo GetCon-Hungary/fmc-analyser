@@ -31,10 +31,10 @@ class Data():
                         rule.action, 
                         rule.enabled, 
                         self._get_networks_data_by_rule(rule.source_networks), 
-                        rule.source_zones, 
+                        self.get_zones_data_by_rule(rule.source_zones), 
                         self._get_ports_data_by_rule(rule.source_ports), 
                         self._get_networks_data_by_rule(rule.destination_networks), 
-                        rule.destination_zones, 
+                        self.get_zones_data_by_rule(rule.destination_zones), 
                         self._get_ports_data_by_rule(rule.destination_ports), 
                         rule.risk_category_by_destination_port_static(self.config['DESTINATION_PORT_CATEGORIES']), 
                         rule.risk_category_by_destination_port_dynamic(avg_port_number, self.config['RELATIVE_DESTINATION_PORT_CATEGORIES']), 
@@ -44,30 +44,12 @@ class Data():
                         rule.risk_category_by_destination_network_dynamic(avg_dst_ip_num, self.config['RELATIVE_DESTINATION_NETWORK_CATEGORIES'])) 
                         for rule in policy.rules]
                 return access_rule_data
-        
-        def get_ports_data(self, ports: dict[str, Union[Port, PortGroup]]):
-                ports_data = []
-                p_s = self.get_port_object(self.builder.port_objs)
-                self.port_object_count(p_s)
-                for port in ports.values():
-                        if isinstance(port, Port):
-                                ports_data.append((None, port.name, port.protocol, port.port, port.size, port._is_risky_port(self.config['HIGH_RISK_PROTOCOLS']), port.equal_with, p_s[port.name]))
-                        elif isinstance(port, PortGroup):
-                                for p in port.ports:
-                                        ports_data.append((port.name, p.name, p.protocol, p.port, p.size, p._is_risky_port(self.config['HIGH_RISK_PROTOCOLS']), port.equal_with, p_s[port.name]))
-                return ports_data
-
-        def get_networks_data(self, networks: dict[str, Union[Network, NetworkGroup]]):
-                networks_data = []
-                n_s = self.get_network_object(self.builder.network_objs)
-                self.network_object_count(n_s)
-                for network in networks.values():
-                        if isinstance(network, NetworkGroup):
-                                nets = network.flat_network_object_grp()
-                                networks_data.extend([(network.name, network.depth, net.name, net.value, net.size, network.equal_with, n_s[network.name]) for net in nets])
-                        else:
-                                networks_data.append((None, None, network.name, network.value, network.size, network.equal_with, n_s[network.name]))
-                return networks_data
+                
+        def get_zones_data_by_rule(self, zones: list[str]):
+                value = ""
+                for zone in zones:
+                        value += "{}, ".format(zone)
+                return value
 
         def _get_ports_data_by_rule(self, ports: list[Union[Port, PortGroup]]):
                 value = ""
@@ -94,7 +76,25 @@ class Data():
                                 value += "{} : {}, ".format(network.name, network.value)
 
                 return value
-    
+        
+        def get_ports_data(self, ports: dict[str, Union[Port, PortGroup]]):
+                ports_data = []
+                ports_count = self.get_port_object(ports)
+                for port in ports.values():
+                        if isinstance(port, Port):
+                                ports_data.append((None, port.name, port.protocol, port.port, port.size, port._is_risky_port(self.config['HIGH_RISK_PROTOCOLS']), port.equal_with, ports_count[port.name]))
+                        elif isinstance(port, PortGroup):
+                                for p in port.ports:
+                                        ports_data.append((port.name, p.name, p.protocol, p.port, p.size, p._is_risky_port(self.config['HIGH_RISK_PROTOCOLS']), port.equal_with, ports_count[port.name]))
+                return ports_data
+        
+        def get_port_object(self, ports_dict: dict[str, Union[Port, PortGroup]]):
+                ports = {}
+                for port in ports_dict.values():
+                        ports[port.name] = 0
+                self.port_object_count(ports)
+                return ports
+        
         def port_object_count(self, ports: dict):
                 for policy in self.builder.policies:
                         for rule in policy.rules:
@@ -102,12 +102,23 @@ class Data():
                                         if rule.port_used_in_rule(key):
                                                 ports[key] += 1
 
-        def get_port_object(self, ports_dict: dict[str, Union[Port, PortGroup]]):
-                ports = {}
-                for port in ports_dict.values():
-                        ports[port.name] = 0
+        def get_networks_data(self, networks: dict[str, Union[Network, NetworkGroup]]):
+                networks_data = []
+                networks_count = self.get_network_object(networks)
+                for network in networks.values():
+                        if isinstance(network, NetworkGroup):
+                                nets = network.flat_network_object_grp()
+                                networks_data.extend([(network.name, network.depth, net.name, net.value, net.size, network.equal_with, networks_count[network.name]) for net in nets])
+                        else:
+                                networks_data.append((None, None, network.name, network.value, network.size, network.equal_with, networks_count[network.name]))
+                return networks_data
 
-                return ports
+        def get_network_object(self, networks_dict: dict[str, Union[Network, NetworkGroup]]):
+                networks = {}
+                for network in networks_dict.values():
+                        networks[network.name] = 0
+                self.network_object_count(networks)
+                return networks
 
         def network_object_count(self, networks: dict):
                 for policy in self.builder.policies:
@@ -116,9 +127,3 @@ class Data():
                                         if rule.network_used_in_rule(key):
                                                 networks[key] += 1
 
-        def get_network_object(self, networks_dict: dict[str, Union[Network, NetworkGroup]]):
-                networks = {}
-                for network in networks_dict.values():
-                        networks[network.name] = 0
-                
-                return networks
