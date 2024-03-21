@@ -16,7 +16,7 @@ class TestPorts(unittest.TestCase):
         test_ports = [
                         {"value": Port('1', 'test_port1', 'TCP', '80'), "result": 1} ,
                         {"value": Port('2', 'test_port2', 'TCP', '80-81'), "result": 2},
-                        {"value": Port('3', 'test_port3', 'TCP', '1000 - 1101'), "result": 102}
+                        {"value": Port('3', 'test_port3', 'TCP', '1000 - 1101'), "result": 102},
         ]
 
         for testcase in test_ports:
@@ -42,7 +42,7 @@ class TestPorts(unittest.TestCase):
         port_group_1.ports.append(Port('2', 'test2', 'TCP', '21'))
         port_group.ports.append(port_group_1)
         test_ports = [
-                        {"value": port_group, "result": port_group_1.ports}
+                        {"value": port_group, "result": port_group_1.ports},
         ]
 
         for testcase in test_ports:
