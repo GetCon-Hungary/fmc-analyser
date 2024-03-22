@@ -30,14 +30,14 @@ class TestAccessRules(unittest.TestCase):
 
     def test_risk_category_by_port_static(self):
         test_rules = [
-                        {'value': self.rule0, 'result': 'High'},
-                        {'value': self.rule1, 'result': 'High'},
-                        {'value': self.rule2, 'result': 'Medium'},
-                        {'value': self.rule3, 'result': 'Low'},
-                        {'value': self.rule4, 'result': 'Low'},
-                        {'value': self.rule5, 'result': 'High'},
-                        {'value': self.rule6, 'result': 'Medium'},
-                        {'value': self.rule7, 'result': 'Low'},
+                        {'value': self.rule0, 'result': 'HIGH'},
+                        {'value': self.rule1, 'result': 'HIGH'},
+                        {'value': self.rule2, 'result': 'MEDIUM'},
+                        {'value': self.rule3, 'result': 'LOW'},
+                        {'value': self.rule4, 'result': 'LOW'},
+                        {'value': self.rule5, 'result': 'HIGH'},
+                        {'value': self.rule6, 'result': 'MEDIUM'},
+                        {'value': self.rule7, 'result': 'LOW'},
         ]
 
         config = {'DESTINATION_PORT_CATEGORIES': {'HIGH': 16, 'MEDIUM': 8, 'LOW': 4}}
@@ -49,9 +49,9 @@ class TestAccessRules(unittest.TestCase):
 
     def test_risk_category_by_port_dynamic(self):
         test_rules = [
-                        {'value': self.rule0, 'result': 'High'},
-                        {'value': self.rule1, 'result': 'Medium'},
-                        {'value': self.rule2, 'result': 'Low'},
+                        {'value': self.rule0, 'result': 'HIGH'},
+                        {'value': self.rule1, 'result': 'MEDIUM'},
+                        {'value': self.rule2, 'result': 'LOW'},
         ]
 
         config = {'RELATIVE_DESTINATION_PORT_CATEGORIES': {'HIGH': 10, 'MEDIUM': 5, 'LOW': 3}}
@@ -63,9 +63,9 @@ class TestAccessRules(unittest.TestCase):
 
     def test_risk_category_by_source_network_static(self):
         test_rules = [
-                        {'value': self.rule0, 'result': 'High'},
-                        {'value': self.rule1, 'result': 'Medium'},
-                        {'value': self.rule2, 'result': 'Low'},
+                        {'value': self.rule0, 'result': 'HIGH'},
+                        {'value': self.rule1, 'result': 'MEDIUM'},
+                        {'value': self.rule2, 'result': 'LOW'},
         ]
 
         config = {'SOURCE_NETWORK_CATEGORIES': {'HIGH': '/16', 'MEDIUM': '/19', 'LOW': '/21'}}
@@ -77,9 +77,9 @@ class TestAccessRules(unittest.TestCase):
 
     def test_risk_category_by_destination_network_static(self):
         test_rules = [
-                        {'value': self.rule3, 'result': 'High'},
-                        {'value': self.rule4, 'result': 'Medium'},
-                        {'value': self.rule5, 'result': 'Low'},
+                        {'value': self.rule3, 'result': 'HIGH'},
+                        {'value': self.rule4, 'result': 'MEDIUM'},
+                        {'value': self.rule5, 'result': 'LOW'},
         ]
 
         config = {'DESTINATION_NETWORK_CATEGORIES': {'HIGH': '/22', 'MEDIUM': '/24', 'LOW': '/28'}}
@@ -91,9 +91,9 @@ class TestAccessRules(unittest.TestCase):
 
     def test_risk_category_by_source_network_dynamic(self):
         test_rules = [
-                        {'value': self.rule3, 'result': 'High'},
-                        {'value': self.rule4, 'result': 'Medium'},
-                        {'value': self.rule5, 'result': 'Low'},
+                        {'value': self.rule3, 'result': 'HIGH'},
+                        {'value': self.rule4, 'result': 'MEDIUM'},
+                        {'value': self.rule5, 'result': 'LOW'},
         ]
 
         config = {'RELATIVE_SOURCE_NETWORK_CATEGORIES': {'HIGH': 10, 'MEDIUM': 5, 'LOW': 3}}
@@ -105,9 +105,9 @@ class TestAccessRules(unittest.TestCase):
 
     def test_risk_category_by_destination_network_dynamic(self):
         test_rules = [
-                        {'value': self.rule3, 'result': 'High'},
-                        {'value': self.rule4, 'result': 'Medium'},
-                        {'value': self.rule5, 'result': 'Low'},
+                        {'value': self.rule3, 'result': 'HIGH'},
+                        {'value': self.rule4, 'result': 'MEDIUM'},
+                        {'value': self.rule5, 'result': 'LOW'},
         ]
         config = {'RELATIVE_DESTINATION_NETWORK_CATEGORIES': {'HIGH': 10, 'MEDIUM': 5, 'LOW': 3}}
         for testcase in test_rules:
