@@ -12,7 +12,7 @@ from models.port_group import PortGroup
 
 
 class Data:
-    def __init__(self, builder: Builder, config: dict) -> None:
+    def __init__(self, builder: Builder, config: dict) -> None:  # noqa:D107
         self.builder = builder
         with open(config, encoding='utf-8') as cfg:
             self.config = yaml.safe_load(cfg)
@@ -36,29 +36,26 @@ class Data:
             avg_dst_ip_num = policy.calculate_avg_dst_network_size_of_acp()
             avg_port_number = policy.calculate_avg_destination_port_size_of_acp()
             access_rule_data[policy.name] = [(
-            rule.name,
-            rule.action,
-            rule.enabled,
-            self._get_networks_data_by_rule(rule.source_networks),
-            self.get_zones_data_by_rule(rule.source_zones),
-            self._get_ports_data_by_rule(rule.source_ports),
-            self._get_networks_data_by_rule(rule.destination_networks),
-            self.get_zones_data_by_rule(rule.destination_zones),
-            self._get_ports_data_by_rule(rule.destination_ports),
-            rule.risk_category_by_dst_port_static(self.config['DESTINATION_PORT_CATEGORIES']),
-            rule.risk_category_by_destination_port_dynamic(avg_port_number, self.config['RELATIVE_DESTINATION_PORT_CATEGORIES']),
-            rule.risk_category_by_src_network_static(self.config['SOURCE_NETWORK_CATEGORIES']),
-            rule.risk_category_by_dst_network_static(self.config['DESTINATION_NETWORK_CATEGORIES']),
-            rule.risk_category_by_source_network_dynamic(avg_src_ip_num, self.config['RELATIVE_SOURCE_NETWORK_CATEGORIES']),
-            rule.risk_category_by_dst_network_dynamic(avg_dst_ip_num, self.config['RELATIVE_DESTINATION_NETWORK_CATEGORIES']))
+                rule.name,
+                rule.action,
+                rule.enabled,
+                self._get_networks_data_by_rule(rule.source_networks),
+                self.get_zones_data_by_rule(rule.source_zones),
+                self._get_ports_data_by_rule(rule.source_ports),
+                self._get_networks_data_by_rule(rule.destination_networks),
+                self.get_zones_data_by_rule(rule.destination_zones),
+                self._get_ports_data_by_rule(rule.destination_ports),
+                rule.risk_category_by_dst_port_static(self.config['DESTINATION_PORT_CATEGORIES']),
+                rule.risk_category_by_destination_port_dynamic(avg_port_number, self.config['RELATIVE_DESTINATION_PORT_CATEGORIES']),
+                rule.risk_category_by_src_network_static(self.config['SOURCE_NETWORK_CATEGORIES']),
+                rule.risk_category_by_dst_network_static(self.config['DESTINATION_NETWORK_CATEGORIES']),
+                rule.risk_category_by_source_network_dynamic(avg_src_ip_num, self.config['RELATIVE_SOURCE_NETWORK_CATEGORIES']),
+                rule.risk_category_by_dst_network_dynamic(avg_dst_ip_num, self.config['RELATIVE_DESTINATION_NETWORK_CATEGORIES']))
             for rule in policy.rules]
         return access_rule_data
 
     def get_zones_data_by_rule(self, zones: list[str]) -> str:
-        value = ''
-        for zone in zones:
-            value += '{}, '.format(zone)
-        return value
+        return ','.join(zones)
 
     def _get_ports_data_by_rule(self, ports: list[Union[Port, PortGroup]]) -> str:
         value = ''
@@ -95,6 +92,7 @@ class Data:
                 for p in port.ports:
                     ports_data.append((port.name, p.name, p.protocol, p.port, p.size, p._is_risky_port(self.config['HIGH_RISK_PROTOCOLS']), port.equal_with, ports_count[port.name]))
         return ports_data
+
     def get_port_object(self, ports_dict: dict[str, Union[Port, PortGroup]]) -> dict:
         ports = {}
         for port in ports_dict.values():

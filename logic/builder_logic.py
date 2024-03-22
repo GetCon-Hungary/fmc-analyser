@@ -11,7 +11,7 @@ from models.port_group import PortGroup
 
 
 class Builder:
-    def __init__(self, fmcloader: FMCLoader) -> None:
+    def __init__(self, fmcloader: FMCLoader) -> None:  # noqa: D107
         self.fmcloader = fmcloader
 
         self.port_objs: dict[str, Union[Port, PortGroup]] = {}
@@ -192,7 +192,7 @@ class Builder:
                 d_ports_list.extend(self.find_port_by_id(d_literals))
         return s_ports_list, d_ports_list
 
-    def find_port_by_id(self, rule_ports: list[dict]):
+    def find_port_by_id(self, rule_ports: list[dict]) -> list:
         final = []
         for port in rule_ports:
             port_id = port.get('id', None)
@@ -223,7 +223,7 @@ class Builder:
                 d_networks_list.extend(self.find_network_by_id(d_literals))
         return s_networks_list, d_networks_list
 
-    def find_network_by_id(self, rule_networks: list[dict]):
+    def find_network_by_id(self, rule_networks: list[dict]) -> list:
         final = []
         for network in rule_networks:
             network_id = network.get('id', None)
@@ -231,5 +231,4 @@ class Builder:
                 final.append(self.network_objs[network_id])
             else:
                 final.append(self._create_network(network))
-
         return final
