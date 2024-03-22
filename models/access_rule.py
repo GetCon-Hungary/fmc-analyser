@@ -44,19 +44,19 @@ class AccessRule:
     def get_destination_network_size(self) -> int:  # noqa: D102
         return sum(network.get_size() for network in self.destination_networks)
 
-    def get_source_port_size(self):
+    def get_source_port_size(self) -> int:
         sum = 0
         for port in self.source_ports:
             sum += port.get_size()
         return sum
 
-    def get_destination_port_size(self):
+    def get_destination_port_size(self) -> int:
         sum = 0
         for port in self.destination_ports:
             sum += port.get_size()
         return sum
 
-    def risk_category_by_destination_port_dynamic(self, avg_port_number: float, relative_destination_port: dict[str, int]):
+    def risk_category_by_destination_port_dynamic(self, avg_port_number: float, relative_destination_port: dict[str, int]) -> str:
         if len(self.destination_ports) > 0:
             if self.get_destination_port_size() >= relative_destination_port['HIGH'] * avg_port_number:
                 return Risk.HIGH.name
@@ -65,7 +65,7 @@ class AccessRule:
             return Risk.LOW.name
         return Risk.HIGH.name
 
-    def risk_category_by_source_network_dynamic(self, avg_ip_number: float, relative_source_network: dict[str, int]):
+    def risk_category_by_source_network_dynamic(self, avg_ip_number: float, relative_source_network: dict[str, int]) -> str:
         if len(self.source_networks) > 0:
             if self.get_source_networks_size() >= relative_source_network['HIGH'] * avg_ip_number:
                 return Risk.HIGH.name
