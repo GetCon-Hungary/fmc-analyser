@@ -40,7 +40,7 @@ class TestPorts(unittest.TestCase):
         port_group_1 = PortGroup('2', 'test_grp2')
         port_group_1.ports.append(Port('1', 'test1', 'TCP', '80'))
         port_group_1.ports.append(Port('2', 'test2', 'TCP', '21'))
-        port_group.ports.append(port_group_1)
+        port_group.ports.extend(port_group_1.ports)
         test_ports = [
                         {'value': port_group, 'result': port_group_1.ports},
         ]

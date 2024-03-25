@@ -22,14 +22,8 @@ class PortGroup:
             return False
         return False
 
-    def flat_port_object_grp(self) -> list:
-        final = []
-        for port_obj in self.ports:
-            if isinstance(port_obj, Port):
-                final.append(port_obj)
-            elif isinstance(port_obj, PortGroup):
-                final.extend(port_obj.flat_port_object_grp())
-        return final
+    def flat_port_object_grp(self) -> list[Port]:
+        return self.ports
 
     def get_size(self) -> int:
         return sum(port.get_size() for port in self.ports)

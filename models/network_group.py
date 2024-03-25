@@ -24,7 +24,7 @@ class NetworkGroup:
             return False
         return False
 
-    def flat_network_object_grp(self) -> list:
+    def flat_network_object_grp(self) -> list[Network]:
         final = []
         for network_obj in self.networks:
             if isinstance(network_obj, Network):
@@ -42,7 +42,4 @@ class NetworkGroup:
         return depth
 
     def get_size(self) -> int:
-        summ = 0
-        for network in self.networks:
-            summ += network.get_size()
-        return summ
+        return sum(network.get_size() for network in self.networks)
