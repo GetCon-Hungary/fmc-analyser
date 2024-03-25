@@ -1,8 +1,8 @@
 """Where the magic happens."""
 import argparse
 
-import excel_export as exp
-from fmc_loader import FMCLoader
+import logic.excel_export as exp
+from logic.fmc_loader import FMCLoader
 from logic.builder_logic import Builder
 from logic.data_logic import Data
 
