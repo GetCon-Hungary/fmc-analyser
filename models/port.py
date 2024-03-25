@@ -29,4 +29,4 @@ class Port:
         return False
 
     def get_size(self) -> int:  # noqa: D102
-        return int(self.size)
+        return self.size

@@ -1,4 +1,5 @@
 """Represents the network class."""
+from typing import Union
 
 from netaddr import IPNetwork, IPRange
 
@@ -15,7 +16,7 @@ class Network:
     def __eq__(self, __value: 'Network') -> bool:
         return self.type == __value.type and self.value == __value.value
 
-    def create_network_value(self, network_value: str):
+    def create_network_value(self, network_value: str) -> Union[IPNetwork, IPRange]:
         value = None
         if '-' in network_value:
             value = IPRange(network_value.split('-')[0], network_value.split('-')[1])
@@ -23,5 +24,5 @@ class Network:
             value = IPNetwork(network_value)
         return value
 
-    def get_size(self):
+    def get_size(self) -> int:
         return self.size
