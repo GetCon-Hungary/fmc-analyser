@@ -1,7 +1,7 @@
 """Builds up all the different model classes."""
 from typing import Union
 
-from fmc_loader import FMCLoader
+from logic.fmc_loader import FMCLoader
 from models.access_policy import AccessPolicy
 from models.access_rule import AccessRule
 from models.network import Network
