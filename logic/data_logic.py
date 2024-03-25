@@ -29,7 +29,7 @@ class Data:
             policy.enabled_rules_ratio(),
             policy.allowed_rules_ratio()) for policy in policies]
 
-    def get_access_rules_data(self, policies: list[AccessPolicy]) -> dict:
+    def get_access_rules_data(self, policies: list[AccessPolicy]) -> dict[str, str]:
         access_rule_data = {}
         for policy in policies:
             avg_src_ip_num = policy.calculate_avg_src_network_size_of_acp()

@@ -24,7 +24,7 @@ if __name__ == "__main__":
     builder = Builder(fmcloader)
     try:
         data = Data(builder, ARGS.config)
-    except (AttributeError, FileNotFoundError):
+    except (NameError, AttributeError, FileNotFoundError):
         data = Data(builder, 'config.yml')
 
     exp.export_to_excel(data.access_policies_data, exp.ACCESS_POLICY_HEADER, 'access_policies_information')
