@@ -29,7 +29,7 @@ class Builder:
         self.policies: list[AccessPolicy] = self.create_access_policies(
             self.fmcloader.access_policies['items'])
 
-    def create_protocol_ports(self, ports: list[dict]) -> dict:  # noqa: D102
+    def create_protocol_ports(self, ports: list[dict]) -> dict[str, Port]:  # noqa: D102
         port_objs = {}
         for port in ports:
             port_id = port.get('id', None)
@@ -37,7 +37,7 @@ class Builder:
                 port_objs[port_id] = self._create_port(port)
         return port_objs
 
-    def create_port_groups(self, port_groups: list[dict]) -> dict:
+    def create_port_groups(self, port_groups: list[dict]) -> dict[str, PortGroup]:
         port_grps = {}
         for port in port_groups:
             port_id = port.get('id', None)
@@ -68,7 +68,7 @@ class Builder:
                     ports[i].equal_with += '{}, '.format(ports[j].name)
                     ports[j].equal_with += '{}, '.format(ports[i].name)
 
-    def create_networks(self, networks: list[dict]) -> dict:
+    def create_networks(self, networks: list[dict]) -> dict[str, Network]:
         network_objs = {}
         for network in networks:
             network_id = network.get('id', None)
@@ -76,7 +76,7 @@ class Builder:
                 network_objs[network_id] = self._create_network(network)
         return network_objs
 
-    def create_network_groups(self, network_groups: list[dict]) -> dict:
+    def create_network_groups(self, network_groups: list[dict]) -> dict[str, NetworkGroup]:
         network_grps = {}
         for network in network_groups:
             network_id = network.get('id', None)
@@ -127,7 +127,7 @@ class Builder:
                         objs[i].equal_with += '{}, '.format(objs[j].name)
                         objs[j].equal_with += '{}, '.format(objs[i].name)
 
-    def create_access_policies(self, acps: list[dict]) -> list:
+    def create_access_policies(self, acps: list[dict]) -> list[AccessPolicy]:
         policies = []
         for acp in acps:
             acp_id = acp.get('id', None)
@@ -136,7 +136,7 @@ class Builder:
             policies.append(AccessPolicy(acp_id, name, rules))
         return policies
 
-    def create_access_rules(self, accessrules: list[dict]) -> list:
+    def create_access_rules(self, accessrules: list[dict]) -> list[AccessRule]:
         rules = []
         for rule in accessrules:
             ac_rule_id = rule.get('id', None)
@@ -160,7 +160,7 @@ class Builder:
             ))
         return rules
 
-    def get_zones_by_rule(self, rule: dict):
+    def get_zones_by_rule(self, rule: dict) -> tuple[list[str], list[str]]:
         s_zones = rule.get('sourceZones')
         d_zones = rule.get('destinationZones')
         s_zones_list = []
@@ -171,7 +171,7 @@ class Builder:
             d_zones_list = [(d_zone['name']) for d_zone in d_zones['objects']]
         return s_zones_list, d_zones_list
 
-    def get_ports_by_rule(self, rule: dict):
+    def get_ports_by_rule(self, rule: dict) -> tuple[list[Union[Port, PortGroup]], list[Union[Port, PortGroup]]]:
         s_ports = rule.get('sourcePorts')
         d_ports = rule.get('destinationPorts')
         s_ports_list = []
@@ -192,7 +192,7 @@ class Builder:
                 d_ports_list.extend(self.find_port_by_id(d_literals))
         return s_ports_list, d_ports_list
 
-    def find_port_by_id(self, rule_ports: list[dict]) -> list:
+    def find_port_by_id(self, rule_ports: list[dict]) -> list[Union[Port, PortGroup]]:
         final = []
         for port in rule_ports:
             port_id = port.get('id', None)
@@ -202,7 +202,7 @@ class Builder:
                 final.append(self._create_port(port))
         return final
 
-    def get_networks_by_rule(self, rule: dict):
+    def get_networks_by_rule(self, rule: dict) -> tuple[list[Union[Network, NetworkGroup]], list[Union[Network, NetworkGroup]]]:
         s_networks = rule.get('sourceNetworks')
         d_networks = rule.get('destinationNetworks')
         s_networks_list = []
@@ -223,7 +223,7 @@ class Builder:
                 d_networks_list.extend(self.find_network_by_id(d_literals))
         return s_networks_list, d_networks_list
 
-    def find_network_by_id(self, rule_networks: list[dict]) -> list:
+    def find_network_by_id(self, rule_networks: list[dict]) -> list[Union[Network, NetworkGroup]]:
         final = []
         for network in rule_networks:
             network_id = network.get('id', None)
