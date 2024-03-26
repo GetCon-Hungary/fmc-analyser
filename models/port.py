@@ -1,18 +1,19 @@
 """Represents the port class."""
+from models.port_object import PortObject
 
-
-class Port:
+class Port(PortObject):
     def __init__(self, id: str, name: str, protocol: str, port: str) -> None:
-        self.id = id
-        self.name = name
+        super().__init__(id, name)
         self.protocol = protocol
         self.port = port
         self.size = self.calculate_protocol_port_object_size()
         self.is_risky = False
-        self.equal_with = ''
-
-    def __eq__(self, __value: 'Port') -> bool:
-        return self.protocol == __value.protocol and self.port == __value.port
+        
+    def __eq__(self, __value: object) -> bool:
+        if isinstance(__value, Port):
+            return self.protocol == __value.protocol and self.port == __value.port
+        else:
+            return False
 
     def calculate_protocol_port_object_size(self) -> int:
         size = 1

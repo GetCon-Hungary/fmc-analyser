@@ -1,20 +1,22 @@
 """Represents the network class."""
 from typing import Union
 
+from models.network_object import NetworkObject
 from netaddr import IPNetwork, IPRange
 
 
-class Network:
-    def __init__(self, id: str, type: str, name: str, value: str):
-        self.id = id
+class Network(NetworkObject):
+    def __init__(self, id: str, type: str, name: str, value: str) -> None:
+        super().__init__(id, name)
         self.type = type
-        self.name = name
         self.value = self.create_network_value(value)
         self.size = self.value.size
-        self.equal_with = ''
 
-    def __eq__(self, __value: 'Network') -> bool:
-        return self.type == __value.type and self.value == __value.value
+    def __eq__(self, __value: object) -> bool:
+        if isinstance(__value, Network):
+            return self.type == __value.type and self.value == __value.value
+        else:
+            return False
 
     def create_network_value(self, network_value: str) -> Union[IPNetwork, IPRange]:
         value = None
