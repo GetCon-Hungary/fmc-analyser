@@ -7,12 +7,20 @@ class FMCLoader:
         with fmcapi.FMC(fmc_host,username=username, password=password, autodeploy=False) as fmc:
             self.protocol_port_objs = fmcapi.ProtocolPortObjects(fmc).get()
             self.port_obj_groups = fmcapi.PortObjectGroups(fmc).get()
-            self.hosts = fmcapi.Hosts(fmc).get()
-            self.networks = fmcapi.Networks(fmc).get()
-            self.ranges = fmcapi.Ranges(fmc).get()
+            self.networks = self.get_networks(fmc)
             self.network_groups = fmcapi.NetworkGroups(fmc).get()
             self.access_policies = self.get_access_policies(fmc, acp_name)
             self.access_rules = self.get_access_rules(fmc)
+    
+    def get_networks(self, fmc):
+        networks: dict[str, list] = {'items': []}
+        hosts = fmcapi.Hosts(fmc).get()
+        networks_ = fmcapi.Networks(fmc).get()
+        ranges = fmcapi.Ranges(fmc).get()
+        networks['items'].extend(hosts['items'])
+        networks['items'].extend(networks_['items'])
+        networks['items'].extend(ranges['items'])
+        return networks
 
     def get_access_policies(self, fmc: fmcapi.FMC, acp_name: str) -> dict:
         access_policies = {}
