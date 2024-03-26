@@ -60,7 +60,7 @@ class TestNetworks(unittest.TestCase):
         network_group.networks.append(network_group_1)
 
         test_networks = [
-                        {'value': network_group, 'result': 2},
+                        {'value': network_group, 'result': 3},
         ]
 
         for testcase in test_networks:
