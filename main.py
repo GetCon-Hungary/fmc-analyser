@@ -4,7 +4,7 @@ import argparse
 import logic.excel_export as exp
 from logic.fmc_loader import FMCLoader
 from logic.builder_logic import Builder
-from logic.data_logic import Data
+from logic.export_data_logic import Data
 
 if __name__ == "__main__":
     try:
@@ -19,7 +19,7 @@ if __name__ == "__main__":
 
         fmcloader = FMCLoader(ARGS.host, ARGS.username, ARGS.password, ARGS.acp)
     except:
-        fmcloader = FMCLoader('192.168.33.193', 'admin', 'GetCon135!!', 'all')
+        fmcloader = FMCLoader('192.168.36.176', 'devnet', 'GetCon135!', 'all')
 
     builder = Builder(fmcloader)
     try:
