@@ -2,6 +2,7 @@
 
 from models.network_object import NetworkObject
 from models.network import Network
+from netaddr import IPSet
 
 
 class NetworkGroup(NetworkObject):
@@ -14,16 +15,11 @@ class NetworkGroup(NetworkObject):
         if isinstance(__value, NetworkGroup):
             self_flatten_networks = self.flat_network_object_grp()
             __value_flatten_networks = __value.flat_network_object_grp()
-            counter = 0
-            if len(self_flatten_networks) == len(__value_flatten_networks):
-                for i in range(len(self_flatten_networks)):
-                    for j in range(len(__value_flatten_networks)):
-                        if self_flatten_networks[i] == __value_flatten_networks[j]:
-                            counter += 1
-                            if counter == len(self_flatten_networks):
-                                return True
-                return False
-        return False
+            self_ip_set = IPSet([(network.value) for network in self_flatten_networks])
+            __value_ip_set = IPSet([(__value.value) for __value in __value_flatten_networks])
+            return self_ip_set == __value_ip_set
+        else:
+            return False
 
     def flat_network_object_grp(self) -> list[Network]:
         final = []
