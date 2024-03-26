@@ -4,9 +4,9 @@ from typing import Union
 import yaml
 
 from logic.builder_logic import Builder
-from models.access_policy import AccessPolicy
-from models.network import Network
 from models.network_group import NetworkGroup
+from models.network_object import NetworkObject
+from models.port_object import PortObject
 from models.port import Port
 from models.port_group import PortGroup
 
@@ -16,22 +16,22 @@ class Data:
         self.builder = builder
         with open(config, encoding='utf-8') as cfg:
             self.config = yaml.safe_load(cfg)
-        self.ports_data = self.get_ports_data(self.builder.port_objs)
-        self.networks_data = self.get_networks_data(self.builder.network_objs)
-        self.access_rules_data = self.get_access_rules_data(self.builder.policies)
-        self.access_policies_data = self.get_access_policy_data(self.builder.policies)
+        self.ports_data = self.get_ports_data()
+        self.networks_data = self.get_networks_data()
+        self.access_rules_data = self.get_access_rules_data()
+        self.access_policies_data = self.get_access_policy_data()
 
-    def get_access_policy_data(self, policies: list[AccessPolicy]) -> list:
+    def get_access_policy_data(self) -> list:
         return [(
             policy.name,
             policy.enabled_rules_count(),
             policy.allowed_rules_count(),
             policy.enabled_rules_ratio(),
-            policy.allowed_rules_ratio()) for policy in policies]
+            policy.allowed_rules_ratio()) for policy in self.builder.policies]
 
-    def get_access_rules_data(self, policies: list[AccessPolicy]) -> dict[str, str]:
+    def get_access_rules_data(self) -> dict[str, str]:
         access_rule_data = {}
-        for policy in policies:
+        for policy in self.builder.policies:
             avg_src_ip_num = policy.calculate_avg_src_network_size_of_acp()
             avg_dst_ip_num = policy.calculate_avg_dst_network_size_of_acp()
             avg_port_number = policy.calculate_avg_destination_port_size_of_acp()
@@ -55,9 +55,9 @@ class Data:
         return access_rule_data
 
     def get_zones_data_by_rule(self, zones: list[str]) -> str:
-        return ','.join(zones)
+        return ', '.join(zones)
 
-    def _get_ports_data_by_rule(self, ports: list[Union[Port, PortGroup]]) -> str:
+    def _get_ports_data_by_rule(self, ports: list[PortObject]) -> str:
         value = ''
         value_2 = ''
         for port in ports:
@@ -69,7 +69,7 @@ class Data:
                 value += '{}: ({}), '.format(port.name, value_2)
         return value
 
-    def _get_networks_data_by_rule(self, networks: list[Union[Network, NetworkGroup]]) -> str:
+    def _get_networks_data_by_rule(self, networks: list[NetworkObject]) -> str:
         value = ''
         value_2 = ''
         for network in networks:
@@ -82,18 +82,21 @@ class Data:
                 value += '{} : {}, '.format(network.name, network.value)
         return value
 
-    def get_ports_data(self, ports: dict[str, Union[Port, PortGroup]]) -> list:
+    def get_ports_data(self) -> list:
         ports_data = []
-        ports_count = self.get_port_object(ports)
-        for port in ports.values():
+        ports_count = self.get_port_object(self.builder.port_objs)
+        for port in self.builder.port_objs.values():
             if isinstance(port, Port):
-                ports_data.append((None, port.name, port.protocol, port.port, port.size, port._is_risky_port(self.config['HIGH_RISK_PROTOCOLS']), port.equal_with, ports_count[port.name]))
+                ports_data.append((None, port.name, port.protocol, port.port, port.size, port._is_risky_port(self.config['HIGH_RISK_PROTOCOLS']), self.get_equal_ports_data(port.equal_with), ports_count[port.name]))
             elif isinstance(port, PortGroup):
                 for p in port.ports:
-                    ports_data.append((port.name, p.name, p.protocol, p.port, p.size, p._is_risky_port(self.config['HIGH_RISK_PROTOCOLS']), port.equal_with, ports_count[port.name]))
+                    ports_data.append((port.name, p.name, p.protocol, p.port, p.size, p._is_risky_port(self.config['HIGH_RISK_PROTOCOLS']), self.get_equal_ports_data(port.equal_with), ports_count[port.name]))
         return ports_data
+    
+    def get_equal_ports_data(self, ports: list[PortObject]) -> str:
+        return ', '.join(port.name for port in ports)
 
-    def get_port_object(self, ports_dict: dict[str, Union[Port, PortGroup]]) -> dict:
+    def get_port_object(self, ports_dict: dict[str, PortObject]) -> dict:
         ports = {}
         for port in ports_dict.values():
             ports[port.name] = 0
@@ -107,18 +110,21 @@ class Data:
                     if rule.port_used_in_rule(key):
                         ports[key] += 1
 
-    def get_networks_data(self, networks: dict[str, Union[Network, NetworkGroup]]) -> list:
+    def get_networks_data(self) -> list:
         networks_data = []
-        networks_count = self.get_network_object(networks)
-        for network in networks.values():
+        networks_count = self.get_network_object(self.builder.network_objs)
+        for network in self.builder.network_objs.values():
             if isinstance(network, NetworkGroup):
                 nets = network.flat_network_object_grp()
-                networks_data.extend([(network.name, network.depth, net.name, net.value, net.size, network.equal_with, networks_count[network.name]) for net in nets])
+                networks_data.extend([(network.name, network.depth, net.name, net.value, net.size, self.get_equal_networks_data(network.equal_with), networks_count[network.name]) for net in nets])
             else:
-                networks_data.append((None, None, network.name, network.value, network.size, network.equal_with, networks_count[network.name]))
+                networks_data.append((None, None, network.name, network.value, network.size, self.get_equal_networks_data(network.equal_with), networks_count[network.name]))
         return networks_data
+    
+    def get_equal_networks_data(self, networks: list[NetworkObject]) -> str:
+        return ', '.join(network.name for network in networks)
 
-    def get_network_object(self, networks_dict: dict[str, Union[Network, NetworkGroup]]) -> dict:
+    def get_network_object(self, networks_dict: dict[str, NetworkObject]) -> dict:
         networks = {}
         for network in networks_dict.values():
             networks[network.name] = 0
