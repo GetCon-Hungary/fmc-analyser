@@ -6,6 +6,8 @@ from models.access_policy import AccessPolicy
 from models.access_rule import AccessRule
 from models.network import Network
 from models.network_group import NetworkGroup
+from models.network_object import NetworkObject
+from models.port_object import PortObject
 from models.port import Port
 from models.port_group import PortGroup
 
@@ -14,32 +16,29 @@ class Builder:
     def __init__(self, fmcloader: FMCLoader) -> None:  # noqa: D107
         self.fmcloader = fmcloader
 
-        self.port_objs: dict[str, Union[Port, PortGroup]] = {}
-        self.port_objs.update(self.create_protocol_ports(self.fmcloader.protocol_port_objs['items']))
-        self.port_objs.update(self.create_port_groups(self.fmcloader.port_obj_groups['items']))
-        self.equal_port_object_finder(self.port_objs)
+        self.port_objs: dict[str, PortObject] = {}
+        self.port_objs.update(self.create_protocol_ports())
+        self.port_objs.update(self.create_port_groups())
+        self.equal_port_object_finder()
 
-        self.network_objs: dict[str, Union[Network, NetworkGroup]] = {}
-        self.network_objs.update(self.create_networks(self.fmcloader.hosts['items']))
-        self.network_objs.update(self.create_networks(self.fmcloader.networks['items']))
-        self.network_objs.update(self.create_networks(self.fmcloader.ranges['items']))
+        self.network_objs: dict[str, NetworkObject] = {}
+        self.network_objs.update(self.create_networks())
         self.network_objs.update(self.create_network_groups(self.fmcloader.network_groups['items']))
-        self.equal_network_object_finder(self.network_objs)
+        self.equal_network_object_finder()
 
-        self.policies: list[AccessPolicy] = self.create_access_policies(
-            self.fmcloader.access_policies['items'])
+        self.policies: list[AccessPolicy] = self.create_access_policies()
 
-    def create_protocol_ports(self, ports: list[dict]) -> dict[str, Port]:  # noqa: D102
+    def create_protocol_ports(self) -> dict[str, Port]:  # noqa: D102
         port_objs = {}
-        for port in ports:
+        for port in self.fmcloader.protocol_port_objs['items']:
             port_id = port.get('id', None)
             if port_id is not None:
                 port_objs[port_id] = self._create_port(port)
         return port_objs
 
-    def create_port_groups(self, port_groups: list[dict]) -> dict[str, PortGroup]:
+    def create_port_groups(self) -> dict[str, PortGroup]:
         port_grps = {}
-        for port in port_groups:
+        for port in self.fmcloader.port_obj_groups['items']:
             port_id = port.get('id', None)
             if port_id is not None:
                 group_name = port.get('name', None)
@@ -57,20 +56,17 @@ class Builder:
             port=port_obj.get('port', ''),
         )
 
-    def equal_port_object_finder(self, ports_dict: dict[str, Union[Port, PortGroup]]) -> None:
-        ports = list(ports_dict.values())
+    def equal_port_object_finder(self) -> None:
+        ports = list(self.port_objs.values())
         for i in range(len(ports) - 1):
             for j in range(i + 1, len(ports)):
-                if isinstance(ports[i], Port) and isinstance(ports[j], Port) and ports[i].__eq__(ports[j]):
-                    ports[i].equal_with += '{}, '.format(ports[j].name)
-                    ports[j].equal_with += '{}, '.format(ports[i].name)
-                elif isinstance(ports[i], PortGroup) and isinstance(ports[j], PortGroup) and ports[i].__eq__(ports[j]):
-                    ports[i].equal_with += '{}, '.format(ports[j].name)
-                    ports[j].equal_with += '{}, '.format(ports[i].name)
+                if ports[i] == ports[j]:
+                    ports[i].equal_with.append(ports[j])
+                    ports[j].equal_with.append(ports[i])
 
-    def create_networks(self, networks: list[dict]) -> dict[str, Network]:
+    def create_networks(self) -> dict[str, Network]:
         network_objs = {}
-        for network in networks:
+        for network in self.fmcloader.networks['items']:
             network_id = network.get('id', None)
             if network_id is not None:
                 network_objs[network_id] = self._create_network(network)
@@ -92,10 +88,10 @@ class Builder:
                             network_group.networks.extend(group_result.values())
                         else:
                             network_group.networks.append(self.network_objs[network_obj.get('id', None)])
-                    network_group.depth = network_group.get_network_depth()
                 if network.get('literals', None) is not None:
                     for network_literal in network['literals']:
                         network_group.networks.append(self._create_network(network_literal))
+                network_group.depth = network_group.get_network_depth()
                 network_grps[network_id] = network_group
         return network_grps
 
@@ -113,32 +109,26 @@ class Builder:
             value=network_obj.get('value', ''),
         )
 
-    def equal_network_object_finder(self, objs_dict: dict[str, Union[Network, NetworkGroup]]) -> None:
-        objs = list(objs_dict.values())
+    def equal_network_object_finder(self) -> None:
+        objs = list(self.network_objs.values())
         for i in range(len(objs) - 1):
             for j in range(i + 1, len(objs)):
-                if isinstance(objs[i], Network) and isinstance(objs[j], Network) and objs[i].__eq__(objs[j]):
-                    objs[i].equal_with += '{}, '.format(objs[j].name)
-                    objs[j].equal_with += '{}, '.format(objs[i].name)
-                elif isinstance(objs[i], NetworkGroup) and isinstance(objs[j], NetworkGroup):
-                    obj_i = objs[i].flat_network_object_grp()
-                    obj_j = objs[j].flat_network_object_grp()
-                    if obj_i.__eq__(obj_j):
-                        objs[i].equal_with += '{}, '.format(objs[j].name)
-                        objs[j].equal_with += '{}, '.format(objs[i].name)
+                if objs[i] == objs[j]:
+                    objs[i].equal_with.append(objs[j])
+                    objs[j].equal_with.append(objs[i])
 
-    def create_access_policies(self, acps: list[dict]) -> list[AccessPolicy]:
+    def create_access_policies(self) -> list[AccessPolicy]:
         policies = []
-        for acp in acps:
+        for acp in self.fmcloader.access_policies['items']:
             acp_id = acp.get('id', None)
             name = acp.get('name', None)
-            rules = self.create_access_rules(self.fmcloader.access_rules[name]['items'])
+            rules = self.create_access_rules(name)
             policies.append(AccessPolicy(acp_id, name, rules))
         return policies
 
-    def create_access_rules(self, accessrules: list[dict]) -> list[AccessRule]:
+    def create_access_rules(self, acp_name) -> list[AccessRule]:
         rules = []
-        for rule in accessrules:
+        for rule in self.fmcloader.access_rules[acp_name]['items']:
             ac_rule_id = rule.get('id', None)
             name = rule.get('name', None)
             action = rule.get('action', None)
@@ -171,7 +161,7 @@ class Builder:
             d_zones_list = [(d_zone['name']) for d_zone in d_zones['objects']]
         return s_zones_list, d_zones_list
 
-    def get_ports_by_rule(self, rule: dict) -> tuple[list[Union[Port, PortGroup]], list[Union[Port, PortGroup]]]:
+    def get_ports_by_rule(self, rule: dict) -> tuple[list[PortObject], list[PortObject]]:
         s_ports = rule.get('sourcePorts')
         d_ports = rule.get('destinationPorts')
         s_ports_list = []
@@ -192,7 +182,7 @@ class Builder:
                 d_ports_list.extend(self.find_port_by_id(d_literals))
         return s_ports_list, d_ports_list
 
-    def find_port_by_id(self, rule_ports: list[dict]) -> list[Union[Port, PortGroup]]:
+    def find_port_by_id(self, rule_ports: list[dict]) -> list[PortObject]:
         final = []
         for port in rule_ports:
             port_id = port.get('id', None)
@@ -202,7 +192,7 @@ class Builder:
                 final.append(self._create_port(port))
         return final
 
-    def get_networks_by_rule(self, rule: dict) -> tuple[list[Union[Network, NetworkGroup]], list[Union[Network, NetworkGroup]]]:
+    def get_networks_by_rule(self, rule: dict) -> tuple[list[NetworkObject], list[NetworkObject]]:
         s_networks = rule.get('sourceNetworks')
         d_networks = rule.get('destinationNetworks')
         s_networks_list = []
@@ -223,7 +213,7 @@ class Builder:
                 d_networks_list.extend(self.find_network_by_id(d_literals))
         return s_networks_list, d_networks_list
 
-    def find_network_by_id(self, rule_networks: list[dict]) -> list[Union[Network, NetworkGroup]]:
+    def find_network_by_id(self, rule_networks: list[dict]) -> list[NetworkObject]:
         final = []
         for network in rule_networks:
             network_id = network.get('id', None)
