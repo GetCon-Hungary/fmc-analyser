@@ -1,13 +1,9 @@
-# FMC analyser
-
-![FMC Analyser logo](assets/fmc_analyser_logo.png)
 # FMC Analyser
 
 ![FMC Analyser logo](assets/fmc_analyser_logo.png)
 
 ## Overview
 
-FMCAnalyser can download, export and analyse wide range of data from Cisco Secure Firewall Management Center (FMC). The scope of the project is to process most of the production data in FMC, with support for the latest version.
 FMC Analyser is a powerful tool designed to analyze Access Policies from Cisco Secure Firewall Management System. It facilitates security analysis and audits by providing detailed insights into access rules. With the ability to export to Excel and additional analytical features, FMC Analyser empowers users to assess network security comprehensively.
 
 ## Key Features
@@ -32,12 +28,6 @@ FMC Analyser is a powerful tool designed to analyze Access Policies from Cisco S
 
 ## Getting Started
 
-### Requirements
-
-- Python >= 3.9
-- Python libraries outlined in `requirements.txt`
-
-### Usage
 1. Clone the FMC Analyser repository from GitHub.
 
 2. Install the necessary dependencies specified in the requirements.txt file.
@@ -51,40 +41,8 @@ FMC Analyser is a powerful tool designed to analyze Access Policies from Cisco S
 ## Usage 
 
 - First configure the application to your needs by modifying the `config.yml` file.
-- First configure the application to your needs by modifying the `config.yml` file.
 - Run the application with the following: `python3 main.py`
 - Command line arguments
-  - `-h / --host`: IP address of FMC (required)
-  - `-u / --username`: FMC login username (required)
-  - `-p / --password`: FMC login password (required)
-  - `-a / --acp`: Choose from the following or leave blank for default "all": acp, ports, networks
-  - `-c / --config`: Enter configuration file path. If skipped, the default is used: `config.yml`
-
-### Example
-
-- If you want to set custom parameters:
-
-```bash
-python3 main.py \
-  --host 10.10.10.1
-  --username administrator
-  --password administrator!
-  --acp networks
-  --config my_conf.yml
-```
-
-- If you want to leave most things on default:
-
-```bash
-python3 main.py \
-  --host 10.10.10.1
-  --username administrator
-  --password administrator!
-```
-
-## Contributing
-
-Please use the issue tracker to report any bugs or file feature requests.
   - `-h / --host`: IP address of FMC (required)
   - `-u / --username`: FMC login username (required)
   - `-p / --password`: FMC login password (required)
