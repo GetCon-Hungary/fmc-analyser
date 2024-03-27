@@ -13,8 +13,8 @@ if __name__ == "__main__":
         parser.add_argument('-h', '--host', required=True, help='IP address of FMC')
         parser.add_argument('-u', '--username', required=True, help='FMC login username')
         parser.add_argument('-p', '--password', required=True, help='FMC login password')
-        parser.add_argument('-a', '--acp', required=False, choices=['acp', 'ports', 'networks'], default='all', help='chose from list or leave it blank and run all by default')
-        parser.add_argument('-c', '--config', required=False, default='config.yml', help='Type config file or leave it blank for config.yml')
+        parser.add_argument('-a', '--acp', required=False, default='all', help='Rule name you want to analyse. Leave blank for default "all"')
+        parser.add_argument('-c', '--config', required=False, default='config.yml', help='Config file path. Leave blank for default: config.yml')
 
         ARGS = parser.parse_args()
 
