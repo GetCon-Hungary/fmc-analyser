@@ -4,41 +4,41 @@
 
 ## Overview
 
-FMC Analyser is a powerful tool designed to analyze Access Policies from Cisco Secure Firewall Management System. It facilitates security analysis and audits by providing detailed insights into access rules. With the ability to export to Excel and additional analytical features, FMC Analyser empowers users to assess network security comprehensively.
+FMC Analyser is a powerful tool designed to analyse access policies from Cisco Secure Firewall Management System. It facilitates security analysis and audits by providing detailed insights into access rules. With the ability to export to Excel and additional analytical features, FMC Analyser empowers users to assess network security comprehensively.
 
 ## Key Features
 
-- **Access Policy Analysis**: Gain deep insights into access policies, enabling efficient security analysis and audit processes.
-  
+- **Access policy analysis**: Gain deep insights into access policies, enabling efficient security analysis and audit processes.
+
 - **Export to Excel**: Seamlessly export analysis results to Excel for further review and sharing with stakeholders.
 
-- **Comprehensive Metrics**: Calculate various metrics including network objects and network group size, duplicates, references from ACP rules, group complexity and depth, port and port group size, reference count, duplicates, and security risk.
+- **Comprehensive metrics**: Calculate various metrics including network objects and network group size, duplicates, references from ACP rules, group complexity and depth, port and port group size, reference count, duplicates, and security risk.
 
-- **Customizable Risk Assessment**: Users can customize risk classes based on their specific security requirements, allowing for tailored risk assessment.
+- **Customizable risk assessment**: Users can customize risk classes based on their specific security requirements, allowing for tailored risk assessment.
 
 ## How It Works
 
-1. **Input Access Policies**: Import Access Policies from Cisco Secure Firewall Management System into FMC Analyser.
+1. **Input access policies**: Import access policies from Cisco Secure Firewall Management System into FMC Analyser.
 
-2. **Analytical Calculations**: FMC Analyser calculates a range of metrics including network object sizes, duplicates, rule references, and security risk levels.
+2. **Analytical calculations**: FMC Analyser calculates a range of metrics including network object sizes, duplicates, rule references, and security risk levels.
 
-3. **Generate Excel Report**: Generate a comprehensive Excel report containing calculated risk levels for all access rules. Rules posing high security risks, such as those allowing broad source IPs like 'any', are highlighted for immediate attention.
+3. **Generate Excel report**: Generate a comprehensive Excel report containing calculated risk levels for all access rules. Rules posing high security risks, such as those allowing broad source IPs like 'any', are highlighted for immediate attention.
 
-4. **Customize Risk Parameters**: Users have the flexibility to adjust risk parameters to align with their organization's security policies and priorities.
+4. **Customize risk parameters**: Users have the flexibility to adjust risk parameters to align with their organization's security policies and priorities.
 
 ## Getting Started
 
 1. Clone the FMC Analyser repository from GitHub.
 
-2. Install the necessary dependencies specified in the requirements.txt file.
+2. Install the necessary dependencies specified in the `requirements.txt` file.
 
-3. Run FMC Analyser and import Access Policies from Cisco Secure Firewall Management System.
+3. Run FMC Analyser and import access policies from Cisco Secure Firewall Management System.
 
-4. Customize risk parameters if needed.
+4. Customize risk parameters, if needed.
 
-5. Analyze the generated Excel report to identify security risks and take necessary actions.
+5. Analyse the generated Excel report to identify security risks and take necessary actions.
 
-## Usage 
+## Usage
 
 - First configure the application to your needs by modifying the `config.yml` file.
 - Run the application with the following: `python3 main.py`
@@ -46,10 +46,10 @@ FMC Analyser is a powerful tool designed to analyze Access Policies from Cisco S
   - `-h / --host`: IP address of FMC (required)
   - `-u / --username`: FMC login username (required)
   - `-p / --password`: FMC login password (required)
-  - `-a / --acp`: Choose from the following or leave blank for default "all": acp, ports, networks
-  - `-c / --config`: Enter configuration file path. If skipped, the default is used: `config.yml`
+  - `-a / --acp`: Rule name you want to analyse. Leave blank for default "all"
+  - `-c / --config`: Config file path. Leave blank for default: `config.yml`
 
-### Example
+### Usage examples
 
 - Run with default settings:
 
@@ -71,9 +71,28 @@ python3 main.py \
   --config my_conf.yml
 ```
 
+- Run by functions:
+
+```python
+# Import FMC Analyser module
+import fmc_analyser
+
+# Load access policies from Cisco Secure Firewall Management System
+fmcloader = logic.fmc_loader.FMCLoader(fmc_host='10.10.10.1', username='superman', password='not_batman123', acp_name='gotham_sec')
+
+# Build up the data models
+builder = logic.builder_logic.Builder(fmcloader)
+
+# Parse FMC data into easy-to-use formats
+data = logic.export_data_logic.Data(builder, config='my_conf.yml')
+
+# Generate Excel report for access policies
+logic.excel_export(data.access_policies_data, exp.ACCESS_POLICY_HEADER, 'access_policies_information')
+```
+
 ## Support
 
-For any questions or issues, please contact our support team at support@fmc-analyser.com.
+For any questions or issues, please contact our support team at <info@getcon.hu>.
 
 ## License
 
@@ -85,8 +104,16 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Contributors
 
-John Doe (@johndoe)
+Balázs Farkas (@gc-farkasb)
 
-Jane Smith (@janesmith)
+Egon Gombár (@Egonka2000)
 
-Thank you for choosing FMC Analyser for your security analysis needs. We're committed to continuously improving our tool to help you better secure your network infrastructure.
+Norbert Omodi
+
+Barnabás Kerekes (@kerekesb)
+
+Botond Barta
+
+---
+
+Thank you for choosing FMC Analyser for your security analysis needs. We're committed to continually improving our tool to help you better secure your network infrastructure.
