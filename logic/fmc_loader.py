@@ -3,7 +3,7 @@ import fmcapi
 
 
 class FMCLoader:
-    def __init__(self, fmc_host: str, username: str, password: str, acp_name: str) -> None:
+    def __init__(self, fmc_host: str, username: str, password: str, acp_name: str) -> None:  # noqa: D107
         with fmcapi.FMC(fmc_host,username=username, password=password, autodeploy=False) as fmc:
             self.protocol_port_objs = fmcapi.ProtocolPortObjects(fmc).get()
             self.port_obj_groups = fmcapi.PortObjectGroups(fmc).get()
@@ -12,7 +12,18 @@ class FMCLoader:
             self.access_policies = self.get_access_policies(fmc, acp_name)
             self.access_rules = self.get_access_rules(fmc)
 
-    def get_networks(self, fmc):
+    def get_networks(self, fmc: fmcapi.FMC) -> dict[str, list]:
+        """Get all the networks from FMC.
+
+        Args:
+        ----
+            fmc (fmcapi.FMC): The FMC object used for query.
+
+        Returns:
+        -------
+            dict[str, list]: The dict of networks.
+
+        """
         networks: dict[str, list] = {'items': []}
         hosts = fmcapi.Hosts(fmc).get()
         networks_ = fmcapi.Networks(fmc).get()
@@ -25,8 +36,7 @@ class FMCLoader:
     def get_access_policies(self, fmc: fmcapi.FMC, acp_name: str) -> dict:
         access_policies = {}
         if acp_name == 'all':
-            access_policies = fmcapi.AccessPolicies(fmc).get()
-            return access_policies
+            return fmcapi.AccessPolicies(fmc).get()
         policy = fmcapi.AccessPolicies(fmc, name=acp_name).get()
         if policy.get('id', None) is not None:
             access_policies['items'] = [policy]
