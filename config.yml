@@ -1,6 +1,7 @@
 HIGH_RISK_PROTOCOLS:
     TCP:
-        - 20-21
+        - 20
+        - 21
         - 23
         - 80
         - 5800
@@ -9,7 +10,7 @@ HIGH_RISK_PROTOCOLS:
     UDP:
         - 69
     ICMP:
-    
+
 DESTINATION_PORT_CATEGORIES:
     HIGH: 16
     MEDIUM: 8
@@ -18,18 +19,18 @@ DESTINATION_PORT_CATEGORIES:
 SOURCE_NETWORK_CATEGORIES:
     HIGH: /16
     MEDIUM: /19
-    LOW: 2048
-    
+    LOW: /21
+
 DESTINATION_NETWORK_CATEGORIES:
     HIGH: /22
     MEDIUM: /24
-    LOW: 16
-    
+    LOW: /28
+
 RELATIVE_SOURCE_NETWORK_CATEGORIES:
     HIGH: 10
     MEDIUM: 5
     LOW: 3
-    
+
 RELATIVE_DESTINATION_NETWORK_CATEGORIES:
     HIGH: 10
     MEDIUM: 5
