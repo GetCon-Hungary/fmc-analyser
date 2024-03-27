@@ -2,9 +2,9 @@
 import argparse
 
 import logic.excel_export as exp
-from logic.fmc_loader import FMCLoader
 from logic.builder_logic import Builder
 from logic.export_data_logic import Data
+from logic.fmc_loader import FMCLoader
 
 if __name__ == "__main__":
     try:
