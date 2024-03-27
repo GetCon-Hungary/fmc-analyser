@@ -1,12 +1,13 @@
-"""Represents the network object class."""
+"""Represents the network object model."""
 import abc
+
 
 class NetworkObject():
     def __init__(self, id: str, name: str) -> None:
         self.id = id
         self.name = name
         self.equal_with = []
-    
+
     @abc.abstractmethod
     def get_size(self) -> int:
         pass

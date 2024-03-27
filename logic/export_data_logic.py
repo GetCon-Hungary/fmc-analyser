@@ -6,9 +6,9 @@ import yaml
 from logic.builder_logic import Builder
 from models.network_group import NetworkGroup
 from models.network_object import NetworkObject
-from models.port_object import PortObject
 from models.port import Port
 from models.port_group import PortGroup
+from models.port_object import PortObject
 
 
 class Data:
@@ -92,7 +92,7 @@ class Data:
                 for p in port.ports:
                     ports_data.append((port.name, p.name, p.protocol, p.port, p.size, p._is_risky_port(self.config['HIGH_RISK_PROTOCOLS']), self.get_equal_ports_data(port.equal_with), ports_count[port.name]))
         return ports_data
-    
+
     def get_equal_ports_data(self, ports: list[PortObject]) -> str:
         return ', '.join(port.name for port in ports)
 
@@ -120,7 +120,7 @@ class Data:
             else:
                 networks_data.append((None, None, network.name, network.value, network.size, self.get_equal_networks_data(network.equal_with), networks_count[network.name]))
         return networks_data
-    
+
     def get_equal_networks_data(self, networks: list[NetworkObject]) -> str:
         return ', '.join(network.name for network in networks)
 

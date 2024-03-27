@@ -33,7 +33,7 @@ FMCAnalyser can download, export and analyse wide range of data from Cisco Secur
 
 ### Requirements
 
-- Python >= 3.6
+- Python >= 3.9
 - Python libraries outlined in `requirements.txt`
 
 ### Usage
