@@ -1,4 +1,4 @@
-"""Represents the access policy class."""
+"""Represents the access policy model."""
 from models.access_rule import AccessRule
 
 

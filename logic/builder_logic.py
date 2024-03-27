@@ -1,5 +1,4 @@
 """Builds up all the different model classes."""
-from typing import Union
 
 from logic.fmc_loader import FMCLoader
 from models.access_policy import AccessPolicy
@@ -7,9 +6,9 @@ from models.access_rule import AccessRule
 from models.network import Network
 from models.network_group import NetworkGroup
 from models.network_object import NetworkObject
-from models.port_object import PortObject
 from models.port import Port
 from models.port_group import PortGroup
+from models.port_object import PortObject
 
 
 class Builder:

@@ -1,5 +1,7 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
+.secrets.toml
+.*/
 *.py[cod]
 *$py.class
 
@@ -167,5 +169,5 @@ cython_debug/
 .secrets.toml
 
 #Excel files
-.xls
-.xlsx
+*.xls
+*.xlsx

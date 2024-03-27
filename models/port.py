@@ -1,5 +1,6 @@
-"""Represents the port class."""
+"""Represents the port model."""
 from models.port_object import PortObject
+
 
 class Port(PortObject):
     def __init__(self, id: str, name: str, protocol: str, port: str) -> None:
@@ -8,7 +9,7 @@ class Port(PortObject):
         self.port = port
         self.size = self.calculate_protocol_port_object_size()
         self.is_risky = False
-        
+
     def __eq__(self, __value: object) -> bool:
         if isinstance(__value, Port):
             return self.protocol == __value.protocol and self.port == __value.port

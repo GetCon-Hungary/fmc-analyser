@@ -1,8 +1,9 @@
-"""Represents the network group class."""
+"""Represents the network group model."""
 
-from models.network_object import NetworkObject
-from models.network import Network
 from netaddr import IPSet
+
+from models.network import Network
+from models.network_object import NetworkObject
 
 
 class NetworkGroup(NetworkObject):
@@ -10,7 +11,7 @@ class NetworkGroup(NetworkObject):
         super().__init__(id, name)
         self.networks: list[NetworkObject] = []
         self.depth = 0
-        
+
     def __eq__(self, __value: object) -> bool:
         if isinstance(__value, NetworkGroup):
             self_flatten_networks = self.flat_network_object_grp()
@@ -18,8 +19,7 @@ class NetworkGroup(NetworkObject):
             self_ip_set = IPSet([(network.value) for network in self_flatten_networks])
             __value_ip_set = IPSet([(__value.value) for __value in __value_flatten_networks])
             return self_ip_set == __value_ip_set
-        else:
-            return False
+        return False
 
     def flat_network_object_grp(self) -> list[Network]:
         final = []
