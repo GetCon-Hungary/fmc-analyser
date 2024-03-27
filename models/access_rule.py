@@ -1,17 +1,16 @@
 """Represents the access rule model."""
 import math
-from typing import Union
 
-from models.network import Network
-from models.network_group import NetworkGroup
-from models.port import Port
+from models.network_object import NetworkObject
 from models.port_group import PortGroup
+from models.port_object import PortObject
 from models.risk_enum import Risk
 
 
 class AccessRule:
     """Represents a single access rule in an access control policy."""
-    def __init__(self, id: str, name: str, action: str, enabled: str, source_networks: list[Union[Network, NetworkGroup]], source_zones: list[str], source_ports: list[Union[Port, PortGroup]], destination_networks: list[Union[Network, NetworkGroup]], destination_zones: list[str], destination_ports: list[Union[Port, PortGroup]]) -> None:
+
+    def __init__(self, id: str, name: str, action: str, enabled: str, source_networks: list[NetworkObject], source_zones: list[str], source_ports: list[PortObject], destination_networks: list[NetworkObject], destination_zones: list[str], destination_ports: list[PortObject]) -> None:  # noqa: D107
         self.id = id
         self.name = name
         self.action = action
@@ -23,13 +22,13 @@ class AccessRule:
         self.destination_zones = destination_zones
         self.destination_ports = destination_ports
 
-    def port_used(self, xport, ports: list[Union[Port, PortGroup]]) -> bool:  # noqa: D102
+    def port_used(self, xport, ports: list[PortObject]) -> bool:  # noqa: D102
         return any(xport == port.name for port in ports)
 
     def port_used_in_rule(self, port) -> bool:  # noqa: D102
         return self.port_used(port, self.source_ports) or self.port_used(port, self.destination_ports)
 
-    def network_used(self, xnetwork, networks: list[Union[Network, NetworkGroup]]) -> bool:  # noqa: D102
+    def network_used(self, xnetwork, networks: list[NetworkObject]) -> bool:  # noqa: D102
         return any(xnetwork == network.name for network in networks)
 
     def network_used_in_rule(self, network) -> bool:  # noqa: D102
@@ -91,7 +90,7 @@ class AccessRule:
             return self._return_risk(self.destination_ports, port_number)
         return Risk.HIGH.name
 
-    def _return_risk(self, ports: list[Union[Port, PortGroup]], port_number: dict[str, int]) -> str:
+    def _return_risk(self, ports: list[PortObject], port_number: dict[str, int]) -> str:
         if len(ports) >= port_number['HIGH']:
             return Risk.HIGH.name
         if len(ports) >= port_number['MEDIUM']:

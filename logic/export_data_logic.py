@@ -1,5 +1,4 @@
 """Parses data from models into easy-to-use format for Pandas."""
-from typing import Union
 
 import yaml
 
@@ -12,7 +11,7 @@ from models.port_object import PortObject
 
 
 class Data:
-    def __init__(self, builder: Builder, config: dict) -> None:  # noqa:D107
+    def __init__(self, builder: Builder, config) -> None:  # noqa:D107
         self.builder = builder
         with open(config, encoding='utf-8') as cfg:
             self.config = yaml.safe_load(cfg)

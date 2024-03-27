@@ -165,9 +165,6 @@ cython_debug/
 .vs/
 .vscode/
 
-# Secrets file
-.secrets.toml
-
 #Excel files
 *.xls
 *.xlsx
