@@ -1,8 +1,9 @@
-"""Represents the network class."""
+"""Represents the network model."""
 from typing import Union
 
-from models.network_object import NetworkObject
 from netaddr import IPNetwork, IPRange
+
+from models.network_object import NetworkObject
 
 
 class Network(NetworkObject):
@@ -15,8 +16,7 @@ class Network(NetworkObject):
     def __eq__(self, __value: object) -> bool:
         if isinstance(__value, Network):
             return self.type == __value.type and self.value == __value.value
-        else:
-            return False
+        return False
 
     def create_network_value(self, network_value: str) -> Union[IPNetwork, IPRange]:
         value = None

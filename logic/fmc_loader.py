@@ -11,7 +11,7 @@ class FMCLoader:
             self.network_groups = fmcapi.NetworkGroups(fmc).get()
             self.access_policies = self.get_access_policies(fmc, acp_name)
             self.access_rules = self.get_access_rules(fmc)
-    
+
     def get_networks(self, fmc):
         networks: dict[str, list] = {'items': []}
         hosts = fmcapi.Hosts(fmc).get()

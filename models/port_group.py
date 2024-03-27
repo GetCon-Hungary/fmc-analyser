@@ -1,13 +1,13 @@
-"""Represents the network group class."""
-from models.port_object import PortObject
+"""Represents the network group model."""
 from models.port import Port
+from models.port_object import PortObject
 
 
 class PortGroup(PortObject):
     def __init__(self, id: str, name: str) -> None:
         super().__init__(id, name)
         self.ports: list[Port] = []
-        
+
     def __eq__(self, __value: object) -> bool:
         if isinstance(__value, PortGroup):
             counter = 0

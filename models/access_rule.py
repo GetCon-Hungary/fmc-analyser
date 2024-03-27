@@ -1,4 +1,4 @@
-"""Represents the access rule class."""
+"""Represents the access rule model."""
 import math
 from typing import Union
 
