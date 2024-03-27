@@ -9,9 +9,9 @@ from logic.fmc_loader import FMCLoader
 if __name__ == "__main__":
     try:
         parser = argparse.ArgumentParser(description='FMC Analyser')
-        parser.add_argument('-h', '--host', required=True, help='ip address of FMC')
-        parser.add_argument('-u', '--username', required=True, help='enter username')
-        parser.add_argument('-p', '--password', required=True, help='enter password')
+        parser.add_argument('-h', '--host', required=True, help='IP address of FMC')
+        parser.add_argument('-u', '--username', required=True, help='FMC login username')
+        parser.add_argument('-p', '--password', required=True, help='FMC login password')
         parser.add_argument('-a', '--acp', required=False, choices=['acp', 'ports', 'networks'], default='all', help='chose from list or leave it blank and run all by default')
         parser.add_argument('-c', '--config', required=False, default='config.yml', help='enter the configurationn file or leave it blank and run config.ini by default')
 
