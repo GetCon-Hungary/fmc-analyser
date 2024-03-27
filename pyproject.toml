@@ -1,3 +1,7 @@
+[project]
+name = "fmc_analyser"
+requires-python = ">=3.9"
+
 [tool.ruff]
 line-length = 99
 # Exclude a variety of ignored directories.
