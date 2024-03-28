@@ -52,7 +52,7 @@ class AccessPolicy:
             return number_of_ip_addresses / len(self.rules)
         return 0
 
-    def calculate_avg_destination_port_size_of_acp(self) -> float:  # noqa: D102
+    def calculate_avg_dst_port_size_of_acp(self) -> float:  # noqa: D102
         number_of_ports = 0
         if len(self.rules) > 0:
             for rule in self.rules:
