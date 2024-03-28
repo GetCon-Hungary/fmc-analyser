@@ -55,7 +55,7 @@ class FMCLoader:
         raise NameError('Wrong access policy name')
 
     def get_access_rules(self, fmc: fmcapi.FMC) -> dict:
-        """Get the specified access rule from FMC.
+        """Get the access rules of access policies from FMC.
 
         Args:
         ----

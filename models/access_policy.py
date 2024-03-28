@@ -36,26 +36,26 @@ class AccessPolicy:
         except ZeroDivisionError:
             return float('NaN')
 
-    def calculate_avg_src_network_size_of_acp(self) -> float:  # noqa: D102
+    def calculate_avg_src_network_size_of_acp(self) -> int:  # noqa: D102
         number_of_ip_addresses = 0
         if len(self.rules) > 0:
             for rule in self.rules:
                 number_of_ip_addresses += rule.get_source_networks_size()
-            return number_of_ip_addresses / len(self.rules)
+            return int(number_of_ip_addresses / len(self.rules))
         return 0
 
-    def calculate_avg_dst_network_size_of_acp(self) -> float:  # noqa: D102
+    def calculate_avg_dst_network_size_of_acp(self) -> int:  # noqa: D102
         number_of_ip_addresses = 0
         if len(self.rules) > 0:
             for rule in self.rules:
                 number_of_ip_addresses += rule.get_destination_network_size()
-            return number_of_ip_addresses / len(self.rules)
+            return int(number_of_ip_addresses / len(self.rules))
         return 0
 
-    def calculate_avg_dst_port_size_of_acp(self) -> float:  # noqa: D102
+    def calculate_avg_dst_port_size_of_acp(self) -> int:  # noqa: D102
         number_of_ports = 0
         if len(self.rules) > 0:
             for rule in self.rules:
                 number_of_ports += rule.get_destination_port_size()
-            return number_of_ports / len(self.rules)
+            return int(number_of_ports / len(self.rules))
         return 0

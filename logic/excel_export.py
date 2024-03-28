@@ -3,9 +3,9 @@ import os
 import pandas as pd
 
 ACCESS_POLICY_HEADER = ['Name', 'Count Of Enabled Rules', 'Count Of Allowed Rules', 'Ratio Of Enabled Rules', 'Ratio Of Allowed Rules', 'Average Source Network Size', 'Average Destination Network Size', 'Average Destination Port Size',]
-ACCESS_RULE_HEADER = ['Access Rule', 'Action', 'Enabled', 'Source Networks', 'Source Networks Size', 'Source Zones', 'Source Ports', 'Destination Networks', 'Destination Networks Size', 'Destination Zones', 'Destination Ports', 'Destination Ports Size', 'Destination Port Category', 'Relative Destination Port Category', 'Source Network Category', 'Destination Network Category', 'Relative Source Network Category', 'Relative Destination Network Category']
-PORTS_HEADER = ['Group Name', 'Name', 'Protocol', 'Port', 'Size', 'Risky', 'Equal with', 'Count of Port object in Rules']
-NETWORK_HEADER = ['Group Name', 'Group depth', 'Name', 'Value', 'Size', 'Equal with', 'Count of Network object in Rules']
+ACCESS_RULE_HEADER = ['Name', 'Action', 'Enabled', 'Source Zones', 'Source Networks', 'Source Ports', 'Destination Zones', 'Destination Networks', 'Destination Ports', 'Source Networks Size', 'Destination Networks Size', 'Destination Ports Size', 'Source Network Category', 'Relative Source Network Category', 'Destination Network Category', 'Relative Destination Network Category', 'Destination Port Category', 'Relative Destination Port Category']
+PORTS_HEADER = ['Group Name', 'Name', 'Protocol', 'Port', 'Size', 'Risky', 'Duplicates', 'Reference Count from Rules']
+NETWORK_HEADER = ['Group Name', 'Group depth', 'Name', 'Value', 'Size', 'Duplicates', 'Reference Count from Rules']
 
 def export_to_excel(data: list[str], header: list[str], sheet_name: str) -> None:
     df = pd.DataFrame(data, columns=header)
