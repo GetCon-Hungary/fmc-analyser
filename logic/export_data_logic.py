@@ -39,7 +39,14 @@ class Data:
             policy.calculate_avg_dst_network_size_of_acp(),
             policy.calculate_avg_dst_port_size_of_acp()) for policy in self.builder.policies]
 
-    def get_access_rules_data(self) -> dict[str, str]:
+    def get_access_rules_data(self) -> dict[str, list]:
+        """Create the access rules data for export.
+
+        Returns:
+        -------
+            dict[str, list]: The dictionary of access rules data by access policy names.
+
+        """
         access_rule_data = {}
         for policy in self.builder.policies:
             avg_src_ip_num = policy.calculate_avg_src_network_size_of_acp()
@@ -49,53 +56,50 @@ class Data:
                 rule.name,
                 rule.action,
                 rule.enabled,
-                self._get_networks_data_by_rule(rule.source_networks),
-                rule.get_source_networks_size(),
                 self.get_zones_data_by_rule(rule.source_zones),
+                self._get_networks_data_by_rule(rule.source_networks),
                 self._get_ports_data_by_rule(rule.source_ports),
-                self._get_networks_data_by_rule(rule.destination_networks),
-                rule.get_destination_network_size(),
                 self.get_zones_data_by_rule(rule.destination_zones),
+                self._get_networks_data_by_rule(rule.destination_networks),
                 self._get_ports_data_by_rule(rule.destination_ports),
-                rule.get_destination_port_size(),
-                rule.risk_category_by_dst_port_static(self.config['DESTINATION_PORT_CATEGORIES']),
-                rule.risk_category_by_destination_port_dynamic(avg_port_number, self.config['RELATIVE_DESTINATION_PORT_CATEGORIES']),
+                rule.get_source_networks_size() if rule.get_source_networks_size() > 0 else 4294967296,
+                rule.get_destination_network_size() if rule.get_destination_network_size() > 0 else 4294967296,
+                rule.get_destination_port_size() if rule.get_destination_network_size() > 0 else 65535,
                 rule.risk_category_by_src_network_static(self.config['SOURCE_NETWORK_CATEGORIES']),
-                rule.risk_category_by_dst_network_static(self.config['DESTINATION_NETWORK_CATEGORIES']),
                 rule.risk_category_by_source_network_dynamic(avg_src_ip_num, self.config['RELATIVE_SOURCE_NETWORK_CATEGORIES']),
-                rule.risk_category_by_dst_network_dynamic(avg_dst_ip_num, self.config['RELATIVE_DESTINATION_NETWORK_CATEGORIES']))
+                rule.risk_category_by_dst_network_static(self.config['DESTINATION_NETWORK_CATEGORIES']),
+                rule.risk_category_by_dst_network_dynamic(avg_dst_ip_num, self.config['RELATIVE_DESTINATION_NETWORK_CATEGORIES']),
+                rule.risk_category_by_dst_port_static(self.config['DESTINATION_PORT_CATEGORIES']),
+                rule.risk_category_by_destination_port_dynamic(avg_port_number, self.config['RELATIVE_DESTINATION_PORT_CATEGORIES']))
             for rule in policy.rules]
         return access_rule_data
 
     def get_zones_data_by_rule(self, zones: list[str]) -> str:
-        return ', '.join(zones)
+        if len(zones) > 0:
+            return ', '.join(zones)
+        else:
+            return 'Any'
 
     def _get_ports_data_by_rule(self, ports: list[PortObject]) -> str:
-        value = ''
-        value_2 = ''
-        for port in ports:
-            if isinstance(port, Port):
-                value += '{} - {} {}, '.format(port.name, port.protocol, port.port)
-            elif isinstance(port, PortGroup):
-                for p in port.ports:
-                    value_2 += '{} - {} {}, '.format(p.name, p.protocol, p.port)
-                value += '{}: ({}), '.format(port.name, value_2)
-        return value
+        if len(ports) > 0:
+            return ', '.join(port.name if port.name != '' else port.port for port in ports)
+        else:
+            return 'Any'
 
     def _get_networks_data_by_rule(self, networks: list[NetworkObject]) -> str:
-        value = ''
-        value_2 = ''
-        for network in networks:
-            if isinstance(network, NetworkGroup):
-                nets = network.flat_network_object_grp()
-                for net in nets:
-                    value_2 += '{} : {}, '.format(net.name, net.value)
-                value += '{}: ({}), '.format(network.name, value_2)
-            else:
-                value += '{} : {}, '.format(network.name, network.value)
-        return value
+        if len(networks) > 0:
+            return ', '.join(network.name if network.name != '' else str(network.value) for network in networks)
+        else:
+            return 'Any'
 
     def get_ports_data(self) -> list:
+        """Create the ports data for export.
+
+        Returns:
+        -------
+            list: The list of ports data.
+
+        """
         ports_data = []
         ports_count = self.get_port_object(self.builder.port_objs)
         for port in self.builder.port_objs.values():
@@ -129,6 +133,13 @@ class Data:
                                         ports[flat.id] += 1
 
     def get_networks_data(self) -> list:
+        """Create the networks data for export.
+
+        Returns:
+        -------
+            list: The list of networks data.
+
+        """
         networks_data = []
         networks_count = self.get_network_object(self.builder.network_objs)
         for network in self.builder.network_objs.values():

@@ -1,7 +1,6 @@
 """Where the magic happens."""
 import argparse
 import sys
-import os
 
 import logic.excel_export as exp
 from logic.builder_logic import Builder
