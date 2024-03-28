@@ -104,15 +104,11 @@ This project is licensed under the GNU General Public License version 3.0 - see 
 
 ## Contributors
 
-Balázs Farkas (@gc-farkasb)
-
-Egon Gombár (@Egonka2000)
-
-Norbert Omodi
-
-Barnabás Kerekes (@kerekesb)
-
-Botond Barta
+- Balázs Farkas (@gc-farkasb)
+- Egon Gombár (@Egonka2000)
+- Norbert Omodi
+- Barnabás Kerekes (@kerekesb)
+- Botond Barta
 
 ---
 
