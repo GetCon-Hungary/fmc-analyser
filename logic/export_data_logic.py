@@ -106,8 +106,11 @@ class Data:
             if isinstance(port, Port):
                 ports_data.append((None, port.name, port.protocol, port.port, port.size, port._is_risky_port(self.config['HIGH_RISK_PROTOCOLS']), self.get_equal_ports_data(port.equal_with), ports_count[port.id]))
             elif isinstance(port, PortGroup):
-                for p in port.ports:
-                    ports_data.append((port.name, p.name, p.protocol, p.port, p.size, p._is_risky_port(self.config['HIGH_RISK_PROTOCOLS']), self.get_equal_ports_data(port.equal_with), ports_count[port.id]))
+                name = '\n'.join(port.name for port in port.flat_port_object_grp())
+                protocol = '\n'.join(port.protocol for port in port.flat_port_object_grp())
+                port_num = '\n'.join(port.port for port in port.flat_port_object_grp())
+                port_risk = '\n'.join(str(port._is_risky_port(self.config['HIGH_RISK_PROTOCOLS'])) for port in port.flat_port_object_grp())
+                ports_data.append((port.name, name, protocol, port_num, port.get_size(), port_risk, self.get_equal_ports_data(port.equal_with), ports_count[port.id]))
         return ports_data
 
     def get_equal_ports_data(self, ports: list[PortObject]) -> str:
@@ -144,10 +147,11 @@ class Data:
         networks_count = self.get_network_object(self.builder.network_objs)
         for network in self.builder.network_objs.values():
             if isinstance(network, NetworkGroup):
-                nets = network.flat_network_object_grp()
-                networks_data.extend([(network.name, network.depth, net.name, net.value, net.size, self.get_equal_networks_data(network.equal_with), networks_count[network.id]) for net in nets])
+                name = '\n'.join(f'{net.name}' for net in network.flat_network_object_grp())
+                ip = '\n'.join(f'{str(net.value)}' for net in network.flat_network_object_grp())
+                networks_data.append((network.name, network.depth, name, ip, network.get_size(), self.get_equal_networks_data(network.equal_with), networks_count[network.id]))
             elif isinstance(network, Network):
-                networks_data.append((None, None, network.name, network.value, network.size, self.get_equal_networks_data(network.equal_with), networks_count[network.id]))
+                networks_data.append((None, None, network.name, str(network.value), network.get_size(), self.get_equal_networks_data(network.equal_with), networks_count[network.id]))
         return networks_data
 
     def get_equal_networks_data(self, networks: list[NetworkObject]) -> str:
