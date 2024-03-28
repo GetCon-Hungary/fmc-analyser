@@ -22,16 +22,16 @@ class AccessRule:
         self.destination_zones = destination_zones
         self.destination_ports = destination_ports
 
-    def port_used(self, xport, ports: list[PortObject]) -> bool:  # noqa: D102
-        return any(xport == port.name for port in ports)
+    def port_used(self, xport: str, ports: list[PortObject]) -> bool:  # noqa: D102
+        return any(xport == port.id for port in ports)
 
-    def port_used_in_rule(self, port) -> bool:  # noqa: D102
+    def port_used_in_rule(self, port: str) -> bool:  # noqa: D102
         return self.port_used(port, self.source_ports) or self.port_used(port, self.destination_ports)
 
-    def network_used(self, xnetwork, networks: list[NetworkObject]) -> bool:  # noqa: D102
-        return any(xnetwork == network.name for network in networks)
+    def network_used(self, xnetwork: str, networks: list[NetworkObject]) -> bool:  # noqa: D102
+        return any(xnetwork == network.id for network in networks)
 
-    def network_used_in_rule(self, network) -> bool:  # noqa: D102
+    def network_used_in_rule(self, network: str) -> bool:  # noqa: D102
         return self.network_used(network, self.source_networks) or self.network_used(network, self.destination_networks)
 
     def get_source_networks_size(self) -> int:  # noqa: D102
@@ -56,68 +56,103 @@ class AccessRule:
         return sum
 
     def risk_category_by_destination_port_dynamic(self, avg_port_number: float, relative_destination_port: dict[str, int]) -> str:
-        if len(self.destination_ports) > 0:
-            if self.get_destination_port_size() >= relative_destination_port['HIGH'] * avg_port_number:
-                return Risk.HIGH.name
-            if self.get_destination_port_size() >= relative_destination_port['MEDIUM'] * avg_port_number:
-                return Risk.MEDIUM.name
-            return Risk.LOW.name
-        return Risk.HIGH.name
+        if self.action.lower() == 'allow':
+            if len(self.destination_ports) > 0:
+                if self.get_destination_port_size() >= relative_destination_port['HIGH'] * avg_port_number:
+                    return Risk.HIGH.name
+                elif self.get_destination_port_size() >= relative_destination_port['MEDIUM'] * avg_port_number:
+                    return Risk.MEDIUM.name
+                elif self.get_destination_port_size() >= relative_destination_port['LOW'] * avg_port_number:
+                    return Risk.LOW.name
+                else:
+                    return Risk.NONE.name
+            return Risk.HIGH.name
+        else:
+            return Risk.NONE.name
 
     def risk_category_by_source_network_dynamic(self, avg_ip_number: float, relative_source_network: dict[str, int]) -> str:
-        if len(self.source_networks) > 0:
-            if self.get_source_networks_size() >= relative_source_network['HIGH'] * avg_ip_number:
-                return Risk.HIGH.name
-            if self.get_source_networks_size() >= relative_source_network['MEDIUM'] * avg_ip_number:
-                return Risk.MEDIUM.name
-            return Risk.LOW.name
-        return Risk.HIGH.name
+        if self.action.lower() == 'allow':
+            if len(self.source_networks) > 0:
+                if self.get_source_networks_size() >= relative_source_network['HIGH'] * avg_ip_number:
+                    return Risk.HIGH.name
+                elif self.get_source_networks_size() >= relative_source_network['MEDIUM'] * avg_ip_number:
+                    return Risk.MEDIUM.name
+                elif self.get_source_networks_size() >= relative_source_network['LOW'] * avg_ip_number:
+                    return Risk.LOW.name
+                else:
+                    return Risk.NONE.name
+            return Risk.HIGH.name
+        else:
+            return Risk.NONE.name
 
     def risk_category_by_dst_network_dynamic(self, avg_ip_number: float, relative_destination_network: dict[str, int]) -> str:  # noqa: D102
-        if len(self.destination_networks) > 0:
-            if self.get_destination_network_size() >= relative_destination_network['HIGH'] * avg_ip_number:
-                return Risk.HIGH.name
-            if self.get_destination_network_size() >= relative_destination_network['MEDIUM'] * avg_ip_number:
-                return Risk.MEDIUM.name
-            return Risk.LOW.name
-        return Risk.HIGH.name
+        if self.action.lower() == 'allow':
+            if len(self.destination_networks) > 0:
+                if self.get_destination_network_size() >= relative_destination_network['HIGH'] * avg_ip_number:
+                    return Risk.HIGH.name
+                elif self.get_destination_network_size() >= relative_destination_network['MEDIUM'] * avg_ip_number:
+                    return Risk.MEDIUM.name
+                elif self.get_destination_network_size() >= relative_destination_network['LOW'] * avg_ip_number:
+                    return Risk.LOW.name
+                else:
+                    return Risk.NONE.name
+            return Risk.HIGH.name
+        return Risk.NONE.name
 
     def risk_category_by_dst_port_static(self, port_number: dict[str, int]) -> str:  # noqa: D102
-        if len(self.destination_ports) > 0:
-            if len(self.destination_ports) == 1 and isinstance(self.destination_ports[0], PortGroup):
-                flattened_ports = self.destination_ports[0].flat_port_object_grp()
-                return self._return_risk(flattened_ports, port_number)
-            return self._return_risk(self.destination_ports, port_number)
-        return Risk.HIGH.name
+        if self.action.lower() == 'allow':
+            if len(self.destination_ports) > 0:
+                if len(self.destination_ports) == 1 and isinstance(self.destination_ports[0], PortGroup):
+                    flattened_ports = self.destination_ports[0].flat_port_object_grp()
+                    return self._return_risk(flattened_ports, port_number)
+                return self._return_risk(self.destination_ports, port_number)
+            return Risk.HIGH.name
+        else:
+            return Risk.NONE.name
 
     def _return_risk(self, ports: list[PortObject], port_number: dict[str, int]) -> str:
         if len(ports) >= port_number['HIGH']:
             return Risk.HIGH.name
-        if len(ports) >= port_number['MEDIUM']:
+        elif len(ports) >= port_number['MEDIUM']:
             return Risk.MEDIUM.name
-        return Risk.LOW.name
+        elif len(ports) >= port_number['LOW']:
+            return Risk.LOW.name
+        else:
+            return Risk.NONE.name
 
     def risk_category_by_src_network_static(self, risky_source_network_mask: dict[str, str]) -> str:  # noqa: D102
-        ip_number = self.get_source_networks_size()
-        if ip_number > 0:
-            mask = self._calculate_subnet_mask(ip_number)
-            if mask <= int(risky_source_network_mask['HIGH'].split('/')[1]):
-                return Risk.HIGH.name
-            if mask <= int(risky_source_network_mask['MEDIUM'].split('/')[1]):
-                return Risk.MEDIUM.name
-            return Risk.LOW.name
-        return Risk.HIGH.name
+        if self.action.lower() == 'allow':
+            ip_number = self.get_source_networks_size()
+            if ip_number > 0:
+                mask = self._calculate_subnet_mask(ip_number)
+                if mask <= int(risky_source_network_mask['HIGH'].split('/')[1]):
+                    return Risk.HIGH.name
+                elif mask <= int(risky_source_network_mask['MEDIUM'].split('/')[1]):
+                    return Risk.MEDIUM.name
+                elif mask <= int(risky_source_network_mask['LOW'].split('/')[1]):
+                    return Risk.LOW.name
+                else:
+                    return Risk.NONE.name
+            return Risk.HIGH.name
+        else:
+            return Risk.NONE.name
 
     def risk_category_by_dst_network_static(self, risky_destination_network_mask: dict[str, str]) -> str:  # noqa: D102
-        ip_number = self.get_destination_network_size()
-        if ip_number > 0:
-            mask = self._calculate_subnet_mask(ip_number)
-            if mask <= int(risky_destination_network_mask['HIGH'].split('/')[1]):
-                return Risk.HIGH.name
-            if mask <= int(risky_destination_network_mask['MEDIUM'].split('/')[1]):
-                return Risk.MEDIUM.name
-            return Risk.LOW.name
-        return Risk.HIGH.name
+        if self.action.lower() == 'allow':
+            ip_number = self.get_destination_network_size()
+            if ip_number > 0:
+                mask = self._calculate_subnet_mask(ip_number)
+                if mask <= int(risky_destination_network_mask['HIGH'].split('/')[1]):
+                    return Risk.HIGH.name
+                elif mask <= int(risky_destination_network_mask['MEDIUM'].split('/')[1]):
+                    return Risk.MEDIUM.name
+                elif mask <= int(risky_destination_network_mask['LOW'].split('/')[1]):
+                    return Risk.LOW.name
+                else:
+                    return Risk.NONE.name
+            return Risk.HIGH.name
+        else:
+            return Risk.NONE.name
 
     def _calculate_subnet_mask(self, ip_number: int) -> float:
         mask = 32 - math.ceil(math.log2(ip_number))
