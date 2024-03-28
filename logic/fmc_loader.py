@@ -4,7 +4,7 @@ import fmcapi
 
 class FMCLoader:
     def __init__(self, fmc_host: str, username: str, password: str, acp_name: str) -> None:  # noqa: D107
-        with fmcapi.FMC(fmc_host,username=username, password=password, autodeploy=False) as fmc:
+        with fmcapi.FMC(fmc_host,username=username, password=password, autodeploy=False, logging_level="NOTSET") as fmc:
             self.protocol_port_objs = fmcapi.ProtocolPortObjects(fmc).get()
             self.port_obj_groups = fmcapi.PortObjectGroups(fmc).get()
             self.networks = self.get_networks(fmc)

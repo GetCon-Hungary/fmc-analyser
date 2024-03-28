@@ -28,33 +28,33 @@ FMC Analyser is a powerful tool designed to analyse access policies from Cisco S
 
 ## Getting Started
 
-1. Clone the FMC Analyser repository from GitHub.
+1. Clone the FMC Analyser repository from GitHub: `git clone https://github.com/GetCon-Hungary/fmc-analyser.git`
 
-2. Install the necessary dependencies specified in the `requirements.txt` file.
+2. Install the necessary dependencies specified in the `requirements.txt` file: `pip install -r requirements.txt`
 
-3. Run FMC Analyser and import access policies from Cisco Secure Firewall Management System.
+3. Customize risk parameters, if needed in the `config.yml` file.
 
-4. Customize risk parameters, if needed.
+4. Run FMC Analyser to start the processing (See [Usage examples](#usage-examples))
 
 5. Analyse the generated Excel report to identify security risks and take necessary actions.
 
 ## Usage
 
 - First configure the application to your needs by modifying the `config.yml` file.
-- Run the application with the following: `python3 main.py`
+- Run the application with the following: `python3 analyser.py`
 - Command line arguments
-  - `-h / --host`: IP address of FMC (required)
-  - `-u / --username`: FMC login username (required)
-  - `-p / --password`: FMC login password (required)
-  - `-a / --acp`: Rule name you want to analyse. Leave blank for default "all"
-  - `-c / --config`: Config file path. Leave blank for default: `config.yml`
+  - `-H / --host`: IP address of FMC (required)
+  - `-U / --username`: FMC login username (required)
+  - `-P / --password`: FMC login password (required)
+  - `-A / --acp`: Rule name you want to analyse. Leave blank for default "all"
+  - `-C / --config`: Config file path. Leave blank for default: `config.yml`
 
 ### Usage examples
 
 - Run with default settings:
 
 ```bash
-python3 main.py \
+python3 analyser.py \
   --host 10.10.10.1
   --username administrator
   --password administrator!
@@ -63,7 +63,7 @@ python3 main.py \
 - Run with custom parameters:
 
 ```bash
-python3 main.py \
+python3 analyser.py \
   --host 10.10.10.1
   --username administrator
   --password administrator!
