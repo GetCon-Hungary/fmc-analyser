@@ -34,7 +34,7 @@ class TestAccessRules(unittest.TestCase):
                         {'value': self.rule1, 'result': 'HIGH'},
                         {'value': self.rule2, 'result': 'MEDIUM'},
                         {'value': self.rule3, 'result': 'LOW'},
-                        {'value': self.rule4, 'result': 'LOW'},
+                        {'value': self.rule4, 'result': 'NONE'},
                         {'value': self.rule5, 'result': 'HIGH'},
                         {'value': self.rule6, 'result': 'MEDIUM'},
                         {'value': self.rule7, 'result': 'LOW'},
@@ -107,7 +107,7 @@ class TestAccessRules(unittest.TestCase):
         test_rules = [
                         {'value': self.rule3, 'result': 'HIGH'},
                         {'value': self.rule4, 'result': 'MEDIUM'},
-                        {'value': self.rule5, 'result': 'LOW'},
+                        {'value': self.rule5, 'result': 'NONE'},
         ]
         config = {'RELATIVE_DESTINATION_NETWORK_CATEGORIES': {'HIGH': 10, 'MEDIUM': 5, 'LOW': 3}}
         for testcase in test_rules:

@@ -169,19 +169,19 @@ class Builder:
             s_objects = s_ports.get('objects', None)
             s_literals = s_ports.get('literals', None)
             if s_objects is not None:
-                s_ports_list.extend(self.find_port_by_id(s_objects))
+                s_ports_list.extend(self.find_ports(s_objects))
             if s_literals is not None:
-                s_ports_list.extend(self.find_port_by_id(s_literals))
+                s_ports_list.extend(self.find_ports(s_literals))
         if d_ports is not None:
             d_objects = d_ports.get('objects', None)
             d_literals = d_ports.get('literals', None)
             if d_objects is not None:
-                d_ports_list.extend(self.find_port_by_id(d_objects))
+                d_ports_list.extend(self.find_ports(d_objects))
             if d_literals is not None:
-                d_ports_list.extend(self.find_port_by_id(d_literals))
+                d_ports_list.extend(self.find_ports(d_literals))
         return s_ports_list, d_ports_list
 
-    def find_port_by_id(self, rule_ports: list[dict]) -> list[PortObject]:
+    def find_ports(self, rule_ports: list[dict]) -> list[PortObject]:
         final = []
         for port in rule_ports:
             port_id = port.get('id', None)
@@ -200,19 +200,19 @@ class Builder:
             s_objects = s_networks.get('objects', None)
             s_literals = s_networks.get('literals', None)
             if s_objects is not None:
-                s_networks_list.extend(self.find_network_by_id(s_objects))
+                s_networks_list.extend(self.find_networks(s_objects))
             if s_literals is not None:
-                s_networks_list.extend(self.find_network_by_id(s_literals))
+                s_networks_list.extend(self.find_networks(s_literals))
         if d_networks is not None:
             d_objects = d_networks.get('objects', None)
             d_literals = d_networks.get('literals', None)
             if d_objects is not None:
-                d_networks_list.extend(self.find_network_by_id(d_objects))
+                d_networks_list.extend(self.find_networks(d_objects))
             if d_literals is not None:
-                d_networks_list.extend(self.find_network_by_id(d_literals))
+                d_networks_list.extend(self.find_networks(d_literals))
         return s_networks_list, d_networks_list
 
-    def find_network_by_id(self, rule_networks: list[dict]) -> list[NetworkObject]:
+    def find_networks(self, rule_networks: list[dict]) -> list[NetworkObject]:
         final = []
         for network in rule_networks:
             network_id = network.get('id', None)

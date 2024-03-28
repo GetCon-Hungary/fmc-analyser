@@ -34,6 +34,17 @@ class FMCLoader:
         return networks
 
     def get_access_policies(self, fmc: fmcapi.FMC, acp_name: str) -> dict:
+        """Get the specified access policy from FMC.
+
+        Args:
+        ----
+            fmc (fmcapi.FMC): The FMC object used for query.
+
+        Returns:
+        -------
+            dict: The dict of access policies.
+
+        """
         access_policies = {}
         if acp_name == 'all':
             return fmcapi.AccessPolicies(fmc).get()
@@ -44,6 +55,17 @@ class FMCLoader:
         raise NameError('Wrong access policy name')
 
     def get_access_rules(self, fmc: fmcapi.FMC) -> dict:
+        """Get the specified access rule from FMC.
+
+        Args:
+        ----
+            fmc (fmcapi.FMC): The FMC object used for query.
+
+        Returns:
+        -------
+            dict: The dict of access rules.
+
+        """
         access_rules = {}
         for access_policy in self.access_policies['items']:
             access_rules[access_policy['name']] = fmcapi.AccessRules(

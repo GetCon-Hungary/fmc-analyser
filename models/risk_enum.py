@@ -2,6 +2,7 @@ from enum import Enum
 
 
 class Risk(Enum):
-    LOW = 1
-    MEDIUM = 2
-    HIGH = 3
+    NONE = 1
+    LOW = 2
+    MEDIUM = 3
+    HIGH = 4
