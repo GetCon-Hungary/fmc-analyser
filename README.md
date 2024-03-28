@@ -96,7 +96,7 @@ For any questions or issues, please contact our support team at <info@getcon.hu>
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the GNU General Public License version 3.0 - see the LICENSE file for details.
 
 ## Acknowledgments
 
@@ -104,15 +104,11 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Contributors
 
-Balázs Farkas (@gc-farkasb)
-
-Egon Gombár (@Egonka2000)
-
-Norbert Omodi
-
-Barnabás Kerekes (@kerekesb)
-
-Botond Barta
+- Balázs Farkas (@gc-farkasb)
+- Egon Gombár (@Egonka2000)
+- Norbert Omodi
+- Barnabás Kerekes (@kerekesb)
+- Botond Barta
 
 ---
 
