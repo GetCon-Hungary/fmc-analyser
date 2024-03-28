@@ -149,9 +149,9 @@ class Data:
             if isinstance(network, NetworkGroup):
                 name = '\n'.join(f'{net.name}' for net in network.flat_network_object_grp())
                 ip = '\n'.join(f'{str(net.value)}' for net in network.flat_network_object_grp())
-                networks_data.append((network.name, network.depth, name, ip, network.get_size(), self.get_equal_networks_data(network.equal_with), networks_count[network.id]))
+                networks_data.append((network.name, network.depth, name, ip, network.get_size(), f'/{network._calculate_subnet_mask(network.get_size())}', self.get_equal_networks_data(network.equal_with), networks_count[network.id]))
             elif isinstance(network, Network):
-                networks_data.append((None, None, network.name, str(network.value), network.get_size(), self.get_equal_networks_data(network.equal_with), networks_count[network.id]))
+                networks_data.append((None, None, network.name, str(network.value), network.get_size(), None, self.get_equal_networks_data(network.equal_with), networks_count[network.id]))
         return networks_data
 
     def get_equal_networks_data(self, networks: list[NetworkObject]) -> str:
