@@ -1,6 +1,7 @@
 """Represents the network group model."""
 
 from netaddr import IPSet
+import math
 
 from models.network import Network
 from models.network_object import NetworkObject
@@ -43,3 +44,11 @@ class NetworkGroup(NetworkObject):
 
     def get_size(self) -> int:
         return sum(network.get_size() for network in self.networks)
+    
+    def _calculate_subnet_mask(self, ip_number: int) -> float:
+        if ip_number > 0:
+            mask = 32 - math.ceil(math.log2(ip_number))
+            if mask > 0:
+                return mask
+            return 0
+        return 0
