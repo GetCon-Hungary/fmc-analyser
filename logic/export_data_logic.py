@@ -56,10 +56,10 @@ class Data:
                 rule.name,
                 rule.action,
                 rule.enabled,
-                self.get_zones_data_by_rule(rule.source_zones),
+                self._get_zones_data_by_rule(rule.source_zones),
                 self._get_networks_data_by_rule(rule.source_networks),
                 self._get_ports_data_by_rule(rule.source_ports),
-                self.get_zones_data_by_rule(rule.destination_zones),
+                self._get_zones_data_by_rule(rule.destination_zones),
                 self._get_networks_data_by_rule(rule.destination_networks),
                 self._get_ports_data_by_rule(rule.destination_ports),
                 rule.get_source_networks_size() if rule.get_source_networks_size() > 0 else 4294967296,
@@ -74,7 +74,7 @@ class Data:
             for rule in policy.rules]
         return access_rule_data
 
-    def get_zones_data_by_rule(self, zones: list[str]) -> str:
+    def _get_zones_data_by_rule(self, zones: list[str]) -> str:
         if len(zones) > 0:
             return ', '.join(zones)
         else:
@@ -101,24 +101,26 @@ class Data:
 
         """
         ports_data = []
-        ports_count = self.get_port_object(self.builder.port_objs)
-        for port in self.builder.port_objs.values():
-            if isinstance(port, Port):
-                ports_data.append((None, port.name, port.protocol, port.port, port.size, port._is_risky_port(self.config['HIGH_RISK_PROTOCOLS']), self.get_equal_ports_data(port.equal_with), ports_count[port.id]))
-            elif isinstance(port, PortGroup):
-                name = '\n'.join(port.name for port in port.flat_port_object_grp())
-                protocol = '\n'.join(port.protocol for port in port.flat_port_object_grp())
-                port_num = '\n'.join(port.port for port in port.flat_port_object_grp())
-                port_risk = '\n'.join(str(port._is_risky_port(self.config['HIGH_RISK_PROTOCOLS'])) for port in port.flat_port_object_grp())
-                ports_data.append((port.name, name, protocol, port_num, port.get_size(), port_risk, self.get_equal_ports_data(port.equal_with), ports_count[port.id]))
+        ports_count = self.get_port_object()
+        for port_obj in self.builder.port_objs.values():
+            if isinstance(port_obj, Port):
+                ports_data.append((None, port_obj.name, port_obj.protocol, port_obj.port, port_obj.size, str(port_obj._is_risky_port(self.config['HIGH_RISK_PROTOCOLS'])), self.get_equal_ports_data(port_obj.equal_with), ports_count[port_obj.id]))
+            elif isinstance(port_obj, PortGroup):
+                names, protocols, ports, port_risks = "", "", "", ""
+                for port in port_obj.flat_port_object_grp():
+                    names += '{}\n'.format(port.name)
+                    protocols += '{}\n'.format(port.protocol)
+                    ports += '{}\n'.format(port.port)
+                    port_risks += '{}\n'.format(port._is_risky_port(self.config['HIGH_RISK_PROTOCOLS']))
+                ports_data.append((port_obj.name, names, protocols, ports, port_obj.get_size(), port_risks, self.get_equal_ports_data(port_obj.equal_with), ports_count[port_obj.id]))
         return ports_data
 
     def get_equal_ports_data(self, ports: list[PortObject]) -> str:
         return ', '.join(port.name for port in ports)
 
-    def get_port_object(self, ports_dict: dict[str, PortObject]) -> dict:
+    def get_port_object(self) -> dict:
         ports = {}
-        for port in ports_dict.values():
+        for port in self.builder.port_objs.values():
             ports[port.id] = 0
         self.port_object_count(ports)
         return ports
@@ -144,22 +146,24 @@ class Data:
 
         """
         networks_data = []
-        networks_count = self.get_network_object(self.builder.network_objs)
-        for network in self.builder.network_objs.values():
-            if isinstance(network, NetworkGroup):
-                name = '\n'.join(f'{net.name}' for net in network.flat_network_object_grp())
-                ip = '\n'.join(f'{str(net.value)}' for net in network.flat_network_object_grp())
-                networks_data.append((network.name, network.depth, name, ip, network.get_size(), f'/{network._calculate_subnet_mask(network.get_size())}', self.get_equal_networks_data(network.equal_with), networks_count[network.id]))
-            elif isinstance(network, Network):
-                networks_data.append((None, None, network.name, str(network.value), network.get_size(), None, self.get_equal_networks_data(network.equal_with), networks_count[network.id]))
+        networks_count = self.get_network_object()
+        for network_obj in self.builder.network_objs.values():
+            if isinstance(network_obj, Network):
+                networks_data.append((None, None, network_obj.name, str(network_obj.value), network_obj.get_size(), None, self.get_equal_networks_data(network_obj.equal_with), networks_count[network_obj.id]))
+            elif isinstance(network_obj, NetworkGroup):
+                names, ips = "", ""
+                for network in network_obj.flat_network_object_grp():
+                    names += '{}\n'.format(network.name)
+                    ips += '{}\n'.format(str(network.value))
+                networks_data.append((network_obj.name, network_obj.depth, names, ips, network_obj.get_size(), '/{}'.format(network_obj._calculate_subnet_mask(network_obj.get_size())), self.get_equal_networks_data(network_obj.equal_with), networks_count[network_obj.id]))
         return networks_data
 
     def get_equal_networks_data(self, networks: list[NetworkObject]) -> str:
         return ', '.join(network.name for network in networks)
 
-    def get_network_object(self, networks_dict: dict[str, NetworkObject]) -> dict:
+    def get_network_object(self) -> dict:
         networks = {}
-        for network in networks_dict.values():
+        for network in self.builder.network_objs.values():
             networks[network.id] = 0
         self.network_object_count(networks)
         return networks

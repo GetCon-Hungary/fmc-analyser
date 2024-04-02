@@ -20,7 +20,7 @@ class AccessPolicy:
     def allowed_rules_count(self) -> int:  # noqa: D102
         count = 0
         for rule in self.rules:
-            if str.lower(rule.action) == 'allow':
+            if rule.action.lower() == 'allow':
                 count += 1
         return count
 
@@ -42,7 +42,7 @@ class AccessPolicy:
             for rule in self.rules:
                 number_of_ip_addresses += rule.get_source_networks_size()
             return int(number_of_ip_addresses / len(self.rules))
-        return 0
+        return number_of_ip_addresses
 
     def calculate_avg_dst_network_size_of_acp(self) -> int:  # noqa: D102
         number_of_ip_addresses = 0
@@ -50,7 +50,7 @@ class AccessPolicy:
             for rule in self.rules:
                 number_of_ip_addresses += rule.get_destination_network_size()
             return int(number_of_ip_addresses / len(self.rules))
-        return 0
+        return number_of_ip_addresses
 
     def calculate_avg_dst_port_size_of_acp(self) -> int:  # noqa: D102
         number_of_ports = 0
@@ -58,4 +58,4 @@ class AccessPolicy:
             for rule in self.rules:
                 number_of_ports += rule.get_destination_port_size()
             return int(number_of_ports / len(self.rules))
-        return 0
+        return number_of_ports

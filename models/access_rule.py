@@ -35,34 +35,26 @@ class AccessRule:
         return self.network_used(network, self.source_networks) or self.network_used(network, self.destination_networks)
 
     def get_source_networks_size(self) -> int:  # noqa: D102
-        sum = 0
-        for network in self.source_networks:
-            sum += network.get_size()
-        return sum
+        return sum(network.get_size() for network in self.source_networks)
 
     def get_destination_network_size(self) -> int:  # noqa: D102
         return sum(network.get_size() for network in self.destination_networks)
 
     def get_source_port_size(self) -> int:
-        sum = 0
-        for port in self.source_ports:
-            sum += port.get_size()
-        return sum
+        return sum(port.get_size() for port in self.source_ports)
 
     def get_destination_port_size(self) -> int:
-        sum = 0
-        for port in self.destination_ports:
-            sum += port.get_size()
-        return sum
+        return sum(port.get_size() for port in self.destination_ports)
 
     def risk_category_by_destination_port_dynamic(self, avg_port_number: float, relative_destination_port: dict[str, int]) -> str:
         if self.action.lower() == 'allow':
             if len(self.destination_ports) > 0:
-                if self.get_destination_port_size() >= relative_destination_port['HIGH'] * avg_port_number:
+                dst_port_size = self.get_destination_port_size()
+                if dst_port_size >= relative_destination_port['HIGH'] * avg_port_number:
                     return Risk.HIGH.name
-                elif self.get_destination_port_size() >= relative_destination_port['MEDIUM'] * avg_port_number:
+                elif dst_port_size >= relative_destination_port['MEDIUM'] * avg_port_number:
                     return Risk.MEDIUM.name
-                elif self.get_destination_port_size() >= relative_destination_port['LOW'] * avg_port_number:
+                elif dst_port_size >= relative_destination_port['LOW'] * avg_port_number:
                     return Risk.LOW.name
                 else:
                     return Risk.NONE.name
@@ -73,11 +65,12 @@ class AccessRule:
     def risk_category_by_source_network_dynamic(self, avg_ip_number: float, relative_source_network: dict[str, int]) -> str:
         if self.action.lower() == 'allow':
             if len(self.source_networks) > 0:
-                if self.get_source_networks_size() >= relative_source_network['HIGH'] * avg_ip_number:
+                src_network_size = self.get_source_networks_size()
+                if src_network_size >= relative_source_network['HIGH'] * avg_ip_number:
                     return Risk.HIGH.name
-                elif self.get_source_networks_size() >= relative_source_network['MEDIUM'] * avg_ip_number:
+                elif src_network_size >= relative_source_network['MEDIUM'] * avg_ip_number:
                     return Risk.MEDIUM.name
-                elif self.get_source_networks_size() >= relative_source_network['LOW'] * avg_ip_number:
+                elif src_network_size >= relative_source_network['LOW'] * avg_ip_number:
                     return Risk.LOW.name
                 else:
                     return Risk.NONE.name
@@ -88,11 +81,12 @@ class AccessRule:
     def risk_category_by_dst_network_dynamic(self, avg_ip_number: float, relative_destination_network: dict[str, int]) -> str:  # noqa: D102
         if self.action.lower() == 'allow':
             if len(self.destination_networks) > 0:
-                if self.get_destination_network_size() >= relative_destination_network['HIGH'] * avg_ip_number:
+                dst_network_size = self.get_destination_network_size()
+                if dst_network_size >= relative_destination_network['HIGH'] * avg_ip_number:
                     return Risk.HIGH.name
-                elif self.get_destination_network_size() >= relative_destination_network['MEDIUM'] * avg_ip_number:
+                elif dst_network_size >= relative_destination_network['MEDIUM'] * avg_ip_number:
                     return Risk.MEDIUM.name
-                elif self.get_destination_network_size() >= relative_destination_network['LOW'] * avg_ip_number:
+                elif dst_network_size >= relative_destination_network['LOW'] * avg_ip_number:
                     return Risk.LOW.name
                 else:
                     return Risk.NONE.name
