@@ -34,7 +34,7 @@ class FMCLoader:
         return networks
 
     def get_access_policies(self, fmc: fmcapi.FMC, acp_name: str) -> dict:
-        """Get the specified access policy from FMC.
+        """Get the specified access policy from FMC. If acp_name is "all" then get all the access policies from FMC
 
         Args:
         ----
@@ -63,7 +63,7 @@ class FMCLoader:
 
         Returns:
         -------
-            dict: The dict of access rules.
+            dict: The dict of access rules by policy names.
 
         """
         access_rules = {}

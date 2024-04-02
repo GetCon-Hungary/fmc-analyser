@@ -22,7 +22,7 @@ class Data:
         self.access_policies_data = self.get_access_policy_data()
 
     def get_access_policy_data(self) -> list:
-        """Create the access policy data for export.
+        """Creates the access policy data for export.
 
         Returns:
         -------
@@ -40,7 +40,7 @@ class Data:
             policy.calculate_avg_dst_port_size_of_acp()) for policy in self.builder.policies]
 
     def get_access_rules_data(self) -> dict[str, list]:
-        """Create the access rules data for export.
+        """Creates the access rules data for export.
 
         Returns:
         -------
@@ -75,25 +75,58 @@ class Data:
         return access_rule_data
 
     def _get_zones_data_by_rule(self, zones: list[str]) -> str:
+        """Gets zones name by rule.
+
+        Args:
+        ----
+            zones: list of zone names.
+
+        Returns:
+        -------
+            str: Returns the elements in the list separated by commas, or 'Any' if the list length is 0.
+
+        """
         if len(zones) > 0:
             return ', '.join(zones)
         else:
             return 'Any'
 
     def _get_ports_data_by_rule(self, ports: list[PortObject]) -> str:
+        """Gets ports data by rule..
+
+        Args:
+        ----
+            zones: list of Port objects.
+
+        Returns:
+        -------
+            str: Returns the name of Port objects in the list separated by commas, or 'Any' if the list length is 0.
+
+        """
         if len(ports) > 0:
             return ', '.join(port.name if port.name != '' else port.port for port in ports)
         else:
             return 'Any'
 
     def _get_networks_data_by_rule(self, networks: list[NetworkObject]) -> str:
+        """Gets networks data by rule..
+
+        Args:
+        ----
+            zones: list of Network objects.
+
+        Returns:
+        -------
+            str: Returns the name of Network objects in the list separated by commas, or 'Any' if the list length is 0.
+
+        """
         if len(networks) > 0:
             return ', '.join(network.name if network.name != '' else str(network.value) for network in networks)
         else:
             return 'Any'
 
     def get_ports_data(self) -> list:
-        """Create the ports data for export.
+        """Creates the ports data for export.
 
         Returns:
         -------
@@ -112,13 +145,31 @@ class Data:
                     protocols += '{}\n'.format(port.protocol)
                     ports += '{}\n'.format(port.port)
                     port_risks += '{}\n'.format(port._is_risky_port(self.config['HIGH_RISK_PROTOCOLS']))
-                ports_data.append((port_obj.name, names, protocols, ports, port_obj.get_size(), port_risks, self.get_equal_ports_data(port_obj.equal_with), ports_count[port_obj.id]))
+                ports_data.append((port_obj.name, names.strip(), protocols.strip(), ports.strip(), port_obj.get_size(), port_risks.strip(), self.get_equal_ports_data(port_obj.equal_with), ports_count[port_obj.id]))
         return ports_data
 
     def get_equal_ports_data(self, ports: list[PortObject]) -> str:
+        """Gets equal ports data
+
+        Args:
+        ----
+            zones: list of Port objects.
+
+        Returns:
+        -------
+            str: Returns the name of Port objects in the list separated by commas.
+
+        """
         return ', '.join(port.name for port in ports)
 
     def get_port_object(self) -> dict:
+        """Builds up the dictionary that contains the appearance of Port object in Access rules.
+
+        Returns:
+        ----
+            dict: dictionary that contains the Port's id and an integer that represents the number of appearance.
+
+        """
         ports = {}
         for port in self.builder.port_objs.values():
             ports[port.id] = 0
@@ -126,6 +177,13 @@ class Data:
         return ports
 
     def port_object_count(self, ports: dict[str, int]) -> None:
+        """It counts how many times the given Port object appears in the Access rules.
+
+        Args:
+        ----
+            ports: dictionary that contains the Port's id and an integer that represents the number of appearance.
+
+        """
         for policy in self.builder.policies:
             for rule in policy.rules:
                 for key in ports:
@@ -155,13 +213,31 @@ class Data:
                 for network in network_obj.flat_network_object_grp():
                     names += '{}\n'.format(network.name)
                     ips += '{}\n'.format(str(network.value))
-                networks_data.append((network_obj.name, network_obj.depth, names, ips, network_obj.get_size(), '/{}'.format(network_obj._calculate_subnet_mask(network_obj.get_size())), self.get_equal_networks_data(network_obj.equal_with), networks_count[network_obj.id]))
+                networks_data.append((network_obj.name, network_obj.depth, names.strip(), ips.strip(), network_obj.get_size(), '/{}'.format(network_obj._calculate_subnet_mask(network_obj.get_size())), self.get_equal_networks_data(network_obj.equal_with), networks_count[network_obj.id]))
         return networks_data
 
     def get_equal_networks_data(self, networks: list[NetworkObject]) -> str:
+        """Gets equal networks data
+
+        Args:
+        ----
+            zones: list of Network objects.
+
+        Returns:
+        -------
+            str: Returns the name of Network objects in the list separated by commas.
+
+        """
         return ', '.join(network.name for network in networks)
 
     def get_network_object(self) -> dict:
+        """Builds up the dictionary that contains the appearance of Network object in Access rules.
+
+        Returns:
+        ----
+            dict: dictionary that contains the Network's id and an integer that represents the number of appearance.
+
+        """
         networks = {}
         for network in self.builder.network_objs.values():
             networks[network.id] = 0
@@ -169,6 +245,13 @@ class Data:
         return networks
 
     def network_object_count(self, networks: dict[str, int]) -> None:
+        """It counts how many times the given Network object appears in the Access rules.
+
+        Args:
+        ----
+            ports: dictionary that contains the Network's id and an integer that represents the number of appearance.
+
+        """
         for policy in self.builder.policies:
             for rule in policy.rules:
                 for key in networks:

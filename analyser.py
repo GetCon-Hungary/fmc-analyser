@@ -1,6 +1,7 @@
 """Where the magic happens."""
 import argparse
 import sys
+import openpyxl
 
 import logic.excel_export as exp
 from logic.builder_logic import Builder
@@ -41,5 +42,12 @@ if __name__ == "__main__":
         )
     exp.export_to_excel(data.ports_data, exp.PORTS_HEADER, 'ports')
     exp.export_to_excel(data.networks_data, exp.NETWORK_HEADER, 'networks')
+    wb = openpyxl.load_workbook('./exports/final.xlsx')
+    for sheet_name in wb.sheetnames:
+        exp.format_rows_font_size(wb[sheet_name])
+        exp.format_row_dimension(wb[sheet_name])
+        exp.format_column_dimension(wb[sheet_name])
+    wb.save('./exports/final.xlsx')
+    
     print('OK')
     print('--- The Analysis is complete! ---')
