@@ -149,7 +149,9 @@ class AccessRule:
             return Risk.NONE.name
 
     def _calculate_subnet_mask(self, ip_number: int) -> float:
-        mask = 32 - math.ceil(math.log2(ip_number))
-        if mask > 0:
-            return mask
+        if ip_number > 0:
+            mask = 32 - math.ceil(math.log2(ip_number))
+            if mask > 0:
+                return mask
+            return 0
         return 0

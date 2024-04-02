@@ -33,10 +33,12 @@ class Data:
             policy.name,
             policy.enabled_rules_count(),
             policy.allowed_rules_count(),
-            policy.enabled_rules_ratio(),
-            policy.allowed_rules_ratio(),
+            '{}%'.format(policy.enabled_rules_ratio()),
+            '{}%'.format(policy.allowed_rules_ratio()),
             policy.calculate_avg_src_network_size_of_acp(),
+            '/{}'.format(policy._calculate_subnet_mask(policy.calculate_avg_src_network_size_of_acp())),
             policy.calculate_avg_dst_network_size_of_acp(),
+            '/{}'.format(policy._calculate_subnet_mask(policy.calculate_avg_dst_network_size_of_acp())),
             policy.calculate_avg_dst_port_size_of_acp()) for policy in self.builder.policies]
 
     def get_access_rules_data(self) -> dict[str, list]:
@@ -63,8 +65,10 @@ class Data:
                 self._get_networks_data_by_rule(rule.destination_networks),
                 self._get_ports_data_by_rule(rule.destination_ports),
                 rule.get_source_networks_size() if rule.get_source_networks_size() > 0 else 4294967296,
+                '/{}'.format(rule._calculate_subnet_mask(rule.get_source_networks_size())),
                 rule.get_destination_network_size() if rule.get_destination_network_size() > 0 else 4294967296,
-                rule.get_destination_port_size() if rule.get_destination_network_size() > 0 else 65535,
+                '/{}'.format(rule._calculate_subnet_mask(rule.get_destination_network_size())),
+                rule.get_destination_port_size() if rule.get_destination_port_size() > 0 else 65535,
                 rule.risk_category_by_src_network_static(self.config['SOURCE_NETWORK_CATEGORIES']),
                 rule.risk_category_by_source_network_dynamic(avg_src_ip_num, self.config['RELATIVE_SOURCE_NETWORK_CATEGORIES']),
                 rule.risk_category_by_dst_network_static(self.config['DESTINATION_NETWORK_CATEGORIES']),
@@ -207,7 +211,7 @@ class Data:
         networks_count = self.get_network_object()
         for network_obj in self.builder.network_objs.values():
             if isinstance(network_obj, Network):
-                networks_data.append((None, None, network_obj.name, str(network_obj.value), network_obj.get_size(), None, self.get_equal_networks_data(network_obj.equal_with), networks_count[network_obj.id]))
+                networks_data.append((None, None, network_obj.name, str(network_obj.value), network_obj.get_size(), '/{}'.format(str(network_obj.value).split('/')[1]), self.get_equal_networks_data(network_obj.equal_with), networks_count[network_obj.id]))
             elif isinstance(network_obj, NetworkGroup):
                 names, ips = "", ""
                 for network in network_obj.flat_network_object_grp():
