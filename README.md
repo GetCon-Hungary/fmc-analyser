@@ -1,8 +1,9 @@
-[![published](https://static.production.devnetcloud.com/codeexchange/assets/images/devnet-published.svg)](https://developer.cisco.com/codeexchange/github/repo/GetCon-Hungary/fmc-analyser)
 
 # FMC Analyser
 
 ![FMC Analyser logo](assets/fmc_analyser_logo.png)
+
+[![published](https://static.production.devnetcloud.com/codeexchange/assets/images/devnet-published.svg)](https://developer.cisco.com/codeexchange/github/repo/GetCon-Hungary/fmc-analyser)
 
 ## Overview
 
