@@ -1,5 +1,6 @@
 """Builds up all the different model classes."""
 
+from typing import Union
 from logic.fmc_loader import FMCLoader
 from models.access_policy import AccessPolicy
 from models.access_rule import AccessRule
@@ -18,12 +19,12 @@ class Builder:
         self.port_objs: dict[str, PortObject] = {}
         self.port_objs.update(self.create_protocol_ports())
         self.port_objs.update(self.create_port_groups())
-        self.equal_port_object_finder()
+        self.equal_object_finder(self.port_objs)
 
         self.network_objs: dict[str, NetworkObject] = {}
         self.network_objs.update(self.create_networks())
         self.network_objs.update(self.create_network_groups(self.fmcloader.network_groups['items']))
-        self.equal_network_object_finder()
+        self.equal_object_finder(self.network_objs)
 
         self.policies: list[AccessPolicy] = self.create_access_policies()
 
@@ -54,14 +55,6 @@ class Builder:
             protocol=port_obj.get('protocol', ''),
             port=port_obj.get('port', ''),
         )
-
-    def equal_port_object_finder(self) -> None:
-        ports = list(self.port_objs.values())
-        for i in range(len(ports) - 1):
-            for j in range(i + 1, len(ports)):
-                if ports[i] == ports[j]:
-                    ports[i].equal_with.append(ports[j])
-                    ports[j].equal_with.append(ports[i])
 
     def create_networks(self) -> dict[str, Network]:
         network_objs = {}
@@ -108,8 +101,8 @@ class Builder:
             value=network_obj.get('value', ''),
         )
 
-    def equal_network_object_finder(self) -> None:
-        objs = list(self.network_objs.values())
+    def equal_object_finder(self, objs: dict[str, Union[NetworkObject, PortObject]]) -> None:
+        objs = list(objs.values())
         for i in range(len(objs) - 1):
             for j in range(i + 1, len(objs)):
                 if objs[i] == objs[j]:
