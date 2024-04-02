@@ -42,4 +42,4 @@ if __name__ == "__main__":
     exp.export_to_excel(data.ports_data, exp.PORTS_HEADER, 'ports')
     exp.export_to_excel(data.networks_data, exp.NETWORK_HEADER, 'networks')
     print('OK')
-    print('--- Analysing finished! ---')
+    print('--- The Analysis is complete! ---')
