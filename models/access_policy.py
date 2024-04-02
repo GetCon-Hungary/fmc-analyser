@@ -1,5 +1,6 @@
 """Represents the access policy model."""
 from models.access_rule import AccessRule
+import math
 
 
 class AccessPolicy:
@@ -59,3 +60,11 @@ class AccessPolicy:
                 number_of_ports += rule.get_destination_port_size()
             return int(number_of_ports / len(self.rules))
         return number_of_ports
+    
+    def _calculate_subnet_mask(self, ip_number: int) -> float:
+        if ip_number > 0:
+            mask = 32 - math.ceil(math.log2(ip_number))
+            if mask > 0:
+                return mask
+            return 0
+        return 0
