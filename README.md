@@ -1,3 +1,5 @@
+[![published](https://static.production.devnetcloud.com/codeexchange/assets/images/devnet-published.svg)](https://developer.cisco.com/codeexchange/github/repo/GetCon-Hungary/fmc-analyser)
+
 # FMC Analyser
 
 ![FMC Analyser logo](assets/fmc_analyser_logo.png)
@@ -92,7 +94,7 @@ logic.excel_export(data.access_policies_data, exp.ACCESS_POLICY_HEADER, 'access_
 
 ## Support
 
-For any questions or issues, please contact our support team at <info@getcon.hu>.
+For any questions or issues, please contact our support team at <devnet@getcon.hu>.
 
 ## License
 
@@ -109,6 +111,7 @@ This project is licensed under the GNU General Public License version 3.0 - see 
 - Norbert Omodi
 - Barnabás Kerekes (@kerekesb)
 - Botond Barta
+- Péter Rostás
 
 ---
 
