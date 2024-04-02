@@ -29,6 +29,13 @@ class Builder:
         self.policies: list[AccessPolicy] = self.create_access_policies()
 
     def create_protocol_ports(self) -> dict[str, Port]:  # noqa: D102
+        """Builds up the Port dictionary.
+
+        Returns:
+        -------
+            dict[str, Port]: The dictionary of Ports by id.
+
+        """
         port_objs = {}
         for port in self.fmcloader.protocol_port_objs['items']:
             port_id = port.get('id', None)
@@ -37,6 +44,13 @@ class Builder:
         return port_objs
 
     def create_port_groups(self) -> dict[str, PortGroup]:
+        """Builds up the Port group dictionary.
+
+        Returns:
+        -------
+            dict[str, PortGroup]: The dictionary of Port groups by id.
+
+        """
         port_grps = {}
         for port in self.fmcloader.port_obj_groups['items']:
             port_id = port.get('id', None)
@@ -49,6 +63,17 @@ class Builder:
         return port_grps
 
     def _create_port(self, port_obj: dict) -> Port:
+        """Creates Port object.
+
+        Args:
+        ----
+            port_obj: dictionary that represents a port.
+
+        Returns:
+        -------
+            Port: Port object.
+
+        """
         return Port(
             id=port_obj.get('id', ''),
             name=port_obj.get('name', ''),
@@ -57,6 +82,13 @@ class Builder:
         )
 
     def create_networks(self) -> dict[str, Network]:
+        """Builds up the Network dictionary.
+
+        Returns:
+        -------
+            dict[str, Network]: The dictionary of Networks by id.
+
+        """
         network_objs = {}
         for network in self.fmcloader.networks['items']:
             network_id = network.get('id', None)
@@ -65,6 +97,17 @@ class Builder:
         return network_objs
 
     def create_network_groups(self, network_groups: list[dict]) -> dict[str, NetworkGroup]:
+        """Builds up the Network group dictionary.
+
+        Args:
+        ----
+            network_groups: The list of Network group objects.
+
+        Returns:
+        -------
+            dict[str, Network]: The dictionary of Network groups by id.
+
+        """
         network_grps = {}
         for network in network_groups:
             network_id = network.get('id', None)
@@ -76,7 +119,7 @@ class Builder:
                         network_type = network_obj['type']
                         if network_type == 'NetworkGroup':
                             net_grp = self.find_network_group_by_id(network_obj['id'])
-                            group_result = self.create_network_groups(net_grp)
+                            group_result = self.create_network_groups([net_grp])
                             network_group.networks.extend(group_result.values())
                         else:
                             network_group.networks.append(self.network_objs[network_obj.get('id', None)])
@@ -87,13 +130,35 @@ class Builder:
                 network_grps[network_id] = network_group
         return network_grps
 
-    def find_network_group_by_id(self, id: str) -> list:
+    def find_network_group_by_id(self, id: str):
+        """Finds Network group by id.
+
+        Args:
+        ----
+            id: The id of a Network group.
+
+        Returns:
+        -------
+            Network: The Network group object found by id.
+
+        """
         for network in self.fmcloader.network_groups['items']:
             if network['id'] == id:
-                return [network]
-        return []
+                return network
+        return None
 
     def _create_network(self, network_obj: dict) -> Network:
+        """Creates Network object.
+
+        Args:
+        ----
+            network_obj: dictionary that represents a network.
+
+        Returns:
+        -------
+            Network: Network object.
+
+        """
         return Network(
             id=network_obj.get('id', ''),
             type=network_obj.get('type', ''),
@@ -102,6 +167,13 @@ class Builder:
         )
 
     def equal_object_finder(self, objs: dict[str, Union[NetworkObject, PortObject]]) -> None:
+        """Finds the duplicated Network/Port objects.
+
+        Args:
+        ----
+            objs: dictionary that contains Network or Port objects by id.
+
+        """
         objs = list(objs.values())
         for i in range(len(objs) - 1):
             for j in range(i + 1, len(objs)):
@@ -110,6 +182,13 @@ class Builder:
                     objs[j].equal_with.append(objs[i])
 
     def create_access_policies(self) -> list[AccessPolicy]:
+        """Builds up the Access policy list.
+
+        Returns:
+        -------
+            list[AccessPolicy]: The list of access policies.
+
+        """
         policies = []
         for acp in self.fmcloader.access_policies['items']:
             acp_id = acp.get('id', None)
@@ -119,6 +198,17 @@ class Builder:
         return policies
 
     def create_access_rules(self, acp_name) -> list[AccessRule]:
+        """Builds up the Access rules list.
+
+        Args:
+        ----
+            acp_name: the name of the Access policy.
+
+        Returns:
+        -------
+            list[AccessRule]: The list of access rules.
+
+        """
         rules = []
         for rule in self.fmcloader.access_rules[acp_name]['items']:
             ac_rule_id = rule.get('id', None)
@@ -143,6 +233,17 @@ class Builder:
         return rules
 
     def get_zones_by_rule(self, rule: dict) -> tuple[list[str], list[str]]:
+        """Gets zone names by rule.
+
+        Args:
+        ----
+            rule: dictionary that represents an access rule.
+
+        Returns:
+        -------
+            tuple[list[str], list[str]]: list of source and destination zone names.
+
+        """
         s_zones = rule.get('sourceZones')
         d_zones = rule.get('destinationZones')
         s_zones_list = []
@@ -154,6 +255,17 @@ class Builder:
         return s_zones_list, d_zones_list
 
     def get_ports_by_rule(self, rule: dict) -> tuple[list[PortObject], list[PortObject]]:
+        """Gets Ports object by rule.
+
+        Args:
+        ----
+            rule: dictionary that represents an access rule.
+
+        Returns:
+        -------
+            tuple[list[PortObject], list[PortObject]]: list of source and destination Port objects.
+
+        """
         s_ports = rule.get('sourcePorts')
         d_ports = rule.get('destinationPorts')
         s_ports_list = []
@@ -175,6 +287,17 @@ class Builder:
         return s_ports_list, d_ports_list
 
     def find_ports(self, rule_ports: list[dict]) -> list[PortObject]:
+        """Finds Port objects by rule.
+
+        Args:
+        ----
+            rule: dictionary that represents a port.
+
+        Returns:
+        -------
+            list[PortObject]: list of Port objects.
+
+        """
         final = []
         for port in rule_ports:
             port_id = port.get('id', None)
@@ -185,6 +308,17 @@ class Builder:
         return final
 
     def get_networks_by_rule(self, rule: dict) -> tuple[list[NetworkObject], list[NetworkObject]]:
+        """Gets Networks object by rule.
+
+        Args:
+        ----
+            rule: dictionary that represents an access rule.
+
+        Returns:
+        -------
+            tuple[list[NetworkObject], list[NetworkObject]]: list of source and destination Network objects.
+
+        """
         s_networks = rule.get('sourceNetworks')
         d_networks = rule.get('destinationNetworks')
         s_networks_list = []
@@ -206,6 +340,17 @@ class Builder:
         return s_networks_list, d_networks_list
 
     def find_networks(self, rule_networks: list[dict]) -> list[NetworkObject]:
+        """Finds Network objects by rule.
+
+        Args:
+        ----
+            rule: dictionary that represents a network.
+
+        Returns:
+        -------
+            list[PortObject]: list of Network objects.
+
+        """
         final = []
         for network in rule_networks:
             network_id = network.get('id', None)
