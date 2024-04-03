@@ -17,13 +17,15 @@ if __name__ == "__main__":
     parser.add_argument('-P', '--password', required=True, help='FMC login password')
     parser.add_argument('-A', '--acp', required=False, default='all', help='Rule name you want to analyse. Leave blank for default "all"')
     parser.add_argument('-C', '--config', required=False, default='config.yml', help='Config file path. Leave blank for default: config.yml')
-
     ARGS = parser.parse_args()
+
     fmcloader = FMCLoader(ARGS.host, ARGS.username, ARGS.password, ARGS.acp)
     print('OK')
+
     print('Building models ... ', end='', flush=True)
     builder = Builder(fmcloader)
     print('OK')
+
     try:
         print('Parsing data ... ', end='', flush=True)
         data = Data(builder, ARGS.config)
@@ -32,6 +34,7 @@ if __name__ == "__main__":
         sys.stderr.write(msg)
         sys.exit(1)
     print('OK')
+
     print('Exporting to Excel ... ', end='', flush=True)
     exp.export_to_excel(data.access_policies_data, exp.ACCESS_POLICY_HEADER, 'access_policies_information')
     for policy in builder.policies:
@@ -42,12 +45,15 @@ if __name__ == "__main__":
         )
     exp.export_to_excel(data.ports_data, exp.PORTS_HEADER, 'ports')
     exp.export_to_excel(data.networks_data, exp.NETWORK_HEADER, 'networks')
+    print('OK')
+
+    print('Formatting Excel ... ', end='', flush=True)
     wb = openpyxl.load_workbook('./exports/final.xlsx')
     for sheet_name in wb.sheetnames:
         exp.format_rows_font_size(wb[sheet_name])
         exp.format_row_dimension(wb[sheet_name])
         exp.format_column_dimension(wb[sheet_name])
     wb.save('./exports/final.xlsx')
-    
     print('OK')
+
     print('--- The Analysis is complete! ---')
