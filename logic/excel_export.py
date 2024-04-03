@@ -29,14 +29,14 @@ def export_to_excel(data: list[str], header: list[str], sheet_name: str) -> None
             df.to_excel(excel_writer=writer, sheet_name=sheet_name)
 
 def format_rows_font_size(ws):
-        for row in range(1, ws.max_row + 1):
-            for col in range(1, ws.max_column + 1):
-                if row > 1:
-                    ws.cell(row=row, column = col).font = Font(size=14)
-                    ws.cell(row=row, column = col).alignment = Alignment(wrapText=True, horizontal='center', vertical='center')
-                else:
-                    ws.cell(row=1, column=col).font = Font(size=16, color="1F497D", bold=True)
-                    ws.cell(row=1, column=col).alignment = Alignment(wrapText=True, horizontal='center', vertical='center')
+    for row in range(1, ws.max_row + 1):
+        for col in range(1, ws.max_column + 1):
+            if row > 1:
+                ws.cell(row=row, column = col).font = Font(size=14)
+                ws.cell(row=row, column = col).alignment = Alignment(wrapText=True, horizontal='center', vertical='center')
+            else:
+                ws.cell(row=row, column=col).font = Font(size=16, color="1F497D", bold=True)
+                ws.cell(row=row, column=col).alignment = Alignment(wrapText=True, horizontal='center', vertical='center')
 
 def format_row_dimension( ws):
     for row in ws.iter_rows():
@@ -52,7 +52,7 @@ def format_column_dimension(ws):
         max_length = 0
         for cell in column:
             if '\n' not in str(cell.value):
-                if len(str(cell.value)) > max_length:
-                    max_length = len(str(cell.value))
-        adjusted_width = (max_length + 2) * 2
-        ws.column_dimensions[cell.column_letter].width = adjusted_width
+                length = len(str(cell.value))
+                if length > max_length:
+                    max_length = length
+        ws.column_dimensions[cell.column_letter].width = (max_length + 2) * 2
