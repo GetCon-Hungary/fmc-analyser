@@ -2,6 +2,7 @@ import os
 import pandas as pd
 from openpyxl.styles import Font
 from openpyxl.styles import Alignment
+from openpyxl.utils import get_column_letter
 
 ACCESS_POLICY_HEADER = ['Name', 'Count Of Enabled Rules', 'Count Of Allowed Rules', 'Ratio Of Enabled Rules', 'Ratio Of Allowed Rules', 'Average Source Network Size', 'Average Source Network Size /', 'Average Destination Network Size', 'Average Destination Network Size /', 'Average Destination Port Size',]
 ACCESS_RULE_HEADER = ['Name', 'Action', 'Enabled', 'Source Zones', 'Source Networks', 'Source Ports', 'Destination Zones', 'Destination Networks', 'Destination Ports', 'Source Networks Size', 'Source Networks Size /', 'Destination Networks Size', 'Destination Networks Size /', 'Destination Ports Size', 'Source Network Category', 'Relative Source Network Category', 'Destination Network Category', 'Relative Destination Network Category', 'Destination Port Category', 'Relative Destination Port Category', 'Duplicated', 'Reversed']
@@ -28,31 +29,26 @@ def export_to_excel(data: list[str], header: list[str], sheet_name: str) -> None
         with pd.ExcelWriter(path=export_dir) as writer:
             df.to_excel(excel_writer=writer, sheet_name=sheet_name)
 
-def format_rows_font_size(ws):
-    for row in range(1, ws.max_row + 1):
-        for col in range(1, ws.max_column + 1):
-            if row > 1:
-                ws.cell(row=row, column = col).font = Font(size=14)
-                ws.cell(row=row, column = col).alignment = Alignment(wrapText=True, horizontal='center', vertical='center')
-            else:
-                ws.cell(row=row, column=col).font = Font(size=16, color="1F497D", bold=True)
-                ws.cell(row=row, column=col).alignment = Alignment(wrapText=True, horizontal='center', vertical='center')
-
-def format_row_dimension( ws):
-    for row in ws.iter_rows():
+def format_row(ws):
+    for i, row in enumerate(ws.iter_rows(), start=1):
         max_line = 0
         for cell in row:
             lines = str(cell.value).count('\n') + 1
             if lines > max_line:
                 max_line = lines
-        ws.row_dimensions[cell.row].height = 20 * max_line
+            if i == 1:
+                cell.font = Font(size=16, color="1F497D", bold=True)
+            else:
+                cell.font = Font(size=14)
+            cell.alignment = Alignment(wrapText=True, horizontal='center', vertical='center')
+        ws.row_dimensions[i].height = 20 * max_line
 
-def format_column_dimension(ws):
-    for column in ws.iter_cols():
+def format_column(ws):
+    for i, column in enumerate(ws.iter_cols(), start=1):
         max_length = 0
         for cell in column:
             if '\n' not in str(cell.value):
                 length = len(str(cell.value))
                 if length > max_length:
                     max_length = length
-        ws.column_dimensions[cell.column_letter].width = (max_length + 2) * 2
+        ws.column_dimensions[get_column_letter(i)].width = (max_length + 2) * 2
