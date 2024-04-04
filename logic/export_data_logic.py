@@ -74,7 +74,9 @@ class Data:
                 rule.risk_category_by_dst_network_static(self.config['DESTINATION_NETWORK_CATEGORIES']),
                 rule.risk_category_by_dst_network_dynamic(avg_dst_ip_num, self.config['RELATIVE_DESTINATION_NETWORK_CATEGORIES']),
                 rule.risk_category_by_dst_port_static(self.config['DESTINATION_PORT_CATEGORIES']),
-                rule.risk_category_by_destination_port_dynamic(avg_port_number, self.config['RELATIVE_DESTINATION_PORT_CATEGORIES']))
+                rule.risk_category_by_destination_port_dynamic(avg_port_number, self.config['RELATIVE_DESTINATION_PORT_CATEGORIES']),
+                ', '.join(eq.name for eq in rule.equal_with),
+                ', '.join(rev.name for rev in rule.rev_eq))
             for rule in policy.rules]
         return access_rule_data
 
