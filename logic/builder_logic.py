@@ -19,14 +19,17 @@ class Builder:
         self.port_objs: dict[str, PortObject] = {}
         self.port_objs.update(self.create_protocol_ports())
         self.port_objs.update(self.create_port_groups())
-        self.equal_object_finder(self.port_objs)
+        self.equal_object_finder(list(self.port_objs.values()))
 
         self.network_objs: dict[str, NetworkObject] = {}
         self.network_objs.update(self.create_networks())
         self.network_objs.update(self.create_network_groups(self.fmcloader.network_groups['items']))
-        self.equal_object_finder(self.network_objs)
+        self.equal_object_finder(list(self.network_objs.values()))
 
         self.policies: list[AccessPolicy] = self.create_access_policies()
+        for policy in self.policies:
+            self.equal_object_finder(policy.rules)
+            self.reverse_equal_object_finder(policy.rules)
 
     def create_protocol_ports(self) -> dict[str, Port]:  # noqa: D102
         """Builds up the Port dictionary.
@@ -165,16 +168,22 @@ class Builder:
             name=network_obj.get('name', ''),
             value=network_obj.get('value', ''),
         )
-
-    def equal_object_finder(self, objs: dict[str, Union[NetworkObject, PortObject]]) -> None:
+    
+    def reverse_equal_object_finder(self, rules: list[AccessRule]) -> None:
+        for i in range(len(rules) - 1):
+            for j in range(i + 1, len(rules)):
+                if rules[i].reverse_eq(rules[j]):
+                    rules[i].rev_eq.append(rules[j])
+                    rules[j].rev_eq.append(rules[i])
+        
+    def equal_object_finder(self, objs: list[Union[NetworkObject, PortObject, AccessRule]]) -> None:
         """Finds the duplicated Network/Port objects.
 
         Args:
         ----
-            objs: dictionary that contains Network or Port objects by id.
+            objs: list that contains Network objects or Port objects or Access Rule objects.
 
         """
-        objs = list(objs.values())
         for i in range(len(objs) - 1):
             for j in range(i + 1, len(objs)):
                 if objs[i] == objs[j]:
@@ -211,7 +220,7 @@ class Builder:
         """
         rules = []
         for rule in self.fmcloader.access_rules[acp_name]['items']:
-            ac_rule_id = rule.get('id', None)
+            id = rule.get('id', None)
             name = rule.get('name', None)
             action = rule.get('action', None)
             enabled = rule.get('enabled', None)
@@ -219,7 +228,7 @@ class Builder:
             source_ports, destination_ports = self.get_ports_by_rule(rule)
             source_networks, destination_networks = self.get_networks_by_rule(rule)
             rules.append(AccessRule(
-                ac_rule_id,
+                id,
                 name,
                 action,
                 enabled,
@@ -250,8 +259,11 @@ class Builder:
         d_zones_list = []
         if s_zones is not None:
             s_zones_list = [(s_zone['name']) for s_zone in s_zones['objects']]
+            s_zones_list.sort()
         if d_zones is not None:
             d_zones_list = [(d_zone['name']) for d_zone in d_zones['objects']]
+            d_zones_list.sort()
+
         return s_zones_list, d_zones_list
 
     def get_ports_by_rule(self, rule: dict) -> tuple[list[PortObject], list[PortObject]]:
@@ -277,6 +289,7 @@ class Builder:
                 s_ports_list.extend(self.find_ports(s_objects))
             if s_literals is not None:
                 s_ports_list.extend(self.find_ports(s_literals))
+            s_ports_list.sort(key=lambda x: x.name)
         if d_ports is not None:
             d_objects = d_ports.get('objects', None)
             d_literals = d_ports.get('literals', None)
@@ -284,6 +297,8 @@ class Builder:
                 d_ports_list.extend(self.find_ports(d_objects))
             if d_literals is not None:
                 d_ports_list.extend(self.find_ports(d_literals))
+            d_ports_list.sort(key=lambda x: x.name)
+
         return s_ports_list, d_ports_list
 
     def find_ports(self, rule_ports: list[dict]) -> list[PortObject]:
@@ -330,6 +345,7 @@ class Builder:
                 s_networks_list.extend(self.find_networks(s_objects))
             if s_literals is not None:
                 s_networks_list.extend(self.find_networks(s_literals))
+            s_networks_list.sort(key=lambda x: x.name)
         if d_networks is not None:
             d_objects = d_networks.get('objects', None)
             d_literals = d_networks.get('literals', None)
@@ -337,6 +353,8 @@ class Builder:
                 d_networks_list.extend(self.find_networks(d_objects))
             if d_literals is not None:
                 d_networks_list.extend(self.find_networks(d_literals))
+            d_networks_list.sort(key=lambda x: x.name)
+
         return s_networks_list, d_networks_list
 
     def find_networks(self, rule_networks: list[dict]) -> list[NetworkObject]:
