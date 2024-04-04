@@ -50,9 +50,8 @@ if __name__ == "__main__":
     print('Formatting Excel ... ', end='', flush=True)
     wb = openpyxl.load_workbook('./exports/final.xlsx')
     for sheet_name in wb.sheetnames:
-        exp.format_rows_font_size(wb[sheet_name])
-        exp.format_row_dimension(wb[sheet_name])
-        exp.format_column_dimension(wb[sheet_name])
+        exp.format_column(wb[sheet_name])
+        exp.format_row(wb[sheet_name])
     wb.save('./exports/final.xlsx')
     print('OK')
 
