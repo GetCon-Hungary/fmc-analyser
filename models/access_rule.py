@@ -168,7 +168,7 @@ class AccessRule:
 
         # Find the leftmost set bit
         position = 32
-        while position > 0:
+        while position >= 0:
             if ip_number - mask > 0:
                 half_mask = mask >> 1
                 if ip_number - mask - half_mask >= 0:
