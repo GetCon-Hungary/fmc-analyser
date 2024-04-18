@@ -18,7 +18,10 @@ class Port(PortObject):
 
     def calculate_protocol_port_object_size(self) -> int:
         size = 1
-        if '-' in self.port:
+        if self.port == '':
+            size = 65535
+            self.port = 'Any'
+        elif '-' in self.port:
             size = int(self.port.split('-')[1]) - (int(self.port.split('-')[0]) - 1)
         return size
 
