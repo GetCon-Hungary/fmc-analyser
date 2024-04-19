@@ -76,7 +76,8 @@ class Data:
                 rule.risk_category_by_dst_port_static(self.config['DESTINATION_PORT_CATEGORIES']),
                 rule.risk_category_by_destination_port_dynamic(avg_port_number, self.config['RELATIVE_DESTINATION_PORT_CATEGORIES']),
                 ', '.join(eq.name for eq in rule.equal_with),
-                ', '.join(rev.name for rev in rule.rev_eq))
+                ', '.join(rev.name for rev in rule.rev_eq),
+                ', '.join(merge.name for merge in rule.merge_can))
             for rule in policy.rules]
         return access_rule_data
 
@@ -213,12 +214,20 @@ class Data:
         networks_count = self.get_network_object()
         for network_obj in self.builder.network_objs.values():
             if isinstance(network_obj, Network):
-                networks_data.append((None, None, network_obj.name, str(network_obj.value), network_obj.get_size(), '/{}'.format(str(network_obj.value).split('/')[1]), self.get_equal_networks_data(network_obj.equal_with), networks_count[network_obj.id]))
+                ip = ""
+                if '/32' in str(network_obj.value):
+                    ip = str(network_obj.value).split('/')[0]
+                else:
+                    ip = str(network_obj.value)
+                networks_data.append((None, None, network_obj.name, ip, network_obj.get_size(), '/{}'.format(str(network_obj.value).split('/')[1]), self.get_equal_networks_data(network_obj.equal_with), networks_count[network_obj.id]))
             elif isinstance(network_obj, NetworkGroup):
                 names, ips = "", ""
                 for network in network_obj.flat_network_object_grp():
                     names += '{}\n'.format(network.name)
-                    ips += '{}\n'.format(str(network.value))
+                    if '/32' in str(network.value):
+                        ips += '{}\n'.format(str(network.value).split('/')[0])
+                    else:
+                        ips += '{}\n'.format(str(network.value))
                 networks_data.append((network_obj.name, network_obj.depth, names.strip(), ips.strip(), network_obj.get_size(), '/{}'.format(network_obj._calculate_subnet_mask(network_obj.get_size())), self.get_equal_networks_data(network_obj.equal_with), networks_count[network_obj.id]))
         return networks_data
 

@@ -23,6 +23,7 @@ class AccessRule:
         self.destination_ports = destination_ports
         self.equal_with = []
         self.rev_eq = []
+        self.merge_can = []
     
     def __eq__(self, value: object) -> bool:
         if isinstance(value, AccessRule):
@@ -33,6 +34,12 @@ class AccessRule:
     def reverse_eq(self, value: object) -> bool:
         if isinstance(value, AccessRule):
             return self.action == value.action and self.source_zones == value.destination_zones and self.source_networks == value.destination_networks and self.source_ports == value.destination_ports and self.destination_zones == value.source_zones and self.destination_networks == value.source_networks and self.destination_ports == value.source_ports
+        else:
+            return False
+    
+    def merge_candidates(self, value: object) -> bool:
+        if isinstance(value, AccessRule):
+            return self.action == value.action and self.source_zones == value.source_zones and self.source_networks == value.source_networks and self.destination_zones == value.destination_zones and self.destination_networks == value.destination_networks
         else:
             return False
 
