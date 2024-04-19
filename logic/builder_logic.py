@@ -19,17 +19,12 @@ class Builder:
         self.port_objs: dict[str, PortObject] = {}
         self.port_objs.update(self.create_protocol_ports())
         self.port_objs.update(self.create_port_groups())
-        self.equal_object_finder(list(self.port_objs.values()))
 
         self.network_objs: dict[str, NetworkObject] = {}
         self.network_objs.update(self.create_networks())
-        self.network_objs.update(self.create_network_groups(self.fmcloader.network_groups['items']))
-        self.equal_object_finder(list(self.network_objs.values()))
+        self.network_objs.update(self.create_network_groups())
 
         self.policies: list[AccessPolicy] = self.create_access_policies()
-        for policy in self.policies:
-            self.equal_object_finder(policy.rules)
-            self.reverse_equal_object_finder(policy.rules)
 
     def create_protocol_ports(self) -> dict[str, Port]:  # noqa: D102
         """Builds up the Port dictionary.
@@ -44,6 +39,7 @@ class Builder:
             port_id = port.get('id', None)
             if port_id is not None:
                 port_objs[port_id] = self._create_port(port)
+        self.equal_object_finder(list(port_objs.values()))
         return port_objs
 
     def create_port_groups(self) -> dict[str, PortGroup]:
@@ -63,6 +59,7 @@ class Builder:
                 for protocol_port in port['objects']:
                     port_group.ports.append(self.port_objs[protocol_port['id']])
                 port_grps[port_id] = port_group
+        self.equal_object_finder(list(port_grps.values()))
         return port_grps
 
     def _create_port(self, port_obj: dict) -> Port:
@@ -97,9 +94,10 @@ class Builder:
             network_id = network.get('id', None)
             if network_id is not None:
                 network_objs[network_id] = self._create_network(network)
+        self.equal_object_finder(list(network_objs.values()))
         return network_objs
 
-    def create_network_groups(self, network_groups: list[dict]) -> dict[str, NetworkGroup]:
+    def create_network_groups(self) -> dict[str, NetworkGroup]:
         """Builds up the Network group dictionary.
 
         Args:
@@ -112,27 +110,34 @@ class Builder:
 
         """
         network_grps = {}
-        for network in network_groups:
-            network_id = network.get('id', None)
-            if network_id is not None:
-                group_name = network.get('name', None)
-                network_group = NetworkGroup(network_id, group_name)
-                if network.get('objects', None) is not None:
-                    for network_obj in network['objects']:
-                        network_type = network_obj['type']
-                        if network_type == 'NetworkGroup':
-                            net_grp = self.find_network_group_by_id(network_obj['id'])
-                            group_result = self.create_network_groups([net_grp])
-                            network_group.networks.extend(group_result.values())
-                        else:
-                            network_group.networks.append(self.network_objs[network_obj.get('id', None)])
-                if network.get('literals', None) is not None:
-                    for network_literal in network['literals']:
-                        network_group.networks.append(self._create_network(network_literal))
-                network_group.depth = network_group.get_network_depth()
-                network_grps[network_id] = network_group
+        for network_grp in self.fmcloader.network_groups['items']:
+            group_id = network_grp.get('id', None)
+            if group_id is not None:
+                network_group = self.recursive_network_group(network_grp)
+                network_grps[group_id] = network_group
+        self.equal_object_finder(list(network_grps.values()))
         return network_grps
-
+    
+    def recursive_network_group(self, net_group: dict):
+        group_id = net_group.get('id', None)
+        if group_id is not None:
+            group_name = net_group.get('name', None)
+            network_group = NetworkGroup(group_id, group_name)
+            if net_group.get('objects', None) is not None:
+                for network_obj in net_group['objects']:
+                    network_type = network_obj['type']
+                    if network_type == 'NetworkGroup':
+                        net_grp = self.find_network_group_by_id(network_obj['id'])
+                        group_result = self.recursive_network_group(net_grp)
+                        network_group.networks.append(group_result)
+                    else:
+                        network_group.networks.append(self.network_objs[network_obj.get('id', None)])
+            if net_group.get('literals', None) is not None:
+                for network_literal in net_group['literals']:
+                        network_group.networks.append(self._create_network(network_literal))
+            network_group.depth = network_group.get_network_depth()
+        return network_group
+            
     def find_network_group_by_id(self, id: str):
         """Finds Network group by id.
 
@@ -175,6 +180,13 @@ class Builder:
                 if rules[i].reverse_eq(rules[j]):
                     rules[i].rev_eq.append(rules[j])
                     rules[j].rev_eq.append(rules[i])
+    
+    def merge_candidates_object_finder(self, rules: list[AccessRule]) -> None:
+        for i in range(len(rules) - 1):
+            for j in range(i + 1, len(rules)):
+                if rules[i].merge_candidates(rules[j]):
+                    rules[i].merge_can.append(rules[j])
+                    rules[j].merge_can.append(rules[i])
         
     def equal_object_finder(self, objs: list[Union[NetworkObject, PortObject, AccessRule]]) -> None:
         """Finds the duplicated Network/Port objects.
@@ -239,6 +251,9 @@ class Builder:
                 destination_zones,
                 destination_ports,
             ))
+        self.equal_object_finder(rules)
+        self.reverse_equal_object_finder(rules)
+        self.merge_candidates_object_finder(rules)
         return rules
 
     def get_zones_by_rule(self, rule: dict) -> tuple[list[str], list[str]]:
