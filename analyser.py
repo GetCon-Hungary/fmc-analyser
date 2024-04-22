@@ -3,10 +3,10 @@ import argparse
 import sys
 import openpyxl
 
-import logic.excel_export as exp
+from logic.fmc_loader import FMCLoader
 from logic.builder_logic import Builder
 from logic.export_data_logic import Data
-from logic.fmc_loader import FMCLoader
+from logic.excel_export import Export
 
 if __name__ == "__main__":
     print('--- FMC Analyser ---')
@@ -36,15 +36,16 @@ if __name__ == "__main__":
     print('OK')
 
     print('Exporting to Excel ... ', end='', flush=True)
-    exp.export_to_excel(data.access_policies_data, exp.ACCESS_POLICY_HEADER, 'access_policies_information')
+    exp = Export()
+    exp.export_to_excel(data.access_policies_data, exp.access_policy_header, 'access_policies_information')
     for policy in builder.policies:
         exp.export_to_excel(
             data.access_rules_data[policy.name],
-            exp.ACCESS_RULE_HEADER,
+            exp.access_rule_header,
             'access_rules_of_{}'.format(policy.name),
         )
-    exp.export_to_excel(data.ports_data, exp.PORTS_HEADER, 'ports')
-    exp.export_to_excel(data.networks_data, exp.NETWORK_HEADER, 'networks')
+    exp.export_to_excel(data.ports_data, exp.port_header, 'ports')
+    exp.export_to_excel(data.networks_data, exp.network_header, 'networks')
     print('OK')
 
     print('Formatting Excel ... ', end='', flush=True)

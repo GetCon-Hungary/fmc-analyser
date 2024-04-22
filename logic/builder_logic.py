@@ -118,7 +118,7 @@ class Builder:
         self.equal_object_finder(list(network_grps.values()))
         return network_grps
     
-    def recursive_network_group(self, net_group: dict):
+    def recursive_network_group(self, net_group: dict) -> NetworkGroup:
         group_id = net_group.get('id', None)
         if group_id is not None:
             group_name = net_group.get('name', None)
