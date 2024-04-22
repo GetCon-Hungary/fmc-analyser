@@ -23,12 +23,15 @@ class Export():
         """
         df = pd.DataFrame(data, columns=header)
         df.index = range(1, len(df)+1)
-        export_dir = os.getcwd() + '/exports/final.xlsx'
-        if os.path.exists(export_dir):
-            with pd.ExcelWriter(path=export_dir, mode='a', if_sheet_exists='replace', engine='openpyxl') as writer:
+        export_dir = os.getcwd() + '/exports'
+        if not os.path.exists(export_dir):
+            os.mkdir(export_dir)
+        export_path = export_dir + '/final.xlsx'
+        if os.path.exists(export_path):
+            with pd.ExcelWriter(path=export_path, mode='a', if_sheet_exists='replace', engine='openpyxl') as writer:
                 df.to_excel(excel_writer=writer, sheet_name=sheet_name)
         else:
-            with pd.ExcelWriter(path=export_dir) as writer:
+            with pd.ExcelWriter(path=export_path) as writer:
                 df.to_excel(excel_writer=writer, sheet_name=sheet_name)
 
     def format_row(self, ws):
