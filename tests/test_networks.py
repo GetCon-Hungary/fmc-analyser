@@ -29,7 +29,8 @@ class TestNetworks(unittest.TestCase):
         ]
 
         for testcase in test_networks:
-            self.assertEqual(testcase['value'].size, testcase['result'])
+            size = testcase['value'].get_size()
+            self.assertEqual(size, testcase['result'])
 
     def test_flat_network_group(self):
         network_group = NetworkGroup('1', 'test_grp')

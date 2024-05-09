@@ -32,7 +32,7 @@ class TestPorts(unittest.TestCase):
         config = {'HIGH_RISK_PROTOCOLS': {'TCP': [20, 21, 23, 80, 5800, 5900, 8080], 'UDP': [69], 'ICMP': []}}
 
         for testcase in test_ports:
-            is_risky = testcase['value'].__is_risky_port(config['HIGH_RISK_PROTOCOLS'])
+            is_risky = testcase['value'].is_risky_port(config['HIGH_RISK_PROTOCOLS'])
             self.assertEqual(is_risky, testcase['result'])
 
     def test_flat_port_group(self):
