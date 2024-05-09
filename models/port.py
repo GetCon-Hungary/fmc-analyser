@@ -7,7 +7,6 @@ class Port(PortObject):
         super().__init__(id, name)
         self.protocol = protocol
         self.port = port
-        self.size = self.calculate_protocol_port_object_size()
         self.is_risky = False
 
     def __eq__(self, __value: object) -> bool:
@@ -16,16 +15,7 @@ class Port(PortObject):
         else:
             return False
 
-    def calculate_protocol_port_object_size(self) -> int:
-        size = 1
-        if self.port == '':
-            size = 65535
-            self.port = 'Any'
-        elif '-' in self.port:
-            size = int(self.port.split('-')[1]) - (int(self.port.split('-')[0]) - 1)
-        return size
-
-    def _is_risky_port(self, risky_ports: dict) -> bool:
+    def is_risky_port(self, risky_ports: dict) -> bool:
         for protocol, ports in risky_ports.items():
             if ports is not None:
                 for port in ports:
@@ -34,4 +24,10 @@ class Port(PortObject):
         return False
 
     def get_size(self) -> int:  # noqa: D102
-        return self.size
+        size = 1
+        if self.port == '':
+            size = 65535
+            self.port = 'Any'
+        elif '-' in self.port:
+            size = int(self.port.split('-')[1]) - (int(self.port.split('-')[0]) - 1)
+        return size
