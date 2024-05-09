@@ -1,18 +1,17 @@
-"""Represents the network model."""
-from typing import Union
+"""Represents the range model."""
 
-from netaddr import IPNetwork
+from netaddr import IPRange
 
 from models.network_object import NetworkObject
 
 
-class Network(NetworkObject):
+class Range(NetworkObject):
     def __init__(self, id: str, name: str, value: str) -> None:
         super().__init__(id, name)
-        self.value = IPNetwork(value)
+        self.value = IPRange(value.split('-')[0], value.split('-')[1])
 
     def __eq__(self, __value: object) -> bool:
-        if isinstance(__value, Network):
+        if isinstance(__value, Range):
             return self.value == __value.value
         return False
 

@@ -11,3 +11,7 @@ class NetworkObject():
     @abc.abstractmethod
     def get_size(self) -> int:
         pass
+    
+    @abc.abstractmethod
+    def __eq__(self, value: object) -> bool:
+        pass
