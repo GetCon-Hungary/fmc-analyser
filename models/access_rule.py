@@ -1,5 +1,4 @@
 """Represents the access rule model."""
-import math
 
 from models.network_object import NetworkObject
 from models.port_group import PortGroup
