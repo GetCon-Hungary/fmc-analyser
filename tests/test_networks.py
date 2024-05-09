@@ -3,6 +3,8 @@ import sys
 import unittest
 
 from models.network import Network
+from models.range import Range
+from models.host import Host
 from models.network_group import NetworkGroup
 
 # Get the parent directory
@@ -13,11 +15,11 @@ sys.path.append(pparent_dir)
 
 class TestNetworks(unittest.TestCase):
     def test_network_size(self):
-        network0 = Network('1', 'Range', 'test_0', '192.168.0.1-192.168.0.5')
-        network1 = Network('2', 'Range', 'test_1', '192.168.0.1-192.168.1.1')
-        network2 = Network('3', 'Network', 'test_2', '192.168.0.0/24')
-        network3 = Network('4', 'Network', 'test_3', '192.168.0.0/27')
-        network4 = Network('5', 'Network', 'test_4', '192.168.0.0/16')
+        network0 = Range('1', 'test_0', '192.168.0.1-192.168.0.5')
+        network1 = Range('2', 'test_1', '192.168.0.1-192.168.1.1')
+        network2 = Network('3', 'test_2', '192.168.0.0/24')
+        network3 = Network('4', 'test_3', '192.168.0.0/27')
+        network4 = Network('5', 'test_4', '192.168.0.0/16')
         test_networks = [
                         {'value': network0, 'result': 5},
                         {'value': network1, 'result': 257},
@@ -34,10 +36,10 @@ class TestNetworks(unittest.TestCase):
         network_group_1 = NetworkGroup('2', 'test_grp2')
         network_group_2 = NetworkGroup('3', 'test_grp3')
 
-        network_group_1.networks.append(Network('1', 'Host', 'test_network_1', '10.10.10.10'))
-        network_group_1.networks.append(Network('2', 'Network', 'test_network_2', '10.10.10.0/24'))
-        network_group_2.networks.append(Network('3', 'Range', 'test_network_3', '192.168.0.1-192.168.0.5'))
-        network_group_2.networks.append(Network('4', 'Network', 'test_network_4', '192.168.0.0/27'))
+        network_group_1.networks.append(Host('1', 'test_network_1', '10.10.10.10'))
+        network_group_1.networks.append(Network('2', 'test_network_2', '10.10.10.0/24'))
+        network_group_2.networks.append(Range('3', 'test_network_3', '192.168.0.1-192.168.0.5'))
+        network_group_2.networks.append(Network('4', 'test_network_4', '192.168.0.0/27'))
 
         network_group.networks.append(network_group_1)
         network_group.networks.append(network_group_2)

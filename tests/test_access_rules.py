@@ -137,12 +137,12 @@ class TestAccessRules(unittest.TestCase):
 
     def create_networks_for_test(self) -> dict:
         return {
-            'rule0': Network('0', 'Network', 'test0', '10.10.10.0/15'),
-            'rule1': Network('1', 'Network', 'test1', '10.10.10.0/19'),
-            'rule2': Network('2', 'Network', 'test2', '10.10.10.0/20'),
-            'rule3': Network('3', 'Network', 'test3', '10.10.10.0/22'),
-            'rule4': Network('4', 'Network', 'test4', '10.10.10.0/23'),
-            'rule5': Network('5', 'Network', 'test5', '10.10.10.0/28'),
+            'rule0': Network('0', 'test0', '10.10.10.0/15'),
+            'rule1': Network('1', 'test1', '10.10.10.0/19'),
+            'rule2': Network('2', 'test2', '10.10.10.0/20'),
+            'rule3': Network('3', 'test3', '10.10.10.0/22'),
+            'rule4': Network('4', 'test4', '10.10.10.0/23'),
+            'rule5': Network('5', 'test5', '10.10.10.0/28'),
         }
 
     def create_port_groups_for_test(self, ports) -> list:
