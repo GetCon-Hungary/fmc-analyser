@@ -11,3 +11,7 @@ class PortObject():
     @abc.abstractmethod
     def get_size(self) -> int:  # noqa: D102
         pass
+    
+    @abc.abstractmethod
+    def __eq__(self, value: object) -> bool:
+        pass

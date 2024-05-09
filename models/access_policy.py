@@ -1,6 +1,5 @@
 """Represents the access policy model."""
 from models.access_rule import AccessRule
-import math
 
 
 class AccessPolicy:

@@ -1,8 +1,11 @@
 import os
 import pandas as pd
+import openpyxl
+from openpyxl.worksheet.worksheet import Worksheet
 from openpyxl.styles import Font
 from openpyxl.styles import Alignment
 from openpyxl.utils import get_column_letter
+
 
 class Export():
     def __init__(self) -> None:
@@ -11,7 +14,7 @@ class Export():
         self.port_header = ['Group Name', 'Name', 'Protocol', 'Port', 'Size', 'Risky', 'Duplicates', 'Reference Count from Rules']
         self.network_header = ['Group Name', 'Group depth', 'Name', 'Value', 'Size', 'Size /', 'Duplicates', 'Reference Count from Rules']
 
-    def export_to_excel(self, data: list[str], header: list[str], sheet_name: str) -> None:
+    def export_to_excel(self, data: list[str], header: list[str], dir: str, file_name: str, sheet_name: str) -> None:
         """Export the specified data to excel.
 
             Args:
@@ -23,10 +26,10 @@ class Export():
         """
         df = pd.DataFrame(data, columns=header)
         df.index = range(1, len(df)+1)
-        export_dir = os.getcwd() + '/exports'
+        export_dir = os.getcwd() + '/' + dir
         if not os.path.exists(export_dir):
             os.mkdir(export_dir)
-        export_path = export_dir + '/final.xlsx'
+        export_path = export_dir + '/' + file_name
         if os.path.exists(export_path):
             with pd.ExcelWriter(path=export_path, mode='a', if_sheet_exists='replace', engine='openpyxl') as writer:
                 df.to_excel(excel_writer=writer, sheet_name=sheet_name)
@@ -34,7 +37,22 @@ class Export():
             with pd.ExcelWriter(path=export_path) as writer:
                 df.to_excel(excel_writer=writer, sheet_name=sheet_name)
 
-    def format_row(self, ws):
+        wb = openpyxl.load_workbook('./exports/final.xlsx')
+        self.__format_column(wb[sheet_name])
+        self.__format_row(wb[sheet_name])
+        wb.save('./exports/final.xlsx')
+
+    def __format_column(self, ws: Worksheet):
+        for i, column in enumerate(ws.iter_cols(), start=1):
+            max_length = 0
+            for cell in column:
+                if '\n' not in str(cell.value):
+                    length = len(str(cell.value))
+                    if length > max_length:
+                        max_length = length
+            ws.column_dimensions[get_column_letter(i)].width = (max_length + 2) * 2
+
+    def __format_row(self, ws: Worksheet):
         for i, row in enumerate(ws.iter_rows(), start=1):
             max_line = 0
             for cell in row:
@@ -47,13 +65,3 @@ class Export():
                     cell.font = Font(size=14)
                 cell.alignment = Alignment(wrapText=True, horizontal='center', vertical='center')
             ws.row_dimensions[i].height = 20 * max_line
-
-    def format_column(self, ws):
-        for i, column in enumerate(ws.iter_cols(), start=1):
-            max_length = 0
-            for cell in column:
-                if '\n' not in str(cell.value):
-                    length = len(str(cell.value))
-                    if length > max_length:
-                        max_length = length
-            ws.column_dimensions[get_column_letter(i)].width = (max_length + 2) * 2

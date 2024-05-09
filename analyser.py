@@ -37,23 +37,17 @@ if __name__ == "__main__":
 
     print('Exporting to Excel ... ', end='', flush=True)
     exp = Export()
-    exp.export_to_excel(data.access_policies_data, exp.access_policy_header, 'access_policies_information')
+    exp.export_to_excel(data.access_policies_data, exp.access_policy_header, 'exports', 'final.xlsx', 'access_policies_information')
     for policy in builder.policies:
         exp.export_to_excel(
             data.access_rules_data[policy.name],
             exp.access_rule_header,
+            'exports',
+            'final.xlsx',
             'access_rules_of_{}'.format(policy.name),
         )
-    exp.export_to_excel(data.ports_data, exp.port_header, 'ports')
-    exp.export_to_excel(data.networks_data, exp.network_header, 'networks')
-    print('OK')
-
-    print('Formatting Excel ... ', end='', flush=True)
-    wb = openpyxl.load_workbook('./exports/final.xlsx')
-    for sheet_name in wb.sheetnames:
-        exp.format_column(wb[sheet_name])
-        exp.format_row(wb[sheet_name])
-    wb.save('./exports/final.xlsx')
+    exp.export_to_excel(data.ports_data, exp.port_header, 'exports', 'final.xlsx', 'ports')
+    exp.export_to_excel(data.networks_data, exp.network_header, 'exports', 'final.xlsx', 'networks')
     print('OK')
 
     print('--- The Analysis is complete! ---')

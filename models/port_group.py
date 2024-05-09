@@ -10,14 +10,11 @@ class PortGroup(PortObject):
 
     def __eq__(self, __value: object) -> bool:
         if isinstance(__value, PortGroup):
-            counter = 0
             if len(self.ports) == len(__value.ports):
-                for i in range(len(self.ports)):
-                    for j in range(len(__value.ports)):
-                        if self.ports[i].__eq__(__value.ports[j]):
-                            counter += 1
-                            if counter == len(self.ports):
-                                return True
+                self.ports.sort(key=lambda x: x.name)
+                __value.ports.sort(key=lambda x: x.name)
+                if self.ports == __value.ports:
+                    return True
                 return False
         return False
 

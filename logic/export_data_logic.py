@@ -58,12 +58,12 @@ class Data:
                 rule.name,
                 rule.action,
                 rule.enabled,
-                self._get_zones_data_by_rule(rule.source_zones),
-                self._get_networks_data_by_rule(rule.source_networks),
-                self._get_ports_data_by_rule(rule.source_ports),
-                self._get_zones_data_by_rule(rule.destination_zones),
-                self._get_networks_data_by_rule(rule.destination_networks),
-                self._get_ports_data_by_rule(rule.destination_ports),
+                self.__get_zones_data_by_rule(rule.source_zones),
+                self.__get_networks_data_by_rule(rule.source_networks),
+                self.__get_ports_data_by_rule(rule.source_ports),
+                self.__get_zones_data_by_rule(rule.destination_zones),
+                self.__get_networks_data_by_rule(rule.destination_networks),
+                self.__get_ports_data_by_rule(rule.destination_ports),
                 rule.get_source_networks_size() if rule.get_source_networks_size() > 0 else 4294967296,
                 '/{}'.format(rule._calculate_subnet_mask(rule.get_source_networks_size())),
                 rule.get_destination_network_size() if rule.get_destination_network_size() > 0 else 4294967296,
@@ -81,7 +81,7 @@ class Data:
             for rule in policy.rules]
         return access_rule_data
 
-    def _get_zones_data_by_rule(self, zones: list[str]) -> str:
+    def __get_zones_data_by_rule(self, zones: list[str]) -> str:
         """Gets zones name by rule.
 
         Args:
@@ -98,7 +98,7 @@ class Data:
         else:
             return 'Any'
 
-    def _get_ports_data_by_rule(self, ports: list[PortObject]) -> str:
+    def __get_ports_data_by_rule(self, ports: list[PortObject]) -> str:
         """Gets ports data by rule..
 
         Args:
@@ -115,7 +115,7 @@ class Data:
         else:
             return 'Any'
 
-    def _get_networks_data_by_rule(self, networks: list[NetworkObject]) -> str:
+    def __get_networks_data_by_rule(self, networks: list[NetworkObject]) -> str:
         """Gets networks data by rule..
 
         Args:
@@ -143,31 +143,17 @@ class Data:
         ports_data = []
         ports_count = self.get_port_object()
         for port_obj in self.builder.port_objs.values():
-            if isinstance(port_obj, Port):
-                ports_data.append((None, port_obj.name, port_obj.protocol, port_obj.port, port_obj.size, str(port_obj._is_risky_port(self.config['HIGH_RISK_PROTOCOLS'])), self.get_equal_ports_data(port_obj.equal_with), ports_count[port_obj.id]))
-            elif isinstance(port_obj, PortGroup):
+            if isinstance(port_obj, PortGroup):
                 names, protocols, ports, port_risks = "", "", "", ""
                 for port in port_obj.flat_port_object_grp():
                     names += '{}\n'.format(port.name)
                     protocols += '{}\n'.format(port.protocol)
                     ports += '{}\n'.format(port.port)
-                    port_risks += '{}\n'.format(port._is_risky_port(self.config['HIGH_RISK_PROTOCOLS']))
-                ports_data.append((port_obj.name, names.strip(), protocols.strip(), ports.strip(), port_obj.get_size(), port_risks.strip(), self.get_equal_ports_data(port_obj.equal_with), ports_count[port_obj.id]))
+                    port_risks += '{}\n'.format(port.is_risky_port(self.config['HIGH_RISK_PROTOCOLS']))
+                ports_data.append((port_obj.name, names.strip(), protocols.strip(), ports.strip(), port_obj.get_size(), port_risks.strip(), ', '.join(port.name for port in port_obj.equal_with), ports_count[port_obj.id]))
+            else:
+                ports_data.append((None, port_obj.name, port_obj.protocol, port_obj.port, port_obj.get_size(), str(port_obj.is_risky_port(self.config['HIGH_RISK_PROTOCOLS'])), ', '.join(port.name for port in port_obj.equal_with), ports_count[port_obj.id]))
         return ports_data
-
-    def get_equal_ports_data(self, ports: list[PortObject]) -> str:
-        """Gets equal ports data
-
-        Args:
-        ----
-            zones: list of Port objects.
-
-        Returns:
-        -------
-            str: Returns the name of Port objects in the list separated by commas.
-
-        """
-        return ', '.join(port.name for port in ports)
 
     def get_port_object(self) -> dict:
         """Builds up the dictionary that contains the appearance of Port object in Access rules.
@@ -213,14 +199,7 @@ class Data:
         networks_data = []
         networks_count = self.get_network_object()
         for network_obj in self.builder.network_objs.values():
-            if isinstance(network_obj, Network):
-                ip = ""
-                if '/32' in str(network_obj.value):
-                    ip = str(network_obj.value).split('/')[0]
-                else:
-                    ip = str(network_obj.value)
-                networks_data.append((None, None, network_obj.name, ip, network_obj.get_size(), '/{}'.format(str(network_obj.value).split('/')[1]), self.get_equal_networks_data(network_obj.equal_with), networks_count[network_obj.id]))
-            elif isinstance(network_obj, NetworkGroup):
+            if isinstance(network_obj, NetworkGroup):
                 names, ips = "", ""
                 for network in network_obj.flat_network_object_grp():
                     names += '{}\n'.format(network.name)
@@ -228,22 +207,15 @@ class Data:
                         ips += '{}\n'.format(str(network.value).split('/')[0])
                     else:
                         ips += '{}\n'.format(str(network.value))
-                networks_data.append((network_obj.name, network_obj.depth, names.strip(), ips.strip(), network_obj.get_size(), '/{}'.format(network_obj._calculate_subnet_mask(network_obj.get_size())), self.get_equal_networks_data(network_obj.equal_with), networks_count[network_obj.id]))
+                networks_data.append((network_obj.name, network_obj.depth, names.strip(), ips.strip(), network_obj.get_size(), '/{}'.format(network_obj._calculate_subnet_mask(network_obj.get_size())), ', '.join(network.name for network in network_obj.equal_with), networks_count[network_obj.id]))
+            else:
+                ip = ""
+                if '/32' in str(network_obj.value):
+                    ip = str(network_obj.value).split('/')[0]
+                else:
+                    ip = str(network_obj.value)
+                networks_data.append((None, None, network_obj.name, ip, network_obj.get_size(), '/{}'.format(str(network_obj.value).split('/')[1]), ', '.join(network.name for network in network_obj.equal_with), networks_count[network_obj.id]))
         return networks_data
-
-    def get_equal_networks_data(self, networks: list[NetworkObject]) -> str:
-        """Gets equal networks data
-
-        Args:
-        ----
-            zones: list of Network objects.
-
-        Returns:
-        -------
-            str: Returns the name of Network objects in the list separated by commas.
-
-        """
-        return ', '.join(network.name for network in networks)
 
     def get_network_object(self) -> dict:
         """Builds up the dictionary that contains the appearance of Network object in Access rules.

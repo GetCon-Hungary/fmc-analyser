@@ -1,18 +1,17 @@
-"""Represents the network model."""
-from typing import Union
+"""Represents the host model."""
 
 from netaddr import IPNetwork
 
 from models.network_object import NetworkObject
 
 
-class Network(NetworkObject):
+class Host(NetworkObject):
     def __init__(self, id: str, name: str, value: str) -> None:
         super().__init__(id, name)
         self.value = IPNetwork(value)
 
     def __eq__(self, __value: object) -> bool:
-        if isinstance(__value, Network):
+        if isinstance(__value, Host):
             return self.value == __value.value
         return False
 
