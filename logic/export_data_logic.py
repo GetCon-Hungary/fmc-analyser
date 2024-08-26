@@ -3,7 +3,6 @@
 import yaml
 
 from logic.builder_logic import Builder
-from models.network import Network
 from models.network_group import NetworkGroup
 from models.network_object import NetworkObject
 from models.port import Port
@@ -147,12 +146,15 @@ class Data:
                 names, protocols, ports, port_risks = "", "", "", ""
                 for port in port_obj.flat_port_object_grp():
                     names += '{}\n'.format(port.name)
-                    protocols += '{}\n'.format(port.protocol)
-                    ports += '{}\n'.format(port.port)
+                    protocols += '{}\n'.format(port.protocol) if isinstance(port, Port) else '{}\n'.format(port.name)
+                    ports += '{}\n'.format(port.port) if isinstance(port, Port) else '{}\n'.format(port.icmp_type)
                     port_risks += '{}\n'.format(port.is_risky_port(self.config['HIGH_RISK_PROTOCOLS']))
                 ports_data.append((port_obj.name, names.strip(), protocols.strip(), ports.strip(), port_obj.get_size(), port_risks.strip(), ', '.join(port.name for port in port_obj.equal_with), ports_count[port_obj.id]))
             else:
-                ports_data.append((None, port_obj.name, port_obj.protocol, port_obj.port, port_obj.get_size(), str(port_obj.is_risky_port(self.config['HIGH_RISK_PROTOCOLS'])), ', '.join(port.name for port in port_obj.equal_with), ports_count[port_obj.id]))
+                protocol = port_obj.protocol if isinstance(port_obj, Port) else port_obj.name
+                port_port = port_obj.port if isinstance(port_obj, Port) else port_obj.icmp_type
+                port_risk = str(port_obj.is_risky_port(self.config['HIGH_RISK_PROTOCOLS']))
+                ports_data.append((None, port_obj.name, protocol, port_port, port_obj.get_size(), port_risk, ', '.join(port.name for port in port_obj.equal_with), ports_count[port_obj.id]))
         return ports_data
 
     def get_port_object(self) -> dict:
@@ -204,17 +206,18 @@ class Data:
                 for network in network_obj.flat_network_object_grp():
                     names += '{}\n'.format(network.name)
                     if '/32' in str(network.value):
-                        ips += '{}\n'.format(str(network.value).split('/')[0])
+                        ips += '{}\n'.format(network.value.network)
                     else:
-                        ips += '{}\n'.format(str(network.value))
+                        ips += '{}\n'.format(network.value)
                 networks_data.append((network_obj.name, network_obj.depth, names.strip(), ips.strip(), network_obj.get_size(), '/{}'.format(network_obj._calculate_subnet_mask(network_obj.get_size())), ', '.join(network.name for network in network_obj.equal_with), networks_count[network_obj.id]))
             else:
                 ip = ""
                 if '/32' in str(network_obj.value):
-                    ip = str(network_obj.value).split('/')[0]
+                    ip = str(network_obj.value.network)
                 else:
                     ip = str(network_obj.value)
-                networks_data.append((None, None, network_obj.name, ip, network_obj.get_size(), '/{}'.format(str(network_obj.value).split('/')[1]), ', '.join(network.name for network in network_obj.equal_with), networks_count[network_obj.id]))
+                subnet = '/{}'.format(network_obj._calculate_subnet_mask(network_obj.get_size()))
+                networks_data.append((None, None, network_obj.name, ip, network_obj.get_size(), subnet, ', '.join(network.name for network in network_obj.equal_with), networks_count[network_obj.id]))
         return networks_data
 
     def get_network_object(self) -> dict:
