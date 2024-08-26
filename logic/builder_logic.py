@@ -5,10 +5,12 @@ from logic.fmc_loader import FMCLoader
 from models.access_policy import AccessPolicy
 from models.access_rule import AccessRule
 from models.network import Network
+from models.fqdn_object import FQDNObject
 from models.host import Host
 from models.range import Range
 from models.network_group import NetworkGroup
 from models.network_object import NetworkObject
+from models.icmp_object import ICMPObject
 from models.port import Port
 from models.port_group import PortGroup
 from models.port_object import PortObject
@@ -59,18 +61,24 @@ class Builder:
                 group_name = port.get('name', None)
                 port_group = PortGroup(port_id, group_name)
                 for protocol_port in port['objects']:
+                    if protocol_port['id'] not in self.port_objs:
+                        self.port_objs[protocol_port['id']] = self.__create_port(protocol_port)
                     port_group.ports.append(self.port_objs[protocol_port['id']])
                 port_grps[port_id] = port_group
         self.__equal_object_finder(list(port_grps.values()))
         return port_grps
 
     def __create_port(self, port_obj: dict) -> Port:
-        return Port(
-            id=port_obj.get('id', ''),
-            name=port_obj.get('name', ''),
-            protocol=port_obj.get('protocol', ''),
-            port=port_obj.get('port', ''),
-        )
+        type = port_obj.get('type', '')
+        if type == 'ICMPV4Object':
+            return ICMPObject(id=port_obj.get('id', ''), name=port_obj.get('name', ''), icmp_type=port_obj.get('icmpType', ''))
+        else:
+            return Port(
+                id=port_obj.get('id', ''),
+                name=port_obj.get('name', ''),
+                protocol=port_obj.get('protocol', ''),
+                port=port_obj.get('port', ''),
+            )
 
     def create_networks(self) -> dict[str, Network]:
         """Builds up the Network dictionary.
@@ -143,6 +151,8 @@ class Builder:
             return Range(id=network_obj.get('id', ''), name=network_obj.get('name', ''), value=network_obj.get('value', ''))
         elif type == 'Network':
             return Network(id=network_obj.get('id', ''), name=network_obj.get('name', ''), value=network_obj.get('value', ''))
+        elif type == 'FQDN':
+            return FQDNObject(id=network_obj.get('id', ''), name=network_obj.get('name', ''), value=network_obj.get('value', ''))
         else:
             raise TypeError
     

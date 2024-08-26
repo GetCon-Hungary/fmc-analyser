@@ -1,9 +1,8 @@
 """Represents the network group model."""
 
 from netaddr import IPSet
-import math
 
-from models.network import Network
+from models.fqdn_object import FQDNObject
 from models.network_object import NetworkObject
 
 
@@ -17,12 +16,18 @@ class NetworkGroup(NetworkObject):
         if isinstance(__value, NetworkGroup):
             self_flatten_networks = self.flat_network_object_grp()
             __value_flatten_networks = __value.flat_network_object_grp()
-            self_ip_set = IPSet([(network.value) for network in self_flatten_networks])
-            __value_ip_set = IPSet([(__value.value) for __value in __value_flatten_networks])
-            return self_ip_set == __value_ip_set
+
+            self_ip_set = IPSet([network.value for network in self_flatten_networks if not isinstance(network, FQDNObject)])
+            __value_ip_set = IPSet([__value.value for __value in __value_flatten_networks if not isinstance(__value, FQDNObject)])
+
+            self_fqdn = [network.value for network in self_flatten_networks if isinstance(network, FQDNObject)]
+            __value_fqdn = [__value.value for __value in __value_flatten_networks if isinstance(__value, FQDNObject)]
+
+            return self_ip_set == __value_ip_set and self_fqdn == __value_fqdn
+        
         return False
 
-    def flat_network_object_grp(self) -> list[Network]:
+    def flat_network_object_grp(self) -> list[NetworkObject]:
         final = []
         for network_obj in self.networks:
             if isinstance(network_obj, NetworkGroup):
@@ -46,20 +51,3 @@ class NetworkGroup(NetworkObject):
     def get_size(self) -> int:
         return sum(network.get_size() for network in self.networks)
     
-    def _calculate_subnet_mask(self, ip_number: int) -> int:
-        # Initialize a mask
-        mask = 0x80000000  # 0b10000000000000000000000000000000
-
-        # Find the leftmost set bit
-        position = 32
-        while position >= 0:
-            if ip_number - mask > 0:
-                half_mask = mask >> 1
-                if ip_number - mask - half_mask >= 0:
-                    return 32 - position
-                else:
-                    return 32 - (position - 1)
-            mask >>= 1
-            position -= 1
-        
-        return 0
