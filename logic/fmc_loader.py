@@ -28,9 +28,11 @@ class FMCLoader:
         hosts = fmcapi.Hosts(self.fmc).get()
         networks_ = fmcapi.Networks(self.fmc).get()
         ranges = fmcapi.Ranges(self.fmc).get()
+        fqdns = fmcapi.FQDNS(self.fmc).get()
         networks['items'].extend(hosts['items'])
         networks['items'].extend(networks_['items'])
         networks['items'].extend(ranges['items'])
+        networks['items'].extend(fqdns['items'])
         return networks
 
     def __get_access_policies(self, acp_name: str) -> dict:
