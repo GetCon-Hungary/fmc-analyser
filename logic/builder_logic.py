@@ -274,6 +274,8 @@ class Builder:
         for port in rule_ports:
             port_id = port.get('id', None)
             if port_id is not None:
+                if port_id not in self.port_objs:
+                    self.port_objs[port_id] = self.__create_port(port)
                 final.append(self.port_objs[port_id])
             else:
                 final.append(self.__create_port(port))
@@ -308,6 +310,8 @@ class Builder:
         for network in rule_networks:
             network_id = network.get('id', None)
             if network_id is not None:
+                if network_id not in self.network_objs:
+                    self.network_objs[network_id] = self.__create_network(network)
                 final.append(self.network_objs[network_id])
             else:
                 final.append(self.__create_network(network))
